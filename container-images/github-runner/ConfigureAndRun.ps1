@@ -20,14 +20,20 @@ if($token.StartsWith("ghp_") -or $token.StartsWith("github_pat_")) {
 if($isPat) {
     $githubUrlSplit = $url.Split("/", [System.StringSplitOptions]::RemoveEmptyEntries)
     $githubOrgRepoSegment = ""
+    $tokenApiUrl = ""
+    $tokenType = ""
 
     if($githubUrlSplit.Length -eq 3) {
         $githubOrgRepoSegment = $githubUrlSplit[-1]
+        $tokenType = "orgs"
     } else {
         $githubOrgRepoSegment = $githubUrlSplit[-2] + "/" + $githubUrlSplit[-1]
+        $tokenType = "repos"
     }
 
-    $tokenApiUrl = "https://api.github.com/repos/$($githubOrgRepoSegment)/actions/runners/registration-token"
+    $tokenApiUrl = "https://api.github.com/$($tokenType)/$($githubOrgRepoSegment)/actions/runners/registration-token"
+
+    Write-Host "Generating a new runner registration token using the supplied PAT from the url $tokenApiUrl"
 
     $headers = @{}
     $headers.Add("Authorization", "bearer $token")
@@ -40,14 +46,18 @@ if($isPat) {
 $env:RUNNER_ALLOW_RUNASROOT = "1"
 if($hasRunnerGroup) {
     if($isEphemeral) {
+        Write-Host "Registering the runner $runnerName with the runner group $runnerGroup and ephemeral mode"
         ./config.sh --unattended --replace --url $url --token $token --name $runnerName --runnergroup $runnerGroup --ephemeral
     } else {
+        Write-Host "Registering the runner $runnerName with the runner group $runnerGroup"
         ./config.sh --unattended --replace --url $url --token $token --name $runnerName --runnergroup $runnerGroup
     }
 } else {
     if($isEphemeral) {
+        Write-Host "Registering the runner $runnerName in ephemeral mode"
         ./config.sh --unattended --replace --url $url --token $token --name $runnerName --ephemeral
     } else {
+        Write-Host "Registering the runner $runnerName"
         ./config.sh --unattended --replace --url $url --token $token --name $runnerName
     }
 }
