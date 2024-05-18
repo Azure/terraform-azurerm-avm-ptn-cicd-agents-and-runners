@@ -15,6 +15,7 @@ variable "container_image_name" {
   description = "Name of the container image to build and push to the container registry"
 }
 
+# tflint-ignore: terraform_variable_separate, terraform_standard_module_structure
 variable "enable_telemetry" {
   type        = bool
   default     = true
