@@ -1,32 +1,35 @@
-provider "azurerm" {
-  features {}
-}
-
 mock_provider "azurerm" {
-  alias = "mock"
-
   mock_data "azurerm_resource_group" {
     defaults = {
-      id   = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-rg"
-      name = "my-rg"
+      id   = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-testagents"
+      name = "rg-testagents"
     }
   }
-  mock_data "azurerm_virtual_network" {
+  mock_resource "azurerm_virtual_network" {
     defaults = {
-      id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-rg/providers/Microsoft.Network/virtualNetworks/my-vnet"
+      id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-testagents/providers/Microsoft.Network/virtualNetworks/vnet-testagents"
+    }
+  }
+  mock_resource "azurerm_subnet" {
+    defaults = {
+      id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-testagents/providers/Microsoft.Network/virtualNetworks/vnet-testagents/subnets/snet-testagents"
+    }
+  }
+  mock_resource "azurerm_log_analytics_workspace" {
+    defaults = {
+      id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-testagents/providers/Microsoft.OperationalInsights/workspaces/laws-testagents"
     }
   }
 }
 
-run "default_configuration" {
-  command = plan
+mock_provider "azapi" {}
 
+run "default_configuration" {
   variables {
-    name                          = "test"
+    name                          = "testagents"
     location                      = "uksouth"
-    azp_pool_name                 = "ca-adoagent-pool"
+    cicd_system                   = "AzureDevOps"
     azp_url                       = "https://dev.azure.com/my-org"
-    pat_token_value               = "my-really-secure-token"
     container_image_name          = "microsoftavm/azure-devops-agent"
     subnet_address_prefix         = "10.0.2.0/23"
     virtual_network_address_space = "10.0.0.0/16"
@@ -34,64 +37,57 @@ run "default_configuration" {
 
   # Resource group is created by default
   assert {
-    condition     = azurerm_resource_group.rg[0].name == "rg-test"
+    condition     = azurerm_resource_group.rg[0].name == "rg-testagents"
     error_message = "Expected resource group to be created"
   }
 
   # Virtual network is created by default
   assert {
-    condition     = azurerm_virtual_network.ado_agents_vnet[0].name == "vnet-test"
+    condition     = azurerm_virtual_network.this_vnet[0].name == "vnet-testagents"
     error_message = "Expected virtual network to be created"
   }
 
   # Subnet is created by default
   assert {
-    condition     = azurerm_subnet.ado_agents_subnet[0].name == "snet-test"
+    condition     = azurerm_subnet.this_subnet[0].name == "snet-testagents"
     error_message = "Expected subnet to be created"
   }
 }
 
 run "disable_resource_creation" {
-  command = plan
-
-  providers = {
-    azurerm = azurerm.mock
-  }
-
   variables {
-    name                 = "test"
+    name                 = "testagents"
     location             = "uksouth"
-    azp_pool_name        = "ca-adoagent-pool"
+    cicd_system          = "AzureDevOps"
     azp_url              = "https://dev.azure.com/my-org"
-    pat_token_value      = "my-really-secure-token"
     container_image_name = "microsoftavm/azure-devops-agent"
 
     resource_group_creation_enabled = false
-    resource_group_name             = "my-rg"
+    resource_group_name             = "rg-testagents"
 
     virtual_network_creation_enabled    = false
-    virtual_network_name                = "my-vnet"
-    virtual_network_resource_group_name = "my-rg"
+    virtual_network_name                = "vnet-testagents"
+    virtual_network_resource_group_name = "rg-testagents"
 
     subnet_creation_enabled = false
-    subnet_id               = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-rg/providers/Microsoft.Network/virtualNetworks/my-vnet/subnets/my-subnet"
+    subnet_id               = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-testagents/providers/Microsoft.Network/virtualNetworks/vnet-testagents/subnets/testagents-snet"
   }
 
   # Resource group should not be created
   assert {
-    condition     = data.azurerm_resource_group.rg[0].name == "my-rg"
+    condition     = data.azurerm_resource_group.rg[0].name == "rg-testagents"
     error_message = "Resource group should not be created"
   }
 
   # Virtual network should not be created
   assert {
-    condition     = data.azurerm_virtual_network.ado_agents_vnet[0].name == "my-vnet"
+    condition     = data.azurerm_virtual_network.this_vnet[0].name == "vnet-testagents"
     error_message = "Virtual network should not be created"
   }
 
   # Subnet should not be created
   assert {
-    condition     = azurerm_container_app_environment.this_ca_environment.infrastructure_subnet_id == "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-rg/providers/Microsoft.Network/virtualNetworks/my-vnet/subnets/my-subnet"
+    condition     = module.ca_ado[0].resource.infrastructure_subnet_id == "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-testagents/providers/Microsoft.Network/virtualNetworks/vnet-testagents/subnets/testagents-snet"
     error_message = "infrastructure_subnet_id should match provided subnet id"
   }
 }
