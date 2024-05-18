@@ -1,8 +1,9 @@
 # resources
 resource "azurerm_resource_group" "rg" {
-  count    = var.resource_group_creation_enabled ? 1 : 0
-  name     = coalesce(var.resource_group_name, "rg-${var.name}")
+  count = var.resource_group_creation_enabled ? 1 : 0
+
   location = var.location
+  name     = coalesce(var.resource_group_name, "rg-${var.name}")
 
   lifecycle {
     precondition {
@@ -14,7 +15,8 @@ resource "azurerm_resource_group" "rg" {
 
 data "azurerm_resource_group" "rg" {
   count = var.resource_group_creation_enabled ? 0 : 1
-  name  = var.resource_group_name
+
+  name = var.resource_group_name
 }
 
 resource "azurerm_virtual_network" "this_vnet" {
@@ -45,11 +47,11 @@ resource "azurerm_subnet" "this_subnet" {
 resource "azurerm_log_analytics_workspace" "this_laws" {
   count = var.log_analytics_workspace_creation_enabled ? 1 : 0
 
-  name                = coalesce(var.log_analytics_workspace_name, "laws-${var.name}")
   location            = try(azurerm_resource_group.rg[0].location, data.azurerm_resource_group.rg[0].location)
+  name                = coalesce(var.log_analytics_workspace_name, "laws-${var.name}")
   resource_group_name = try(azurerm_resource_group.rg[0].name, data.azurerm_resource_group.rg[0].name)
-  sku                 = "PerGB2018"
   retention_in_days   = 30
+  sku                 = "PerGB2018"
 }
 
 

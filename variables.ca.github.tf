@@ -9,8 +9,8 @@ variable "github_keda_metadata" {
     applicationID             = optional(string)
     installationID            = optional(string)
   })
-  nullable = true
-  default = null
+  nullable    = true
+  default     = null
   description = <<DESCRIPTION
 Metadata for the Keda Github Runner Scaler
 https://keda.sh/docs/2.13/scalers/github-runner/

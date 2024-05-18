@@ -147,8 +147,8 @@ variable "environment_variables" {
     name  = string
     value = string
   }))
-  nullable = true
-  default = null
+  nullable    = true
+  default     = null
   description = "List of environment variables to pass to the container."
 }
 
