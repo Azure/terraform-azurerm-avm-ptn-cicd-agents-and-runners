@@ -53,15 +53,29 @@ module "avm-ptn-cicd-agents-and-runners-ca" {
 
   name                          = module.naming.container_app.name_unique
   location                      = module.regions.regions[random_integer.region_index.result].name
-  cicd_system                   = "AzureDevOps" # or GitHub
+  cicd_system                   = "GitHub"
   pat_token_value               = var.personal_access_token
-  container_image_name          = "microsoftavm/azure-devops-agent:1.1.0"
+  container_image_name          = "microsoftavm/github-runner:1.0.1"
   subnet_address_prefix         = "10.0.2.0/23"
   virtual_network_address_space = "10.0.0.0/16"
 
-  # For Azure Pipelines
-  azp_pool_name = "ca-adoagent-pool"
-  azp_url       = var.ado_organization_url
+  github_keda_metadata = {
+    owner       = "BlakeWills-BJSS"
+    runnerScope = "repo"
+    repos       = join(",", ["terraform-azurerm-avm-ptn-cicd-agents-and-runners"])
+  }
+
+  pat_env_var_name = "GH_RUNNER_TOKEN"
+  environment_variables = [
+    {
+      name  = "GH_RUNNER_URL",
+      value = "https://github.com/BlakeWills-BJSS/terraform-azurerm-avm-ptn-cicd-agents-and-runners"
+    },
+    {
+      name  = "GH_RUNNER_NAME"
+      value = "container-app-agent"
+    }
+  ]
 
   enable_telemetry = var.enable_telemetry # see variables.tf
 }

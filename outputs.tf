@@ -1,11 +1,15 @@
-output "private_endpoints" {
-  description = "A map of private endpoints. The map key is the supplied input to var.private_endpoints. The map value is the entire azurerm_private_endpoint resource."
-  value       = azurerm_private_endpoint.this
+output "resource" {
+  description = "The container app environment."
+  value       = try(module.ca_ado[0].resource, module.ca_github[0].resource)
+  sensitive   = true
 }
 
-# Module owners should include the full resource via a 'resource' output
-# https://azure.github.io/Azure-Verified-Modules/specs/terraform/#id-tffr2---category-outputs---additional-terraform-outputs
-output "resource" {
-  description = "This is the full output for the resource."
-  value       = azurerm_resource_group.TODO # TODO: Replace this dummy resource azurerm_resource_group.TODO with your module resource
+output "resource_placeholder_job" {
+  description = "The placeholder job."
+  value       = try(module.ca_ado[0].resource_placeholder_job, null)
+}
+
+output "resource_runner_job" {
+  description = "The runner job."
+  value       = try(module.ca_ado[0].resource_runner_job, module.ca_github[0].resource_runner_job)
 }
