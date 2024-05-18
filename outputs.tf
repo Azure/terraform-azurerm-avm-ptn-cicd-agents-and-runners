@@ -1,7 +1,7 @@
 output "resource" {
   description = "The container app environment."
+  sensitive   = true # todo: check if we still need this
   value       = try(module.ca_ado[0].resource, module.ca_github[0].resource)
-  sensitive   = true
 }
 
 output "resource_placeholder_job" {

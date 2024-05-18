@@ -6,7 +6,7 @@ This deploys the module in its simplest form.
 ```hcl
 locals {
   tags = {
-    scenario = "default"
+    scenario = "azure_container_registry"
   }
 }
 
@@ -54,27 +54,9 @@ resource "azurerm_resource_group" "this" {
   tags     = local.tags
 }
 
-# Not required, but useful for checking execution logs.
-resource "azurerm_log_analytics_workspace" "this_workspace" {
-  location            = azurerm_resource_group.this.location
-  name                = module.naming.log_analytics_workspace.name_unique
-  resource_group_name = azurerm_resource_group.this.name
-  retention_in_days   = 30
-  sku                 = "PerGB2018"
-  tags                = local.tags
-}
-
 resource "azurerm_user_assigned_identity" "this_identity" {
   location            = azurerm_resource_group.this.location
   name                = module.naming.user_assigned_identity.name_unique
-  resource_group_name = azurerm_resource_group.this.name
-  tags                = local.tags
-}
-
-resource "azurerm_virtual_network" "this_vnet" {
-  address_space       = ["10.0.0.0/16"]
-  location            = azurerm_resource_group.this.location
-  name                = module.naming.virtual_network.name_unique
   resource_group_name = azurerm_resource_group.this.name
   tags                = local.tags
 }
@@ -110,23 +92,26 @@ module "avm-ptn-cicd-agents-and-runners-ca" {
   source = "../.."
   # source             = "Azure/avm-ptn-cicd-agents-and-runners-ca/azurerm"
 
-  resource_group_name = azurerm_resource_group.this.name
+  resource_group_creation_enabled = false
+  resource_group_name             = azurerm_resource_group.this.name
 
   managed_identities = {
     system_assigned            = false
     user_assigned_resource_ids = [azurerm_user_assigned_identity.this_identity.id]
   }
 
-  name                                = module.naming.container_app.name_unique
-  azp_pool_name                       = "ca-adoagent-pool"
-  azp_url                             = var.ado_organization_url
-  pat_token_value                     = var.personal_access_token
-  container_image_name                = "${module.containerregistry.resource.login_server}/${var.container_image_name}"
-  log_analytics_workspace_id          = azurerm_log_analytics_workspace.this_workspace.id
-  container_registry_login_server     = module.containerregistry.resource.login_server
-  virtual_network_name                = azurerm_virtual_network.this_vnet.name
-  virtual_network_resource_group_name = azurerm_virtual_network.this_vnet.resource_group_name
-  subnet_address_prefix               = "10.0.2.0/23"
+  name                          = module.naming.container_app.name_unique
+  azp_pool_name                 = "ca-adoagent-pool"
+  azp_url                       = var.ado_organization_url
+  pat_token_value               = var.personal_access_token
+  container_image_name          = "${module.containerregistry.resource.login_server}/${var.container_image_name}"
+  virtual_network_address_space = "10.0.0.0/16"
+  subnet_address_prefix         = "10.0.2.0/23"
+
+  azure_container_registries = [{
+    login_server = module.containerregistry.resource.login_server,
+    identity     = azurerm_user_assigned_identity.this_identity.principal_id
+  }]
 
   depends_on       = [terraform_data.agent_container_image]
   enable_telemetry = var.enable_telemetry # see variables.tf
@@ -158,10 +143,8 @@ The following providers are used by this module:
 
 The following resources are used by this module:
 
-- [azurerm_log_analytics_workspace.this_workspace](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_workspace) (resource)
 - [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
 - [azurerm_user_assigned_identity.this_identity](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/user_assigned_identity) (resource)
-- [azurerm_virtual_network.this_vnet](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
 - [terraform_data.agent_container_image](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) (resource)
 

@@ -4,20 +4,6 @@ variable "container_image_name" {
   nullable    = false
 }
 
-variable "azure_container_registries" {
-  type = set(object({
-    login_server = string
-    identity     = string
-  }))
-  nullable    = true
-  default     = null
-  description = <<DESCRIPTION
-A list of Azure Container Registries to link to the container app environment. Required values are:
-- `login_server` - The login server url for the Azure Container Registry.
-- `identity` - The id of the identity used to authenticate to the registry. For system managed identity, use 'System'.
-DESCRIPTION
-}
-
 variable "name" {
   type        = string
   description = "Prefix used for naming the container app environment and container app jobs."
@@ -28,17 +14,17 @@ variable "name" {
   }
 }
 
-variable "resource_group_creation_enabled" {
-  type        = bool
-  default     = true
-  description = "Whether or not to create a resource group."
-}
-
-variable "resource_group_name" {
-  type        = string
+variable "azure_container_registries" {
+  type = set(object({
+    login_server = string
+    identity     = string
+  }))
   default     = null
-  nullable    = true
-  description = "The resource group where the resources will be deployed. Must be specified if `resource_group_creation_enabled == false`"
+  description = <<DESCRIPTION
+A list of Azure Container Registries to link to the container app environment. Required values are:
+- `login_server` - The login server url for the Azure Container Registry.
+- `identity` - The id of the identity used to authenticate to the registry. For system managed identity, use 'System'.
+DESCRIPTION
 }
 
 variable "enable_telemetry" {
@@ -89,6 +75,18 @@ variable "managed_identities" {
   })
   default     = {}
   description = "Managed identities to be created for the resource."
+}
+
+variable "resource_group_creation_enabled" {
+  type        = bool
+  default     = true
+  description = "Whether or not to create a resource group."
+}
+
+variable "resource_group_name" {
+  type        = string
+  default     = null
+  description = "The resource group where the resources will be deployed. Must be specified if `resource_group_creation_enabled == false`"
 }
 
 variable "role_assignments" {
@@ -196,6 +194,6 @@ variable "virtual_network_name" {
 variable "virtual_network_resource_group_name" {
   type        = string
   default     = ""
-  nullable    = false
   description = "The name of the Virtual Network's Resource Group. Must be specified if `virtual_network_creation_enabled` == `false`"
+  nullable    = false
 }

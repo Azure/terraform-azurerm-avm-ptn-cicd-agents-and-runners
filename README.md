@@ -28,45 +28,43 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (>= 1.9.0, < 2.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.71.0, < 4.0)
-
-- <a name="requirement_random"></a> [random](#requirement\_random) (>= 3.5.0, < 4.0)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.71)
 
 ## Providers
 
 The following providers are used by this module:
 
-- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (>= 3.71.0, < 4.0)
+- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (~> 3.71)
 
-- <a name="provider_random"></a> [random](#provider\_random) (>= 3.5.0, < 4.0)
+- <a name="provider_random"></a> [random](#provider\_random)
 
 ## Resources
 
 The following resources are used by this module:
 
-- [azurerm_management_lock.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/management_lock) (resource)
-- [azurerm_private_endpoint.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint) (resource)
-- [azurerm_private_endpoint_application_security_group_association.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint_application_security_group_association) (resource)
-- [azurerm_resource_group.TODO](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
+- [azurerm_log_analytics_workspace.this_laws](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_workspace) (resource)
+- [azurerm_resource_group.rg](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
 - [azurerm_resource_group_template_deployment.telemetry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group_template_deployment) (resource)
-- [azurerm_role_assignment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
+- [azurerm_subnet.this_subnet](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet) (resource)
+- [azurerm_virtual_network.this_vnet](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network) (resource)
 - [random_id.telem](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/id) (resource)
-- [azurerm_resource_group.parent](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/resource_group) (data source)
+- [azurerm_resource_group.rg](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/resource_group) (data source)
+- [azurerm_virtual_network.this_vnet](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/virtual_network) (data source)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_name"></a> [name](#input\_name)
+### <a name="input_container_image_name"></a> [container\_image\_name](#input\_container\_image\_name)
 
-Description: The name of the this resource.
+Description: Fully qualified name of the Docker image the agents should run.
 
 Type: `string`
 
-### <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name)
+### <a name="input_name"></a> [name](#input\_name)
 
-Description: The resource group where the resources will be deployed.
+Description: Prefix used for naming the container app environment and container app jobs.
 
 Type: `string`
 
@@ -74,56 +72,70 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_customer_managed_key"></a> [customer\_managed\_key](#input\_customer\_managed\_key)
+### <a name="input_azp_pool_name"></a> [azp\_pool\_name](#input\_azp\_pool\_name)
 
-Description: Customer managed keys that should be associated with the resource.
+Description: Name of the pool that agents should register against in Azure DevOps.
 
-Type:
+Type: `string`
 
-```hcl
-object({
-    key_vault_resource_id              = optional(string)
-    key_name                           = optional(string)
-    key_version                        = optional(string, null)
-    user_assigned_identity_resource_id = optional(string, null)
-  })
-```
+Default: `null`
 
-Default: `{}`
+### <a name="input_azp_url"></a> [azp\_url](#input\_azp\_url)
 
-### <a name="input_diagnostic_settings"></a> [diagnostic\_settings](#input\_diagnostic\_settings)
+Description: URL for the Azure DevOps project.
 
-Description: A map of diagnostic settings to create on the Key Vault. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+Type: `string`
 
-- `name` - (Optional) The name of the diagnostic setting. One will be generated if not set, however this will not be unique if you want to create multiple diagnostic setting resources.
-- `log_categories` - (Optional) A set of log categories to send to the log analytics workspace. Defaults to `[]`.
-- `log_groups` - (Optional) A set of log groups to send to the log analytics workspace. Defaults to `["allLogs"]`.
-- `metric_categories` - (Optional) A set of metric categories to send to the log analytics workspace. Defaults to `["AllMetrics"]`.
-- `log_analytics_destination_type` - (Optional) The destination type for the diagnostic setting. Possible values are `Dedicated` and `AzureDiagnostics`. Defaults to `Dedicated`.
-- `workspace_resource_id` - (Optional) The resource ID of the log analytics workspace to send logs and metrics to.
-- `storage_account_resource_id` - (Optional) The resource ID of the storage account to send logs and metrics to.
-- `event_hub_authorization_rule_resource_id` - (Optional) The resource ID of the event hub authorization rule to send logs and metrics to.
-- `event_hub_name` - (Optional) The name of the event hub. If none is specified, the default event hub will be selected.
-- `marketplace_partner_resource_id` - (Optional) The full ARM resource ID of the Marketplace resource to which you would like to send Diagnostic LogsLogs.
+Default: `null`
+
+### <a name="input_azure_container_registries"></a> [azure\_container\_registries](#input\_azure\_container\_registries)
+
+Description: A list of Azure Container Registries to link to the container app environment. Required values are:
+- `login_server` - The login server url for the Azure Container Registry.
+- `identity` - The id of the identity used to authenticate to the registry. For system managed identity, use 'System'.
 
 Type:
 
 ```hcl
-map(object({
-    name                                     = optional(string, null)
-    log_categories                           = optional(set(string), [])
-    log_groups                               = optional(set(string), ["allLogs"])
-    metric_categories                        = optional(set(string), ["AllMetrics"])
-    log_analytics_destination_type           = optional(string, "Dedicated")
-    workspace_resource_id                    = optional(string, null)
-    storage_account_resource_id              = optional(string, null)
-    event_hub_authorization_rule_resource_id = optional(string, null)
-    event_hub_name                           = optional(string, null)
-    marketplace_partner_resource_id          = optional(string, null)
+set(object({
+    login_server = string
+    identity     = string
   }))
 ```
 
-Default: `{}`
+Default: `null`
+
+### <a name="input_cicd_system"></a> [cicd\_system](#input\_cicd\_system)
+
+Description: The name of the CI/CD system to deploy the agents too. Allowed values are 'AzureDevOps' or 'Github'
+
+Type: `string`
+
+Default: `false`
+
+### <a name="input_container_app_environment_name"></a> [container\_app\_environment\_name](#input\_container\_app\_environment\_name)
+
+Description: The name of the Container App Environment.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_container_app_job_placeholder_name"></a> [container\_app\_job\_placeholder\_name](#input\_container\_app\_job\_placeholder\_name)
+
+Description: The name of the Container App placeholder job.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_container_app_job_runner_name"></a> [container\_app\_job\_runner\_name](#input\_container\_app\_job\_runner\_name)
+
+Description: The name of the Container App runner job.
+
+Type: `string`
+
+Default: `null`
 
 ### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
 
@@ -135,9 +147,55 @@ Type: `bool`
 
 Default: `true`
 
+### <a name="input_environment_variables"></a> [environment\_variables](#input\_environment\_variables)
+
+Description: List of environment variables to pass to the container.
+
+Type:
+
+```hcl
+set(object({
+    name  = string
+    value = string
+  }))
+```
+
+Default: `null`
+
+### <a name="input_github_keda_metadata"></a> [github\_keda\_metadata](#input\_github\_keda\_metadata)
+
+Description: Metadata for the Keda Github Runner Scaler  
+https://keda.sh/docs/2.13/scalers/github-runner/
+
+Type:
+
+```hcl
+object({
+    githubAPIURL              = optional(string, "https://api.github.com")
+    owner                     = string
+    runnerScope               = string
+    repos                     = optional(string)
+    labels                    = optional(set(string))
+    targetWorkflowQueueLength = optional(string, "1")
+    applicationID             = optional(string)
+    installationID            = optional(string)
+  })
+```
+
+Default: `null`
+
+### <a name="input_key_vault_user_assigned_identity"></a> [key\_vault\_user\_assigned\_identity](#input\_key\_vault\_user\_assigned\_identity)
+
+Description: The user assigned identity to use to authenticate with Key Vault.  
+Must be specified if multiple user assigned are specified in `managed_identities`.
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_location"></a> [location](#input\_location)
 
-Description: Azure region where the resource should be deployed.  If null, the location will be inferred from the resource group location.
+Description: Azure region where the resource should be deployed. Must be specified if `resource_group_creation_enabled == true`.
 
 Type: `string`
 
@@ -158,6 +216,30 @@ object({
 
 Default: `{}`
 
+### <a name="input_log_analytics_workspace_creation_enabled"></a> [log\_analytics\_workspace\_creation\_enabled](#input\_log\_analytics\_workspace\_creation\_enabled)
+
+Description: Whether or not to create a log analytics workspace for the Container App Environment.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_log_analytics_workspace_id"></a> [log\_analytics\_workspace\_id](#input\_log\_analytics\_workspace\_id)
+
+Description: Terraform Id of the Log Analytics Workspace to connect to the Container App Environment.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_log_analytics_workspace_name"></a> [log\_analytics\_workspace\_name](#input\_log\_analytics\_workspace\_name)
+
+Description: The name to give the deployed log analytics workspace.
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_managed_identities"></a> [managed\_identities](#input\_managed\_identities)
 
 Description: Managed identities to be created for the resource.
@@ -173,61 +255,105 @@ object({
 
 Default: `{}`
 
-### <a name="input_private_endpoints"></a> [private\_endpoints](#input\_private\_endpoints)
+### <a name="input_max_execution_count"></a> [max\_execution\_count](#input\_max\_execution\_count)
 
-Description: A map of private endpoints to create on this resource. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+Description: The maximum number of executions (ADO jobs) to spawn per polling interval.
 
-- `name` - (Optional) The name of the private endpoint. One will be generated if not set.
-- `role_assignments` - (Optional) A map of role assignments to create on the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time. See `var.role_assignments` for more information.
-- `lock` - (Optional) The lock level to apply to the private endpoint. Default is `None`. Possible values are `None`, `CanNotDelete`, and `ReadOnly`.
-- `tags` - (Optional) A mapping of tags to assign to the private endpoint.
-- `subnet_resource_id` - The resource ID of the subnet to deploy the private endpoint in.
-- `private_dns_zone_group_name` - (Optional) The name of the private DNS zone group. One will be generated if not set.
-- `private_dns_zone_resource_ids` - (Optional) A set of resource IDs of private DNS zones to associate with the private endpoint. If not set, no zone groups will be created and the private endpoint will not be associated with any private DNS zones. DNS records must be managed external to this module.
-- `application_security_group_resource_ids` - (Optional) A map of resource IDs of application security groups to associate with the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-- `private_service_connection_name` - (Optional) The name of the private service connection. One will be generated if not set.
-- `network_interface_name` - (Optional) The name of the network interface. One will be generated if not set.
-- `location` - (Optional) The Azure location where the resources will be deployed. Defaults to the location of the resource group.
-- `resource_group_name` - (Optional) The resource group where the resources will be deployed. Defaults to the resource group of this resource.
-- `ip_configurations` - (Optional) A map of IP configurations to create on the private endpoint. If not specified the platform will create one. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-  - `name` - The name of the IP configuration.
-  - `private_ip_address` - The private IP address of the IP configuration.
+Type: `number`
 
-Type:
+Default: `100`
 
-```hcl
-map(object({
-    name = optional(string, null)
-    role_assignments = optional(map(object({
-      role_definition_id_or_name             = string
-      principal_id                           = string
-      description                            = optional(string, null)
-      skip_service_principal_aad_check       = optional(bool, false)
-      condition                              = optional(string, null)
-      condition_version                      = optional(string, null)
-      delegated_managed_identity_resource_id = optional(string, null)
-    })), {})
-    lock = optional(object({
-      name = optional(string, null)
-      kind = optional(string, "None")
-    }), {})
-    tags                                    = optional(map(any), null)
-    subnet_resource_id                      = string
-    private_dns_zone_group_name             = optional(string, "default")
-    private_dns_zone_resource_ids           = optional(set(string), [])
-    application_security_group_associations = optional(map(string), {})
-    private_service_connection_name         = optional(string, null)
-    network_interface_name                  = optional(string, null)
-    location                                = optional(string, null)
-    resource_group_name                     = optional(string, null)
-    ip_configurations = optional(map(object({
-      name               = string
-      private_ip_address = string
-    })), {})
-  }))
-```
+### <a name="input_min_execution_count"></a> [min\_execution\_count](#input\_min\_execution\_count)
 
-Default: `{}`
+Description: The minimum number of executions (ADO jobs) to spawn per polling interval.
+
+Type: `number`
+
+Default: `0`
+
+### <a name="input_pat_env_var_name"></a> [pat\_env\_var\_name](#input\_pat\_env\_var\_name)
+
+Description: Name of the PAT token environment variable.  
+Defaults to 'AZP\_TOKEN' when 'cicd\_system' == 'AzureDevOps'  
+Defaults to 'GH\_RUNNER\_TOKEN' when 'cicd\_system' == 'Github'
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_pat_token_secret_url"></a> [pat\_token\_secret\_url](#input\_pat\_token\_secret\_url)
+
+Description: The value of the personal access token the agents will use for authenticating to Azure DevOps.  
+One of 'pat\_token\_value' or 'pat\_token\_secret\_url' must be specified.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_pat_token_value"></a> [pat\_token\_value](#input\_pat\_token\_value)
+
+Description: The value of the personal access token the agents will use for authenticating to Azure DevOps.  
+One of 'pat\_token\_value' or 'pat\_token\_secret\_url' must be specified.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_placeholder_agent_name"></a> [placeholder\_agent\_name](#input\_placeholder\_agent\_name)
+
+Description: The name of the agent that will appear in Azure DevOps for the placeholder agent.
+
+Type: `string`
+
+Default: `"placeholder-agent"`
+
+### <a name="input_placeholder_container_name"></a> [placeholder\_container\_name](#input\_placeholder\_container\_name)
+
+Description: The name of the container for the placeholder Container Apps job.
+
+Type: `string`
+
+Default: `"ado-agent-linux"`
+
+### <a name="input_placeholder_replica_retry_limit"></a> [placeholder\_replica\_retry\_limit](#input\_placeholder\_replica\_retry\_limit)
+
+Description: The number of times to retry the placeholder Container Apps job.
+
+Type: `number`
+
+Default: `0`
+
+### <a name="input_placeholder_replica_timeout"></a> [placeholder\_replica\_timeout](#input\_placeholder\_replica\_timeout)
+
+Description: The timeout in seconds for the placeholder Container Apps job.
+
+Type: `number`
+
+Default: `300`
+
+### <a name="input_polling_interval_seconds"></a> [polling\_interval\_seconds](#input\_polling\_interval\_seconds)
+
+Description: How often should the pipeline queue be checked for new events, in seconds.
+
+Type: `number`
+
+Default: `30`
+
+### <a name="input_resource_group_creation_enabled"></a> [resource\_group\_creation\_enabled](#input\_resource\_group\_creation\_enabled)
+
+Description: Whether or not to create a resource group.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name)
+
+Description: The resource group where the resources will be deployed. Must be specified if `resource_group_creation_enabled == false`
+
+Type: `string`
+
+Default: `null`
 
 ### <a name="input_role_assignments"></a> [role\_assignments](#input\_role\_assignments)
 
@@ -258,6 +384,78 @@ map(object({
 
 Default: `{}`
 
+### <a name="input_runner_agent_cpu"></a> [runner\_agent\_cpu](#input\_runner\_agent\_cpu)
+
+Description: Required CPU in cores, e.g. 0.5
+
+Type: `number`
+
+Default: `1`
+
+### <a name="input_runner_agent_memory"></a> [runner\_agent\_memory](#input\_runner\_agent\_memory)
+
+Description: Required memory, e.g. '250Mb'
+
+Type: `string`
+
+Default: `"2Gi"`
+
+### <a name="input_runner_container_name"></a> [runner\_container\_name](#input\_runner\_container\_name)
+
+Description: The name of the container for the runner Container Apps job.
+
+Type: `string`
+
+Default: `"ado-agent-linux"`
+
+### <a name="input_runner_replica_retry_limit"></a> [runner\_replica\_retry\_limit](#input\_runner\_replica\_retry\_limit)
+
+Description: The number of times to retry the runner Container Apps job.
+
+Type: `number`
+
+Default: `3`
+
+### <a name="input_runner_replica_timeout"></a> [runner\_replica\_timeout](#input\_runner\_replica\_timeout)
+
+Description: The timeout in seconds for the runner Container Apps job.
+
+Type: `number`
+
+Default: `1800`
+
+### <a name="input_subnet_address_prefix"></a> [subnet\_address\_prefix](#input\_subnet\_address\_prefix)
+
+Description: The address prefix for the Container App Environment. Either subnet\_id or subnet\_name and subnet\_address\_prefix must be specified.
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_subnet_creation_enabled"></a> [subnet\_creation\_enabled](#input\_subnet\_creation\_enabled)
+
+Description: Whether or not to create a subnet for the Container App Environment.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_subnet_id"></a> [subnet\_id](#input\_subnet\_id)
+
+Description: The ID of a pre-existing subnet to use for the Container App Environment. Either subnet\_id or subnet\_name and subnet\_address\_prefix must be specified.
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_subnet_name"></a> [subnet\_name](#input\_subnet\_name)
+
+Description: The subnet name for the Container App Environment. Either subnet\_id or subnet\_name and subnet\_address\_prefix must be specified.
+
+Type: `string`
+
+Default: `""`
+
 ### <a name="input_tags"></a> [tags](#input\_tags)
 
 Description: The map of tags to be applied to the resource
@@ -266,21 +464,101 @@ Type: `map(any)`
 
 Default: `{}`
 
+### <a name="input_target_queue_length"></a> [target\_queue\_length](#input\_target\_queue\_length)
+
+Description: The target value for the amound of pending jobs to scale on.
+
+Type: `number`
+
+Default: `1`
+
+### <a name="input_tracing_tags_enabled"></a> [tracing\_tags\_enabled](#input\_tracing\_tags\_enabled)
+
+Description: Whether enable tracing tags that generated by BridgeCrew Yor.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_tracing_tags_prefix"></a> [tracing\_tags\_prefix](#input\_tracing\_tags\_prefix)
+
+Description: Default prefix for generated tracing tags
+
+Type: `string`
+
+Default: `"avm_"`
+
+### <a name="input_virtual_network_address_space"></a> [virtual\_network\_address\_space](#input\_virtual\_network\_address\_space)
+
+Description: The address range for the Container App Environment virtual network. Either virtual\_network\_id or virtual\_network\_name and virtual\_network\_address\_range must be specified.
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_virtual_network_creation_enabled"></a> [virtual\_network\_creation\_enabled](#input\_virtual\_network\_creation\_enabled)
+
+Description: Whether or not to create a virtual network for the Container App Environment.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_virtual_network_id"></a> [virtual\_network\_id](#input\_virtual\_network\_id)
+
+Description: The ID of a pre-existing virtual network to use for the Container App Environment. Either virtual\_network\_id or virtual\_network\_name and virtual\_network\_address\_range must be specified.
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_virtual_network_name"></a> [virtual\_network\_name](#input\_virtual\_network\_name)
+
+Description: The virtual network name for the Container App Environment. Either virtual\_network\_id or virtual\_network\_name and virtual\_network\_address\_range must be specified.
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_virtual_network_resource_group_name"></a> [virtual\_network\_resource\_group\_name](#input\_virtual\_network\_resource\_group\_name)
+
+Description: The name of the Virtual Network's Resource Group. Must be specified if `virtual_network_creation_enabled` == `false`
+
+Type: `string`
+
+Default: `""`
+
 ## Outputs
 
 The following outputs are exported:
 
-### <a name="output_private_endpoints"></a> [private\_endpoints](#output\_private\_endpoints)
-
-Description: A map of private endpoints. The map key is the supplied input to var.private\_endpoints. The map value is the entire azurerm\_private\_endpoint resource.
-
 ### <a name="output_resource"></a> [resource](#output\_resource)
 
-Description: This is the full output for the resource.
+Description: The container app environment.
+
+### <a name="output_resource_placeholder_job"></a> [resource\_placeholder\_job](#output\_resource\_placeholder\_job)
+
+Description: The placeholder job.
+
+### <a name="output_resource_runner_job"></a> [resource\_runner\_job](#output\_resource\_runner\_job)
+
+Description: The runner job.
 
 ## Modules
 
-No modules.
+The following Modules are called:
+
+### <a name="module_ca_ado"></a> [ca\_ado](#module\_ca\_ado)
+
+Source: ./modules/ca-azure-devops-agents
+
+Version:
+
+### <a name="module_ca_github"></a> [ca\_github](#module\_ca\_github)
+
+Source: ./modules/ca-github-runners
+
+Version:
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection
