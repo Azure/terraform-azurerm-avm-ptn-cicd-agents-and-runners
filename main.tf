@@ -54,7 +54,6 @@ resource "azurerm_log_analytics_workspace" "this_laws" {
   sku                 = "PerGB2018"
 }
 
-
 module "ca_ado" {
   source = "./modules/ca-azure-devops-agents"
 
