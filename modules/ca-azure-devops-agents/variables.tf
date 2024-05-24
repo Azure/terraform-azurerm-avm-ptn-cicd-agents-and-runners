@@ -13,6 +13,14 @@ variable "container_app_job_placeholder_name" {
   description = "The name of the Container App placeholder job."
 }
 
+variable "environment_variables" {
+  type = set(object({
+    name  = string
+    value = string
+  }))
+  description = "List of environment variables to pass to the container."
+}
+
 variable "placeholder_agent_name" {
   type        = string
   description = "The name of the agent that will appear in Azure DevOps for the placeholder agent."
@@ -35,15 +43,6 @@ variable "placeholder_replica_timeout" {
 
 variable "pat_env_var_name" {
   type        = string
-  nullable    = true
   default     = "AZP_TOKEN"
   description = "Name of the PAT token environment variable. Defaults to 'AZP_TOKEN'."
-}
-
-variable "environment_variables" {
-  type = set(object({
-    name  = string
-    value = string
-  }))
-  description = "List of environment variables to pass to the container."
 }

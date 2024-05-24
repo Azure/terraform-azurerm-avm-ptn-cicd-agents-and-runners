@@ -66,7 +66,7 @@ resource "azurerm_user_assigned_identity" "example_identity" {
 module "keyvault" {
   source              = "Azure/avm-res-keyvault-vault/azurerm"
   name                = module.naming.key_vault.name_unique
-  enable_telemetry    = var.enable_telemetry
+  enable_telemetry    = true
   location            = azurerm_resource_group.this.location
   resource_group_name = azurerm_resource_group.this.name
   tenant_id           = data.azurerm_client_config.this.tenant_id
@@ -115,14 +115,17 @@ module "avm-ptn-cicd-agents-and-runners-ca" {
   }
 
   name                          = module.naming.container_app.name_unique
-  azp_pool_name                 = "ca-adoagent-pool"
-  azp_url                       = var.ado_organization_url
+  cicd_system                   = "AzureDevOps"
   pat_token_secret_url          = module.keyvault.resource_secrets["pat-token"].id
   container_image_name          = "microsoftavm/azure-devops-agent:1.1.0"
   subnet_address_prefix         = "10.0.2.0/23"
   virtual_network_address_space = "10.0.0.0/16"
 
-  enable_telemetry = var.enable_telemetry # see variables.tf
+  # For Azure Pipelines
+  azp_pool_name = "ca-adoagent-pool"
+  azp_url       = var.ado_organization_url
+
+  enable_telemetry = true
 }
 ```
 
@@ -173,25 +176,7 @@ Type: `string`
 
 ## Optional Inputs
 
-The following input variables are optional (have default values):
-
-### <a name="input_container_image_name"></a> [container\_image\_name](#input\_container\_image\_name)
-
-Description: Name of the container image to build and push to the container registry
-
-Type: `string`
-
-Default: `"azure-pipelines:latest"`
-
-### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
-
-Description: This variable controls whether or not telemetry is enabled for the module.  
-For more information see <https://aka.ms/avm/telemetryinfo>.  
-If it is set to false, then no telemetry will be collected.
-
-Type: `bool`
-
-Default: `true`
+No optional inputs.
 
 ## Outputs
 

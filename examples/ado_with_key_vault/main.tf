@@ -116,8 +116,8 @@ module "avm-ptn-cicd-agents-and-runners-ca" {
   virtual_network_address_space = "10.0.0.0/16"
 
   # For Azure Pipelines
-  azp_pool_name                 = "ca-adoagent-pool"
-  azp_url                       = var.ado_organization_url
+  azp_pool_name = "ca-adoagent-pool"
+  azp_url       = var.ado_organization_url
 
   enable_telemetry = true
 }
