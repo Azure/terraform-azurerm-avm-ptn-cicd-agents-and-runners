@@ -63,5 +63,5 @@ module "avm-ptn-cicd-agents-and-runners-ca" {
   azp_pool_name = "ca-adoagent-pool"
   azp_url       = var.ado_organization_url
 
-  enable_telemetry = var.enable_telemetry # see variables.tf
+  enable_telemetry = true
 }

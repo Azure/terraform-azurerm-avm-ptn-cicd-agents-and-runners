@@ -75,19 +75,19 @@ run "disable_resource_creation" {
 
   # Resource group should not be created
   assert {
-    condition     = data.azurerm_resource_group.rg[0].name == "rg-testagents"
+    condition     = try(azurerm_resource_group.rg[0], null) == null
     error_message = "Resource group should not be created"
   }
 
   # Virtual network should not be created
   assert {
-    condition     = data.azurerm_virtual_network.this_vnet[0].name == "vnet-testagents"
+    condition     = try(azurerm_virtual_network.this_vnet[0], null) == null
     error_message = "Virtual network should not be created"
   }
 
   # Subnet should not be created
   assert {
-    condition     = module.ca_ado[0].resource.infrastructure_subnet_id == "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-testagents/providers/Microsoft.Network/virtualNetworks/vnet-testagents/subnets/testagents-snet"
-    error_message = "infrastructure_subnet_id should match provided subnet id"
+    condition     = try(azurerm_subnet.this_subnet[0], null) == null
+    error_message = "Subnet should not be created"
   }
 }

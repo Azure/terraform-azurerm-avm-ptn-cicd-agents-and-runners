@@ -134,7 +134,7 @@ variable "log_analytics_workspace_name" {
 
 variable "cicd_system" {
   type        = string
-  default     = false
+  nullable    = false
   description = "The name of the CI/CD system to deploy the agents too. Allowed values are 'AzureDevOps' or 'Github'"
   validation {
     condition     = contains(["azuredevops", "github"], lower(var.cicd_system))
