@@ -1,12 +1,12 @@
 <!-- BEGIN_TF_DOCS -->
 # Default example
 
-This deploys the module in its simplest form.
+This deploys the module using a personal access token stored in Azure KeyVault.
 
 ```hcl
 locals {
   tags = {
-    scenario = "default"
+    scenario = "with_key_vault"
   }
 }
 
@@ -28,6 +28,8 @@ provider "azurerm" {
   features {}
 }
 
+data "azurerm_client_config" "this" {}
+
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
 module "regions" {
@@ -48,19 +50,73 @@ module "naming" {
   version = ">= 0.3.0"
 }
 
+resource "azurerm_resource_group" "this" {
+  location = module.regions.regions[random_integer.region_index.result].name
+  name     = module.naming.resource_group.name_unique
+  tags     = local.tags
+}
+
+resource "azurerm_user_assigned_identity" "example_identity" {
+  location            = azurerm_resource_group.this.location
+  name                = module.naming.user_assigned_identity.name_unique
+  resource_group_name = azurerm_resource_group.this.name
+  tags                = local.tags
+}
+
+module "keyvault" {
+  source              = "Azure/avm-res-keyvault-vault/azurerm"
+  name                = module.naming.key_vault.name_unique
+  enable_telemetry    = true
+  location            = azurerm_resource_group.this.location
+  resource_group_name = azurerm_resource_group.this.name
+  tenant_id           = data.azurerm_client_config.this.tenant_id
+
+  network_acls = null
+
+  secrets = {
+    pat-token = {
+      name = "pat-token"
+    }
+  }
+
+  secrets_value = {
+    pat-token = var.personal_access_token
+  }
+
+  role_assignments = {
+    # Required for container app environments to be able to read PAT token from KeyVault.
+    secrets_reader = {
+      role_definition_id_or_name = "Key Vault Secrets User"
+      principal_id               = azurerm_user_assigned_identity.example_identity.principal_id
+    },
+
+    # Required to set PAT token.
+    current_user = {
+      role_definition_id_or_name = "Key Vault Administrator"
+      principal_id               = data.azurerm_client_config.this.object_id
+    }
+  }
+}
+
 # This is the module call
+# Do not specify location here due to the randomization above.
+# Leaving location as `null` will cause the module to use the resource group location
+# with a data source.
 module "avm-ptn-cicd-agents-and-runners-ca" {
   source = "../.."
   # source             = "Azure/avm-ptn-cicd-agents-and-runners-ca/azurerm"
 
+  resource_group_creation_enabled = false
+  resource_group_name             = azurerm_resource_group.this.name
+
   managed_identities = {
-    system_assigned = true
+    system_assigned            = false
+    user_assigned_resource_ids = [azurerm_user_assigned_identity.example_identity.id]
   }
 
   name                          = module.naming.container_app.name_unique
-  location                      = module.regions.regions[random_integer.region_index.result].name
-  cicd_system                   = "AzureDevOps" # or GitHub
-  pat_token_value               = var.personal_access_token
+  cicd_system                   = "AzureDevOps"
+  pat_token_secret_url          = module.keyvault.resource_secrets["pat-token"].id
   container_image_name          = "microsoftavm/azure-devops-agent:1.1.0"
   subnet_address_prefix         = "10.0.2.0/23"
   virtual_network_address_space = "10.0.0.0/16"
@@ -88,13 +144,18 @@ The following requirements are needed by this module:
 
 The following providers are used by this module:
 
+- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (>= 3.7.0, < 4.0.0)
+
 - <a name="provider_random"></a> [random](#provider\_random) (>= 3.5.0, < 4.0.0)
 
 ## Resources
 
 The following resources are used by this module:
 
+- [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
+- [azurerm_user_assigned_identity.example_identity](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/user_assigned_identity) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
+- [azurerm_client_config.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
@@ -128,6 +189,12 @@ The following Modules are called:
 ### <a name="module_avm-ptn-cicd-agents-and-runners-ca"></a> [avm-ptn-cicd-agents-and-runners-ca](#module\_avm-ptn-cicd-agents-and-runners-ca)
 
 Source: ../..
+
+Version:
+
+### <a name="module_keyvault"></a> [keyvault](#module\_keyvault)
+
+Source: Azure/avm-res-keyvault-vault/azurerm
 
 Version:
 
