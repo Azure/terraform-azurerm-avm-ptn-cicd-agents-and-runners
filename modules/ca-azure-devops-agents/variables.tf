@@ -39,3 +39,11 @@ variable "pat_env_var_name" {
   default     = "AZP_TOKEN"
   description = "Name of the PAT token environment variable. Defaults to 'AZP_TOKEN'."
 }
+
+variable "environment_variables" {
+  type = set(object({
+    name  = string
+    value = string
+  }))
+  description = "List of environment variables to pass to the container."
+}

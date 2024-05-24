@@ -2,6 +2,8 @@ locals {
   tags = {
     scenario = "azure_container_registry"
   }
+
+  container_image_name = "azure-pipelines:latest"
 }
 
 terraform {
@@ -73,7 +75,7 @@ resource "terraform_data" "agent_container_image" {
 
   provisioner "local-exec" {
     command = <<COMMAND
-az acr build --registry ${module.containerregistry.resource.name} --image "${var.container_image_name}" --file "Dockerfile.azure-pipelines" "https://github.com/Azure-Samples/container-apps-ci-cd-runner-tutorial.git"
+az acr build --registry ${module.containerregistry.resource.name} --image "${local.container_image_name}" --file "Dockerfile.azure-pipelines" "https://github.com/Azure-Samples/container-apps-ci-cd-runner-tutorial.git"
 COMMAND
   }
 }
@@ -95,12 +97,14 @@ module "avm-ptn-cicd-agents-and-runners-ca" {
   }
 
   name                          = module.naming.container_app.name_unique
-  azp_pool_name                 = "ca-adoagent-pool"
-  azp_url                       = var.ado_organization_url
+  cicd_system                   = "AzureDevOps"
   pat_token_value               = var.personal_access_token
-  container_image_name          = "${module.containerregistry.resource.login_server}/${var.container_image_name}"
+  container_image_name          = "${module.containerregistry.resource.login_server}/${local.container_image_name}"
   virtual_network_address_space = "10.0.0.0/16"
   subnet_address_prefix         = "10.0.2.0/23"
+
+  azp_pool_name                 = "ca-adoagent-pool"
+  azp_url                       = var.ado_organization_url
 
   azure_container_registries = [{
     login_server = module.containerregistry.resource.login_server,
@@ -108,5 +112,5 @@ module "avm-ptn-cicd-agents-and-runners-ca" {
   }]
 
   depends_on       = [terraform_data.agent_container_image]
-  enable_telemetry = var.enable_telemetry # see variables.tf
+  enable_telemetry = true
 }

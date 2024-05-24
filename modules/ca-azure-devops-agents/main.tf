@@ -102,7 +102,7 @@ resource "azapi_resource" "runner_job" {
             cpu    = var.runner_agent_cpu
             memory = var.runner_agent_memory
           }
-          env = [
+          env = concat(tolist(var.environment_variables), tolist([
             {
               name      = "AZP_TOKEN"
               secretRef = "personal-access-token"
@@ -115,7 +115,7 @@ resource "azapi_resource" "runner_job" {
               name  = "AZP_POOL"
               value = var.azp_pool_name
             }
-          ]
+          ]))
         }]
       }
     }
@@ -183,7 +183,7 @@ resource "azapi_resource" "placeholder_job" {
             cpu    = 1.0
             memory = "2Gi"
           }
-          env = [
+          env = concat(tolist(var.environment_variables), tolist([
             {
               name      = "AZP_TOKEN"
               secretRef = "personal-access-token"
@@ -204,7 +204,7 @@ resource "azapi_resource" "placeholder_job" {
               name  = "AZP_AGENT_NAME"
               value = var.placeholder_agent_name
             }
-          ]
+          ]))
         }]
       }
     }

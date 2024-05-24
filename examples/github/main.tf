@@ -77,5 +77,5 @@ module "avm-ptn-cicd-agents-and-runners-ca" {
     }
   ]
 
-  enable_telemetry = var.enable_telemetry # see variables.tf
+  enable_telemetry = true
 }
