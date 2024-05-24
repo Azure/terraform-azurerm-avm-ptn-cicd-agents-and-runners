@@ -83,7 +83,7 @@ module "avm-ptn-cicd-agents-and-runners-ca" {
     }
   ]
 
-  enable_telemetry = var.enable_telemetry # see variables.tf
+  enable_telemetry = true
 }
 ```
 
@@ -115,12 +115,6 @@ The following resources are used by this module:
 
 The following input variables are required:
 
-### <a name="input_ado_organization_url"></a> [ado\_organization\_url](#input\_ado\_organization\_url)
-
-Description: Azure DevOps Organisation URL
-
-Type: `string`
-
 ### <a name="input_personal_access_token"></a> [personal\_access\_token](#input\_personal\_access\_token)
 
 Description: The personal access token used for agent authentication to Azure DevOps.
@@ -129,25 +123,7 @@ Type: `string`
 
 ## Optional Inputs
 
-The following input variables are optional (have default values):
-
-### <a name="input_container_image_name"></a> [container\_image\_name](#input\_container\_image\_name)
-
-Description: Name of the container image to build and push to the container registry
-
-Type: `string`
-
-Default: `"azure-pipelines:latest"`
-
-### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
-
-Description: This variable controls whether or not telemetry is enabled for the module.  
-For more information see <https://aka.ms/avm/telemetryinfo>.  
-If it is set to false, then no telemetry will be collected.
-
-Type: `bool`
-
-Default: `true`
+No optional inputs.
 
 ## Outputs
 

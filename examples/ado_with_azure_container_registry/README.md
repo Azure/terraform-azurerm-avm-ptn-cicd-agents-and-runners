@@ -5,6 +5,7 @@ This deploys the module in its simplest form.
 
 ```hcl
 locals {
+  container_image_name = "azure-pipelines:latest"
   tags = {
     scenario = "azure_container_registry"
   }
@@ -79,7 +80,7 @@ resource "terraform_data" "agent_container_image" {
 
   provisioner "local-exec" {
     command = <<COMMAND
-az acr build --registry ${module.containerregistry.resource.name} --image "${var.container_image_name}" --file "Dockerfile.azure-pipelines" "https://github.com/Azure-Samples/container-apps-ci-cd-runner-tutorial.git"
+az acr build --registry ${module.containerregistry.resource.name} --image "${local.container_image_name}" --file "Dockerfile.azure-pipelines" "https://github.com/Azure-Samples/container-apps-ci-cd-runner-tutorial.git"
 COMMAND
   }
 }
@@ -101,12 +102,14 @@ module "avm-ptn-cicd-agents-and-runners-ca" {
   }
 
   name                          = module.naming.container_app.name_unique
-  azp_pool_name                 = "ca-adoagent-pool"
-  azp_url                       = var.ado_organization_url
+  cicd_system                   = "AzureDevOps"
   pat_token_value               = var.personal_access_token
-  container_image_name          = "${module.containerregistry.resource.login_server}/${var.container_image_name}"
+  container_image_name          = "${module.containerregistry.resource.login_server}/${local.container_image_name}"
   virtual_network_address_space = "10.0.0.0/16"
   subnet_address_prefix         = "10.0.2.0/23"
+
+  azp_pool_name = "ca-adoagent-pool"
+  azp_url       = var.ado_organization_url
 
   azure_container_registries = [{
     login_server = module.containerregistry.resource.login_server,
@@ -114,7 +117,7 @@ module "avm-ptn-cicd-agents-and-runners-ca" {
   }]
 
   depends_on       = [terraform_data.agent_container_image]
-  enable_telemetry = var.enable_telemetry # see variables.tf
+  enable_telemetry = true
 }
 ```
 
@@ -167,25 +170,7 @@ Type: `string`
 
 ## Optional Inputs
 
-The following input variables are optional (have default values):
-
-### <a name="input_container_image_name"></a> [container\_image\_name](#input\_container\_image\_name)
-
-Description: Name of the container image to build and push to the container registry
-
-Type: `string`
-
-Default: `"azure-pipelines:latest"`
-
-### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
-
-Description: This variable controls whether or not telemetry is enabled for the module.  
-For more information see <https://aka.ms/avm/telemetryinfo>.  
-If it is set to false, then no telemetry will be collected.
-
-Type: `bool`
-
-Default: `true`
+No optional inputs.
 
 ## Outputs
 

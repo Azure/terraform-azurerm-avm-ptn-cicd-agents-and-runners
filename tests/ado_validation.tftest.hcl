@@ -261,8 +261,8 @@ run "runner_job_configuration" {
     tags                               = {}
     lock                               = {}
     azure_container_registries         = []
-    environment_variables              = [{
-      name = "my-custom-var"
+    environment_variables = [{
+      name  = "my-custom-var"
       value = "my-value"
     }]
     managed_identities = {
@@ -339,8 +339,8 @@ run "placeholder_job_configuration" {
     tags                               = {}
     lock                               = {}
     azure_container_registries         = []
-    environment_variables              = [{
-      name = "my-custom-var"
+    environment_variables = [{
+      name  = "my-custom-var"
       value = "my-value"
     }]
     managed_identities = {

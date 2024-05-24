@@ -1,9 +1,8 @@
 locals {
+  container_image_name = "azure-pipelines:latest"
   tags = {
     scenario = "azure_container_registry"
   }
-
-  container_image_name = "azure-pipelines:latest"
 }
 
 terraform {
@@ -103,8 +102,8 @@ module "avm-ptn-cicd-agents-and-runners-ca" {
   virtual_network_address_space = "10.0.0.0/16"
   subnet_address_prefix         = "10.0.2.0/23"
 
-  azp_pool_name                 = "ca-adoagent-pool"
-  azp_url                       = var.ado_organization_url
+  azp_pool_name = "ca-adoagent-pool"
+  azp_url       = var.ado_organization_url
 
   azure_container_registries = [{
     login_server = module.containerregistry.resource.login_server,

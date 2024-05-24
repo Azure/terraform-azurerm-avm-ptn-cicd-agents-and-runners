@@ -140,7 +140,6 @@ resource "azapi_resource" "runner_job" {
       condition     = var.pat_token_secret_url == null || local.key_vault_user_assigned_identity != null
       error_message = "Unable to determine identity for authenticating to Azure Key Vault. Either specify `key_vault_user_assigned_identity` or configure a single identity."
     }
-
     precondition {
       condition     = var.azp_url != null && var.azp_url != ""
       error_message = "azp_url must be specified"
