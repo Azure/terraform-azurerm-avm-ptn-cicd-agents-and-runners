@@ -32,11 +32,13 @@ locals {
     {
       name  = "AZP_URL"
       value = var.version_control_system_organization
+      container_app_secret_name = "organization-url"
       keda_auth_name = "organizationURL"
     },
     {
       name  = "AZP_TOKEN"
       value = var.version_control_system_personal_access_token
+      container_app_secret_name = "personal-access-token"
       keda_auth_name = "personalAccessToken"
     }
   ]
@@ -44,6 +46,7 @@ locals {
     {
       name  = "GH_TOKEN"
       value = var.version_control_system_personal_access_token
+      container_app_secret_name = "personal-access-token"
       keda_auth_name = "personalAccessToken"
     }
   ]

@@ -1,6 +1,6 @@
 resource "azapi_resource" "job" {
   type = "Microsoft.App/jobs@2023-05-01"
-  body = jsonencode({
+  body = nonsensitive(jsonencode({
     properties = {
       environmentId = var.container_app_environment_id
       configuration = {
@@ -24,7 +24,7 @@ resource "azapi_resource" "job" {
         containers = local.containers
       }
     }
-  })
+  }))
   location  = var.location
   name      = local.job_name
   parent_id = var.resource_group_id

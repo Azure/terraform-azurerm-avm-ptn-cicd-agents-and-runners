@@ -10,13 +10,13 @@ locals {
   } ]
 
   secrets = [ for env in var.sensitive_environment_variables : {
-    name  = env.name
+    name  = env.container_app_secret_name
     value = env.value
   } ]
 
   secret_environment_variables = [ for env in var.sensitive_environment_variables : {
     name  = env.name
-    secretRef = env.value
+    secretRef = env.container_app_secret_name
   } ]
 
   final_environment_variables = concat(local.environment_variables, local.secret_environment_variables)
@@ -31,7 +31,7 @@ locals {
   ]
   containers = [{
     name  = var.container_name
-    image = var.container_image_name
+    image = "${var.registry_login_server}/${var.container_image_name}"
     resources = {
       cpu    = var.container_cpu
       memory = var.container_memory
@@ -42,7 +42,7 @@ locals {
 
 locals {
   keda_auth = [ for env in var.sensitive_environment_variables : {
-    secretRef = env.name
+    secretRef = env.container_app_secret_name
     triggerParameter = env.keda_auth_name
   } if env.keda_auth_name != null ]
 

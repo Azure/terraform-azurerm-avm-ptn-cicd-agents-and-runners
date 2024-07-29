@@ -108,6 +108,7 @@ variable "sensitive_environment_variables" {
   type = set(object({
     name  = string
     value = string
+    container_app_secret_name = string
     keda_auth_name = optional(string)
   }))
   nullable    = true
