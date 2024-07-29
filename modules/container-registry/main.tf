@@ -1,3 +1,9 @@
+resource "azurerm_private_dns_zone" "this" {
+  count              = var.use_private_networking && var.create_private_dns_zone ? 1 : 0
+  name                = "privatelink.azurecr.io"
+  resource_group_name = var.resource_group_name
+}
+
 module "container_registry" {
   source  = "Azure/avm-res-containerregistry-registry/azurerm"
   version = "0.1.0"
@@ -9,6 +15,12 @@ module "container_registry" {
   zone_redundancy_enabled       = var.use_private_networking
   network_rule_bypass_option    = var.use_private_networking ? "AzureServices" : "None"
   enable_telemetry              = var.enable_telemetry
+  private_endpoints = var.use_private_networking ? {
+    container_registry = {
+      private_dns_zone_resource_ids = [ local.private_dns_zone_id ]
+      subnet_resource_id = var.subnet_id
+    }
+  } : null
   tags                          = var.tags
 }
 

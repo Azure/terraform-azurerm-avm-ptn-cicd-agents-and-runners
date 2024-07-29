@@ -42,6 +42,24 @@ variable "use_private_networking" {
   type        = bool
 }
 
+variable "subnet_id" {
+  description = "The id of the subnet to use for the private endpoint"
+  type        = string
+  default     = null
+}
+
+variable "create_private_dns_zone" {
+  description = "Whether to create a private DNS zone for the container registry"
+  type        = bool
+  default     = true
+}
+
+variable "private_dns_zone_id" {
+  description = "The id of the private DNS zone to create for the container registry. Only required if `create_private_dns_zone` is `false`."
+  type        = string
+  default     = null
+}
+
 variable "tags" {
   description = "A mapping of tags to assign to the resource"
   type        = map(string)
