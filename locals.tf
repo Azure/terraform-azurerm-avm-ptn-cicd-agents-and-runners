@@ -10,7 +10,7 @@ locals {
 
 locals {
   container_app_environment_name = var.container_app_environment_name != null ? var.container_app_environment_name : "cae-${var.postfix}"
-  container_registry_name = var.container_registry_name != null ? var.container_registry_name : "acr-${var.postfix}"
+  container_registry_name = var.container_registry_name != null ? var.container_registry_name : "acr${var.postfix}"
   log_analytics_workspace_name = var.log_analytics_workspace_name != null ? var.log_analytics_workspace_name : "laws-${var.postfix}"
   virtual_network_name = var.virtual_network_name != null ? var.virtual_network_name : "vnet-${var.postfix}"
   container_app_subnet_name = var.container_app_subnet_name != null ? var.container_app_subnet_name : "subnet-container-app-${var.postfix}"

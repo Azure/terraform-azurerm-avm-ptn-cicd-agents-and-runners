@@ -6,7 +6,7 @@ resource "azurerm_private_dns_zone" "this" {
 
 module "container_registry" {
   source  = "Azure/avm-res-containerregistry-registry/azurerm"
-  version = "0.1.0"
+  version = "~> 0.2"
   name                          = var.name
   resource_group_name           = var.resource_group_name
   location                      = var.location
@@ -52,7 +52,7 @@ resource "azurerm_container_registry_task_schedule_run_now" "this" {
   for_each = var.images
   container_registry_task_id = azurerm_container_registry_task.this[each.key].id
   lifecycle {
-    replace_triggered_by = [azurerm_container_registry_task.alz]
+    replace_triggered_by = [azurerm_container_registry_task.this]
   }
   depends_on = [azurerm_role_assignment.container_registry_push_for_task]
 }

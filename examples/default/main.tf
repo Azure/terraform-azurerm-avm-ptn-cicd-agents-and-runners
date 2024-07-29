@@ -67,6 +67,13 @@ resource "random_integer" "region_index" {
 ## End of section to provide a random Azure region for the resource group
 
 # This ensures we have unique CAF compliant names for our resources.
+resource "random_string" "name" {
+  length  = 4
+  special = false
+  numeric = true
+  upper = false
+}
+
 module "naming" {
   source  = "Azure/naming/azurerm"
   version = ">= 0.3.0"
@@ -91,11 +98,10 @@ resource "azuredevops_agent_queue" "alz" {
 module "azure_devops_agents" {
   source = "../.."
 
-  postfix                       = module.naming.unique-seed
+  postfix                       = random_string.name.result
   location                      = module.regions.regions[random_integer.region_index.result].name
   version_control_system_type   = "azuredevops"
   version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
   version_control_system_organization = local.azure_devops_organization_url
-  subnet_address_prefix         = "10.0.2.0/23"
   virtual_network_address_space = "10.0.0.0/16"
 }
