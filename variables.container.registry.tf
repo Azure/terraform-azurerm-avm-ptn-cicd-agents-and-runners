@@ -17,6 +17,19 @@ variable "custom_container_registry_login_server" {
   default = null
 }
 
+variable "custom_container_registry_username" {
+  type        = string
+  description = "The username of the container registry to use if `create_container_registry` is `false`."
+  default = null
+}
+
+variable "custom_container_registry_password" {
+  type        = string
+  description = "The password of the container registry to use if `create_container_registry` is `false`."
+  default = null
+  sensitive = true
+}
+
 variable "custom_container_image_name" {
   type        = string
   description = "The image to use in the container registry to use if `create_container_registry` is `false`."

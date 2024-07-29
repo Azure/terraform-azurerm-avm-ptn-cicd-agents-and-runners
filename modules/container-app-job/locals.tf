@@ -9,11 +9,14 @@ locals {
     value = env.value
   } ]
 
-  secrets = [ for env in var.sensitive_environment_variables : {
-    name  = env.container_app_secret_name
-    value = env.value
-  } ]
-
+  secrets = concat([ for env in var.sensitive_environment_variables : {
+      name  = env.container_app_secret_name
+      value = env.value
+    } ], [{
+      name  = "registry-password"
+      value = var.registry_password
+  }])
+  
   secret_environment_variables = [ for env in var.sensitive_environment_variables : {
     name  = env.name
     secretRef = env.container_app_secret_name
@@ -26,7 +29,9 @@ locals {
   container_registies = [
     {
       server = var.registry_login_server
-      identity = var.user_assigned_managed_identity_id
+      #identity = var.user_assigned_managed_identity_id
+      username = var.registry_username
+      passwordSecretRef = "registry-password"
     }
   ]
   containers = [{

@@ -47,12 +47,22 @@ variable "registry_login_server" {
   description = "The login server of the container registry."
 }
 
+variable "registry_username" {
+  type        = string
+  description = "The login server of the container registry."
+}
+
+variable "registry_password" {
+  type        = string
+  description = "The login server of the container registry."
+  sensitive = true
+}
+
 variable "container_image_name" {
   type        = string
   description = "Fully qualified name of the Docker image the agents should run."
   nullable    = false
 }
-
 
 variable "user_assigned_managed_identity_id" {
   type        = string

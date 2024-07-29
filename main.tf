@@ -70,6 +70,8 @@ module "container_app_job" {
   container_app_environment_id = azurerm_container_app_environment.this.id
 
   registry_login_server = var.create_container_registry ? module.container_registry[0].login_server : var.custom_container_registry_login_server
+  registry_username = var.create_container_registry ? module.container_registry[0].username : var.custom_container_registry_username
+  registry_password = var.create_container_registry ? module.container_registry[0].password : var.custom_container_registry_password
 
   placeholder_agent_name             = var.placeholder_agent_name
   placeholder_container_name         = var.placeholder_container_name
@@ -88,4 +90,6 @@ module "container_app_job" {
   max_execution_count                = var.max_execution_count
   tags                               = var.tags
   user_assigned_managed_identity_id   = local.user_assigned_managed_identity_id
+
+  depends_on = [ module.container_registry ]
 }
