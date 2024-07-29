@@ -16,19 +16,37 @@ variable "virtual_network_address_space" {
   description = "The address space for the virtual network. Must be specified if `create_virtual_network == false`."
 }
 
-variable "subnet_name" {
+variable "container_app_subnet_name" {
   type        = string
   default = null
   description = "The name of the subnet. Must be specified if `create_virtual_network == false`."
 }
 
-variable "subnet_address_prefix" {
+variable "container_app_subnet_address_prefix" {
   type        = string
   default     = null
   description = "The address prefix for the Container App Environment. Either subnet_id or subnet_name and subnet_address_prefix must be specified."
 }
 
-variable "subnet_id" {
+variable "container_app_subnet_id" {
+  type        = string
+  default     = null
+  description = "The ID of a pre-existing subnet to use. Required if `create_virtual_network` is `false`."
+}
+
+variable "container_registry_private_endpoint_subnet_name" {
+  type        = string
+  default = null
+  description = "The name of the subnet. Must be specified if `create_virtual_network == false`."
+}
+
+variable "container_registry_private_endpoint_subnet_address_prefix" {
+  type        = string
+  default     = null
+  description = "The address prefix for the Container App Environment. Either subnet_id or subnet_name and subnet_address_prefix must be specified."
+}
+
+variable "container_registry_private_endpoint_subnet_id" {
   type        = string
   default     = null
   description = "The ID of a pre-existing subnet to use. Required if `create_virtual_network` is `false`."

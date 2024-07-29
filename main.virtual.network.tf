@@ -9,9 +9,13 @@ module "virtual_network" {
   address_space            = [var.virtual_network_address_space]
 
   subnets = {
-    agents = {
-      name                 = var.subnet_name
-      address_prefix       = var.subnet_address_prefix
+    container_app = {
+      name                 = var.container_app_subnet_name
+      address_prefix       = var.container_app_subnet_address_prefix
+    }
+    container_registry_private_endpoint = {
+      name                 = var.container_registry_private_endpoint_subnet_name
+      address_prefix       = var.container_registry_private_endpoint_subnet_address_prefix
     }
   }
 }

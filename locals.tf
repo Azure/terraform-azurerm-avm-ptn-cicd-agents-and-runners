@@ -2,7 +2,8 @@ locals {
   role_definition_resource_substring = "/providers/Microsoft.Authorization/roleDefinitions"
   resource_group_name = var.resource_group_creation_enabled ? azurerm_resource_group.this[0].name : var.resource_group_name
   resource_group_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${local.resource_group_name}"
-  subnet_id = var.create_virtual_network ? module.virtual_network[0].subnets["agents"].resource_id : var.subnet_id
+  container_app_subnet_id = var.create_virtual_network ? module.virtual_network[0].subnets["container_app"].resource_id : var.container_app_subnet_id
+  container_registry_private_endpoint_subnet_id = var.create_virtual_network ? module.virtual_network[0].subnets["container_registry_private_endpoint"].resource_id : var.container_registry_private_endpoint_subnet_id
   log_analytics_workspace_id = var.create_log_analytics_workspace ? module.log_analytics_workspace[0].resource_id : var.log_analytics_workspace_id
   user_assigned_managed_identity_principal_id = var.create_user_assigned_managed_identity ? module.user_assigned_managed_identity[0].principal_id : var.user_assigned_managed_identity_principal_id
 }
@@ -12,7 +13,8 @@ locals {
   container_registry_name = var.container_registry_name != null ? var.container_registry_name : "acr-${var.postfix}"
   log_analytics_workspace_name = var.log_analytics_workspace_name != null ? var.log_analytics_workspace_name : "laws-${var.postfix}"
   virtual_network_name = var.virtual_network_name != null ? var.virtual_network_name : "vnet-${var.postfix}"
-  subnet_name = var.subnet_name != null ? var.subnet_name : "subnet-${var.postfix}"
+  container_app_subnet_name = var.container_app_subnet_name != null ? var.container_app_subnet_name : "subnet-container-app-${var.postfix}"
+  container_registry_private_endpoint_subnet_name = var.container_registry_private_endpoint_subnet_name != null ? var.container_registry_private_endpoint_subnet_name : "subnet-container-registry-private-endpoint-${var.postfix}"
   user_assigned_managed_identity_name = var.user_assigned_managed_identity_name != null ? var.user_assigned_managed_identity_name : "uami-${var.postfix}"
   user_assigned_managed_identity_id = var.user_assigned_managed_identity_id != null ? var.user_assigned_managed_identity_id : module.user_assigned_managed_identity[0].resource_id
 }
