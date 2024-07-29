@@ -1,135 +1,88 @@
-# resources
-resource "azurerm_resource_group" "rg" {
+resource "azurerm_resource_group" "this" {
   count = var.resource_group_creation_enabled ? 1 : 0
 
   location = var.location
-  name     = coalesce(var.resource_group_name, "rg-${var.name}")
+  name     = coalesce(var.resource_group_name, "rg-${var.postfix}")
+}
 
-  lifecycle {
-    precondition {
-      condition     = var.location != null
-      error_message = "location must be specified when resource_group_creation_enabled == true"
-    }
+locals {
+  keda_meta_data_github = {
+    owner = var.version_control_system_organization
+    repos = var.version_control_system_repository
+    targetWorkflowQueueLength = var.target_queue_length
+    runnerScope = var.version_control_system_scope
   }
+  keda_meta_data_azure_devops = {
+    poolName = var.version_control_system_pool_name
+    targetPipelinesQueueLength = var.target_queue_length
+  }
+  keda_meta_data_final = var.version_control_system_type == local.version_control_system_azure_devops ? jsonencode(local.keda_meta_data_azure_devops) : jsonencode(local.keda_meta_data_github)
+  keda_meta_data = tomap(jsondecode(local.keda_meta_data_final))
 }
 
-data "azurerm_resource_group" "rg" {
-  count = var.resource_group_creation_enabled ? 0 : 1
-
-  name = var.resource_group_name
+locals {
+  environment_variables_azure_devops = []
+  environment_variables_github = []
+  environment_variables_final = var.version_control_system_type == local.version_control_system_azure_devops ? jsonencode(local.environment_variables_azure_devops) : jsonencode(local.environment_variables_github)
+  environment_variables = concat(tolist(jsondecode(local.environment_variables_final)), tolist(var.environment_variables))
 }
 
-resource "azurerm_virtual_network" "this_vnet" {
-  count = var.virtual_network_creation_enabled ? 1 : 0
+locals {
+  sensitive_environment_variables_azure_devops = [
+    {
+      name  = "AZP_URL"
+      value = var.version_control_system_organization
+      keda_auth_name = "organizationURL"
+    },
+    {
+      name  = "AZP_TOKEN"
+      value = var.version_control_system_personal_access_token
+      keda_auth_name = "personalAccessToken"
+    }
+  ]
+  sensitive_environment_variables_github = [
+    {
+      name  = "GH_TOKEN"
+      value = var.version_control_system_personal_access_token
+      keda_auth_name = "personalAccessToken"
+    }
+  ]
 
-  address_space       = [var.virtual_network_address_space]
-  location            = try(azurerm_resource_group.rg[0].location, data.azurerm_resource_group.rg[0].location)
-  name                = coalesce(var.virtual_network_name, "vnet-${var.name}")
-  resource_group_name = try(azurerm_resource_group.rg[0].name, data.azurerm_resource_group.rg[0].name)
+  sensitive_environment_variables_final = var.version_control_system_type == local.version_control_system_azure_devops ? jsonencode(local.sensitive_environment_variables_azure_devops) : jsonencode(local.sensitive_environment_variables_github)
+  sensitive_environment_variables = concat(tolist(jsondecode(local.sensitive_environment_variables_final)), tolist(var.sensitive_environment_variables))
 }
 
-data "azurerm_virtual_network" "this_vnet" {
-  count = var.virtual_network_creation_enabled ? 0 : 1
+module "container_app_job" {
+  source = "./modules/container-app-job"
 
-  name                = var.virtual_network_name
-  resource_group_name = var.virtual_network_resource_group_name
-}
+  resource_group_id                  = local.resource_group_id
+  location                           = var.location
+  postfix                            = var.postfix
+  keda_rule_type = var.version_control_system_type == local.version_control_system_azure_devops ? "azure-pipelines" : "github-runner"
+  keda_meta_data = local.keda_meta_data
 
-resource "azurerm_subnet" "this_subnet" {
-  count = var.subnet_creation_enabled ? 1 : 0
+  environment_variables = local.environment_variables
+  sensitive_environment_variables = local.sensitive_environment_variables
 
-  address_prefixes     = [var.subnet_address_prefix]
-  name                 = coalesce(var.subnet_name, "snet-${var.name}")
-  resource_group_name  = try(azurerm_virtual_network.this_vnet[0].resource_group_name, var.virtual_network_resource_group_name)
-  virtual_network_name = try(azurerm_virtual_network.this_vnet[0].name, var.virtual_network_name)
-}
+  container_app_environment_id = azurerm_container_app_environment.this.id
 
-resource "azurerm_log_analytics_workspace" "this_laws" {
-  count = var.log_analytics_workspace_creation_enabled ? 1 : 0
+  registry_login_server = var.create_container_registry ? module.container_registry[0].login_server : var.custom_container_registry_login_server
 
-  location            = try(azurerm_resource_group.rg[0].location, data.azurerm_resource_group.rg[0].location)
-  name                = coalesce(var.log_analytics_workspace_name, "laws-${var.name}")
-  resource_group_name = try(azurerm_resource_group.rg[0].name, data.azurerm_resource_group.rg[0].name)
-  retention_in_days   = 30
-  sku                 = "PerGB2018"
-}
-
-module "ca_ado" {
-  source = "./modules/ca-azure-devops-agents"
-
-  count = lower(var.cicd_system) == "azuredevops" ? 1 : 0
-
-  resource_group_name                = try(azurerm_resource_group.rg[0].name, data.azurerm_resource_group.rg[0].name)
-  resource_group_location            = try(azurerm_resource_group.rg[0].location, data.azurerm_resource_group.rg[0].location)
-  name                               = var.name
-  azp_pool_name                      = var.azp_pool_name
-  azp_url                            = var.azp_url
   placeholder_agent_name             = var.placeholder_agent_name
   placeholder_container_name         = var.placeholder_container_name
   placeholder_replica_retry_limit    = var.placeholder_replica_retry_limit
   placeholder_replica_timeout        = var.placeholder_replica_timeout
-  pat_token_secret_url               = var.pat_token_secret_url
-  pat_token_value                    = var.pat_token_value
   polling_interval_seconds           = var.polling_interval_seconds
-  runner_agent_cpu                   = var.runner_agent_cpu
-  runner_agent_memory                = var.runner_agent_memory
-  runner_container_name              = var.runner_container_name
-  runner_replica_retry_limit         = var.runner_replica_retry_limit
-  runner_replica_timeout             = var.runner_replica_timeout
-  target_queue_length                = var.target_queue_length
-  container_image_name               = var.container_image_name
-  container_app_environment_name     = var.container_app_environment_name
-  container_app_job_placeholder_name = var.container_app_job_placeholder_name
-  container_app_job_runner_name      = var.container_app_job_runner_name
+  container_cpu                   = var.container_cpu
+  container_memory                = var.container_memory
+  replica_retry_limit         = var.replica_retry_limit
+  replica_timeout             = var.replica_timeout
+  container_image_name               = local.container_images["default"].image_names[0]
+  container_name = var.container_name
+  placeholder_job_name = var.container_app_placeholder_job_name
+  job_name      = var.container_app_job_name
   min_execution_count                = var.min_execution_count
   max_execution_count                = var.max_execution_count
-  subnet_id                          = try(azurerm_subnet.this_subnet[0].id, var.subnet_id)
-  virtual_network_id                 = try(azurerm_virtual_network.this_vnet[0].id, data.azurerm_virtual_network.this_vnet[0].id)
-  tracing_tags_enabled               = var.tracing_tags_enabled
-  tracing_tags_prefix                = var.tracing_tags_prefix
   tags                               = var.tags
-  lock                               = var.lock
-  azure_container_registries         = var.azure_container_registries
-  managed_identities                 = var.managed_identities
-  key_vault_user_assigned_identity   = var.key_vault_user_assigned_identity
-  role_assignments                   = var.role_assignments
-  log_analytics_workspace_id         = try(azurerm_log_analytics_workspace.this_laws[0].id, var.log_analytics_workspace_id)
-}
-
-module "ca_github" {
-  source = "./modules/ca-github-runners"
-
-  count = lower(var.cicd_system) == "github" ? 1 : 0
-
-  resource_group_name              = try(azurerm_resource_group.rg[0].name, data.azurerm_resource_group.rg[0].name)
-  resource_group_location          = try(azurerm_resource_group.rg[0].location, data.azurerm_resource_group.rg[0].location)
-  name                             = var.name
-  github_keda_metadata             = var.github_keda_metadata
-  pat_token_secret_url             = var.pat_token_secret_url
-  pat_token_value                  = var.pat_token_value
-  pat_env_var_name                 = var.pat_env_var_name
-  environment_variables            = var.environment_variables
-  polling_interval_seconds         = var.polling_interval_seconds
-  runner_agent_cpu                 = var.runner_agent_cpu
-  runner_agent_memory              = var.runner_agent_memory
-  runner_container_name            = var.runner_container_name
-  runner_replica_retry_limit       = var.runner_replica_retry_limit
-  runner_replica_timeout           = var.runner_replica_timeout
-  target_queue_length              = var.target_queue_length
-  container_image_name             = var.container_image_name
-  container_app_environment_name   = var.container_app_environment_name
-  container_app_job_runner_name    = var.container_app_job_runner_name
-  min_execution_count              = var.min_execution_count
-  max_execution_count              = var.max_execution_count
-  subnet_id                        = try(azurerm_subnet.this_subnet[0].id, var.subnet_id)
-  virtual_network_id               = try(azurerm_virtual_network.this_vnet[0].id, data.azurerm_virtual_network.this_vnet[0].id)
-  tracing_tags_enabled             = var.tracing_tags_enabled
-  tracing_tags_prefix              = var.tracing_tags_prefix
-  tags                             = var.tags
-  lock                             = var.lock
-  azure_container_registries       = var.azure_container_registries
-  managed_identities               = var.managed_identities
-  key_vault_user_assigned_identity = var.key_vault_user_assigned_identity
-  role_assignments                 = var.role_assignments
-  log_analytics_workspace_id       = try(azurerm_log_analytics_workspace.this_laws[0].id, var.log_analytics_workspace_id)
+  user_assigned_managed_identity_id   = local.user_assigned_managed_identity_id
 }

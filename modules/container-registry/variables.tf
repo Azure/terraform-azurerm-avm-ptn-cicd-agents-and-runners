@@ -12,7 +12,7 @@ A map of objects that define the images to build in the container registry. The 
 - task_name: The name of the task to create for building the image (e.g. `image-build-task`)
 - dockerfile_path: The path to the Dockerfile to use for building the image (e.g. `dockerfile`)
 - context_path: The path to the context of the Dockerfile in three sections `<repository-url>#<repository-commit>:<repository-folder-path>` (e.g. https://github.com/Azure/terraform-azurerm-avm-ptn-cicd-agents-and-runners#8ff4b85:container-images/azure-devops-agent)
-- context_access_token: The access token to use for accessing the context. This is a dummy value because the context_access_token should not be required in the provider
+- context_access_token: The access token to use for accessing the context. Supply a PAT if targetting a private repository.
 - image_names: A list of the names of the images to build (e.g. `["image-name:tag"]`)
 DESCRIPTION
 }
