@@ -33,29 +33,18 @@ variable "environment_variables" {
 
 variable "sensitive_environment_variables" {
   type = set(object({
-    name  = string
-    value = string
+    name                      = string
+    value                     = string
     container_app_secret_name = string
-    keda_auth_name = optional(string)
+    keda_auth_name            = optional(string)
   }))
   description = "List of sensitive environment variables to pass to the container."
-  sensitive = true
+  sensitive   = true
 }
 
 variable "registry_login_server" {
   type        = string
   description = "The login server of the container registry."
-}
-
-variable "registry_username" {
-  type        = string
-  description = "The login server of the container registry."
-}
-
-variable "registry_password" {
-  type        = string
-  description = "The login server of the container registry."
-  sensitive = true
 }
 
 variable "container_image_name" {

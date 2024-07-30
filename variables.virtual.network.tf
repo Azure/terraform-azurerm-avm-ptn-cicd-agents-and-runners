@@ -12,13 +12,13 @@ variable "virtual_network_name" {
 
 variable "virtual_network_address_space" {
   type        = string
-  default = null
+  default     = null
   description = "The address space for the virtual network. Must be specified if `create_virtual_network == false`."
 }
 
 variable "container_app_subnet_name" {
   type        = string
-  default = null
+  default     = null
   description = "The name of the subnet. Must be specified if `create_virtual_network == false`."
 }
 
@@ -36,7 +36,7 @@ variable "container_app_subnet_id" {
 
 variable "container_registry_private_endpoint_subnet_name" {
   type        = string
-  default = null
+  default     = null
   description = "The name of the subnet. Must be specified if `create_virtual_network == false`."
 }
 
@@ -57,4 +57,16 @@ variable "virtual_network_resource_group_name" {
   default     = ""
   description = "The name of the Virtual Network's Resource Group. Must be specified if `virtual_network_creation_enabled` == `false`"
   nullable    = false
+}
+
+variable "create_container_registry_private_dns_zone" {
+  type        = bool
+  default     = true
+  description = "Whether or not to create a private DNS zone for the container registry."
+}
+
+variable "container_registry_dns_zone_id" {
+  type        = string
+  default     = null
+  description = "The ID of the private DNS zone to create for the container registry. Only required if `create_private_dns_zone` is `false`."
 }

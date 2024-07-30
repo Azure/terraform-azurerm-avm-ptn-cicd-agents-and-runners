@@ -1,4 +1,4 @@
-# Linux GitHub Runner Docker Image
+# Linux GitHub Runner Docker Image for Azure Container Instances
 
 > Note: You can update the [Dockerfile](Dockerfile) to add any software that your require into the Azure DevOps agent, if you don't want to have to download the bits during all pipelines executions.
 

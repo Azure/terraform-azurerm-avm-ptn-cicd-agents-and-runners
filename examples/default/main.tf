@@ -23,7 +23,7 @@ locals {
 
 terraform {
   required_version = ">= 1.3.0"
-  required_providers {#
+  required_providers { #
     azuredevops = {
       source  = "microsoft/azuredevops"
       version = "~> 1.1"
@@ -68,10 +68,10 @@ resource "random_integer" "region_index" {
 
 # This ensures we have unique CAF compliant names for our resources.
 resource "random_string" "name" {
-  length  = 4
+  length  = 6
   special = false
   numeric = true
-  upper = false
+  upper   = false
 }
 
 module "naming" {
@@ -80,11 +80,11 @@ module "naming" {
 }
 
 resource "azuredevops_project" "this" {
-  name  = module.naming.unique-seed
+  name = random_string.name.result
 }
 
 resource "azuredevops_agent_pool" "this" {
-  name           = module.naming.unique-seed
+  name           = random_string.name.result
   auto_provision = false
   auto_update    = true
 }
@@ -98,10 +98,10 @@ resource "azuredevops_agent_queue" "alz" {
 module "azure_devops_agents" {
   source = "../.."
 
-  postfix                       = random_string.name.result
-  location                      = module.regions.regions[random_integer.region_index.result].name
-  version_control_system_type   = "azuredevops"
+  postfix                                      = random_string.name.result
+  location                                     = module.regions.regions[random_integer.region_index.result].name
+  version_control_system_type                  = "azuredevops"
   version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
-  version_control_system_organization = local.azure_devops_organization_url
-  virtual_network_address_space = "10.0.0.0/16"
+  version_control_system_organization          = local.azure_devops_organization_url
+  virtual_network_address_space                = "10.0.0.0/16"
 }

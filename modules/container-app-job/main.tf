@@ -14,10 +14,10 @@ resource "azapi_resource" "job" {
             minExecutions   = var.min_execution_count
             maxExecutions   = var.max_execution_count
             pollingInterval = var.polling_interval_seconds
-            rules = [ local.keda_rule]
+            rules           = [local.keda_rule]
           }
         }
-        secrets = local.secrets
+        secrets     = local.secrets
         triggerType = "Event"
       }
       template = {
@@ -32,13 +32,13 @@ resource "azapi_resource" "job" {
 
   identity {
     type         = "UserAssigned"
-    identity_ids = [ var.user_assigned_managed_identity_id ]
+    identity_ids = [var.user_assigned_managed_identity_id]
   }
 }
 
 resource "azapi_resource" "placeholder" {
   count = var.create_placeholder_job ? 1 : 0
-  type = "Microsoft.App/jobs@2023-05-01"
+  type  = "Microsoft.App/jobs@2023-05-01"
   body = jsonencode({
     properties = {
       environmentId = var.container_app_environment_id
@@ -50,7 +50,7 @@ resource "azapi_resource" "placeholder" {
           parallelism            = 1
           replicaCompletionCount = 1
         }
-        secrets = local.secrets
+        secrets     = local.secrets
         triggerType = "Manual"
       }
       template = {
@@ -65,6 +65,6 @@ resource "azapi_resource" "placeholder" {
 
   identity {
     type         = "UserAssigned"
-    identity_ids = [ var.user_assigned_managed_identity_id ]
+    identity_ids = [var.user_assigned_managed_identity_id]
   }
 }

@@ -18,7 +18,7 @@ variable "user_assigned_managed_identity_principal_id" {
 }
 
 variable "user_assigned_managed_identity_id" {
-    type        = string
-    default     = null
-    description = "The resource Id of the user assigned managed identity. Only required if `create_user_assigned_managed_identity == false`."
+  type        = string
+  default     = null
+  description = "The resource Id of the user assigned managed identity. Only required if `create_user_assigned_managed_identity == false`."
 }

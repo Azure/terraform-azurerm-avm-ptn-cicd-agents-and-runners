@@ -7,19 +7,19 @@ variable "create_placeholder_job" {
 variable "placeholder_job_name" {
   type        = string
   description = "The name of the Container App placeholder job."
-  default = null
+  default     = null
 }
 
 variable "placeholder_agent_name" {
   type        = string
   description = "The name of the agent / runner that will appear in Azure DevOps / GitHub for the placeholder agent."
-  default = null
+  default     = null
 }
 
 variable "placeholder_container_name" {
   type        = string
   description = "The name of the container for the placeholder Container Apps job."
-  default = null
+  default     = null
 }
 
 variable "placeholder_replica_retry_limit" {

@@ -14,26 +14,26 @@ variable "container_registry_name" {
 variable "custom_container_registry_login_server" {
   type        = string
   description = "The login server of the container registry to use if `create_container_registry` is `false`."
-  default = null
+  default     = null
 }
 
 variable "custom_container_registry_username" {
   type        = string
   description = "The username of the container registry to use if `create_container_registry` is `false`."
-  default = null
+  default     = null
 }
 
 variable "custom_container_registry_password" {
   type        = string
   description = "The password of the container registry to use if `create_container_registry` is `false`."
-  default = null
-  sensitive = true
+  default     = null
+  sensitive   = true
 }
 
 variable "custom_container_image_name" {
   type        = string
   description = "The image to use in the container registry to use if `create_container_registry` is `false`."
-  default = null
+  default     = null
 }
 
 variable "use_default_container_image" {
@@ -43,11 +43,11 @@ variable "use_default_container_image" {
 }
 
 variable "custom_container_registry_image" {
-  type        = object({
+  type = object({
     task_name            = string
     dockerfile_path      = string
     context_path         = string
-    context_access_token = optional(string, "a")  # This `a` is a dummy value because the context_access_token should not be required in the provider
+    context_access_token = optional(string, "a") # This `a` is a dummy value because the context_access_token should not be required in the provider
     image_names          = list(string)
   })
   default     = null
@@ -75,10 +75,13 @@ variable "default_image_repository_commit" {
   default     = "8ff4b85"
 }
 
-variable "default_image_repository_folder_path" {
-  type        = string
+variable "default_image_repository_folder_paths" {
+  type        = map(string)
   description = "The default image repository folder path to use if no custom image is provided."
-  default     = "container-images/azure-devops-agent"
+  default     = {
+    azuredevops = "container-images/azure-devops-agent-aca"
+    github      = "container-images/github-runner-aca"
+  }
 }
 
 variable "default_image_registry_dockerfile_path" {

@@ -1,12 +1,6 @@
-resource "azurerm_private_dns_zone" "this" {
-  count              = var.use_private_networking && var.create_private_dns_zone ? 1 : 0
-  name                = "privatelink.azurecr.io"
-  resource_group_name = var.resource_group_name
-}
-
 module "container_registry" {
-  source  = "Azure/avm-res-containerregistry-registry/azurerm"
-  version = "~> 0.2"
+  source                        = "Azure/avm-res-containerregistry-registry/azurerm"
+  version                       = "~> 0.2"
   name                          = var.name
   resource_group_name           = var.resource_group_name
   location                      = var.location
@@ -17,12 +11,11 @@ module "container_registry" {
   enable_telemetry              = var.enable_telemetry
   private_endpoints = var.use_private_networking ? {
     container_registry = {
-      private_dns_zone_resource_ids = [ local.private_dns_zone_id ]
-      subnet_resource_id = var.subnet_id
+      private_dns_zone_resource_ids = [var.private_dns_zone_id]
+      subnet_resource_id            = var.subnet_id
     }
   } : null
-  tags                          = var.tags
-  admin_enabled = true
+  tags          = var.tags
 }
 
 resource "azurerm_container_registry_task" "this" {
@@ -50,7 +43,7 @@ resource "azurerm_container_registry_task" "this" {
 }
 
 resource "azurerm_container_registry_task_schedule_run_now" "this" {
-  for_each = var.images
+  for_each                   = var.images
   container_registry_task_id = azurerm_container_registry_task.this[each.key].id
   lifecycle {
     replace_triggered_by = [azurerm_container_registry_task.this]

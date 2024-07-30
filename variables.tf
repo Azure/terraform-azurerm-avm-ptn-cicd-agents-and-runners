@@ -81,13 +81,13 @@ variable "version_control_system_organization" {
 variable "version_control_system_personal_access_token" {
   type        = string
   description = "The personal access token for the version control system."
-  sensitive = true
+  sensitive   = true
 }
 
 variable "version_control_system_repository" {
   type        = string
   description = "The version control system repository to deploy the agents too."
-  default = null
+  default     = null
 }
 
 variable "version_control_system_scope" {
@@ -99,5 +99,29 @@ variable "version_control_system_scope" {
 variable "version_control_system_pool_name" {
   type        = string
   description = "The name of the agent pool in the version control system."
+  default     = null
+}
+
+variable "version_control_system_agent_name_prefix" {
+  type        = string
+  description = "The version control system agent name prefix."
+  default     = null
+}
+
+variable "version_control_system_agent_scope" {
+  type        = string
+  description = "The scope of the agent / runner. Must be `ent`, `org`, or `repo`. This is ignored for Azure DevOps."
+  default     = "repo"
+}
+
+variable "version_control_system_runner_group" {
+  type        = string
+  description = "The runner group to add the runner to."
+  default     = null
+}
+
+variable "version_control_system_enterprise" {
+  type        = string
+  description = "The enterprise name for the version control system."
   default     = null
 }

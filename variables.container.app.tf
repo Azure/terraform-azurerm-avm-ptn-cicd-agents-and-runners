@@ -106,12 +106,18 @@ variable "environment_variables" {
 
 variable "sensitive_environment_variables" {
   type = set(object({
-    name  = string
-    value = string
+    name                      = string
+    value                     = string
     container_app_secret_name = string
-    keda_auth_name = optional(string)
+    keda_auth_name            = optional(string)
   }))
   nullable    = true
   default     = []
   description = "List of additional sensitive environment variables to pass to the container."
+}
+
+variable "container_apps_infrastructure_resource_group_name" {
+  type        = string
+  default     = null
+  description = "The name of the resource group where the Container Apps infrastructure is deployed."
 }

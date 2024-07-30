@@ -1,12 +1,12 @@
 variable "images" {
-  type        = map(object({
+  type = map(object({
     task_name            = string
     dockerfile_path      = string
     context_path         = string
-    context_access_token = optional(string, "a")  # This `a` is a dummy value because the context_access_token should not be required in the provider
+    context_access_token = optional(string, "a") # This `a` is a dummy value because the context_access_token should not be required in the provider
     image_names          = list(string)
   }))
-  default = {}
+  default     = {}
   description = <<DESCRIPTION
 A map of objects that define the images to build in the container registry. The key of the map is the name of the image and the value is an object with the following attributes:
 - task_name: The name of the task to create for building the image (e.g. `image-build-task`)
@@ -46,12 +46,6 @@ variable "subnet_id" {
   description = "The id of the subnet to use for the private endpoint"
   type        = string
   default     = null
-}
-
-variable "create_private_dns_zone" {
-  description = "Whether to create a private DNS zone for the container registry"
-  type        = bool
-  default     = true
 }
 
 variable "private_dns_zone_id" {

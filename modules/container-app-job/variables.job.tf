@@ -1,11 +1,11 @@
 variable "keda_meta_data" {
-    type = map(string)
-    description = "The metadata for the KEDA scaler."
+  type        = map(string)
+  description = "The metadata for the KEDA scaler."
 }
 
 variable "keda_rule_type" {
-    type = string
-    description = "The type of the KEDA rule."
+  type        = string
+  description = "The type of the KEDA rule."
 }
 
 variable "job_name" {
