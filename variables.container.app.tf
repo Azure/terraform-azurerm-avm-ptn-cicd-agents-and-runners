@@ -114,6 +114,6 @@ variable "container_app_infrastructure_resource_group_name" {
 
 variable "container_app_placeholder_schedule_offset_minutes" {
   type        = number
-  default     = 2
+  default     = 5
   description = "The offset in minutes for the placeholder job."
 }

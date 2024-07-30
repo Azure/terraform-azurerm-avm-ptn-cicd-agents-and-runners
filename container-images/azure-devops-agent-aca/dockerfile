@@ -1,4 +1,5 @@
 FROM mcr.microsoft.com/azure-powershell:ubuntu-22.04
+ENV TARGETARCH="linux-x64"
 
 # To make it easier for build and release pipelines to run apt-get,
 # configure apt to not require confirmation (assume the -y argument by default)
