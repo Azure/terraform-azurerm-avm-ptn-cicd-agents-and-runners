@@ -15,7 +15,7 @@ module "container_registry" {
       subnet_resource_id            = var.subnet_id
     }
   } : null
-  tags          = var.tags
+  tags = var.tags
 }
 
 resource "azurerm_container_registry_task" "this" {

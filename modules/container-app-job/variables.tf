@@ -37,8 +37,8 @@ variable "environment_variables_placeholder" {
     value = string
   }))
   description = "List of environment variables to pass only to the placeholder container."
-  default = []
-  nullable = false
+  default     = []
+  nullable    = false
 }
 
 variable "sensitive_environment_variables" {

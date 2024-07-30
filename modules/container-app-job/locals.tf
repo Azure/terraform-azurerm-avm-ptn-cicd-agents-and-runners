@@ -1,7 +1,7 @@
 locals {
-  job_name             = var.job_name == null ? "caj-${var.postfix}" : var.job_name
-  placeholder_job_name = var.placeholder_job_name == null ? "${local.job_name}-ph" : var.placeholder_job_name
-  job_container_name       = var.job_container_name == null ? "caj-${var.postfix}" : var.job_container_name
+  job_name                   = var.job_name == null ? "caj-${var.postfix}" : var.job_name
+  placeholder_job_name       = var.placeholder_job_name == null ? "${local.job_name}-ph" : var.placeholder_job_name
+  job_container_name         = var.job_container_name == null ? "caj-${var.postfix}" : var.job_container_name
   placeholder_container_name = var.placeholder_container_name == null ? "${local.job_container_name}-ph" : var.placeholder_container_name
 }
 

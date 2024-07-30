@@ -9,7 +9,7 @@ module "container_registry" {
   container_compute_identity_principal_id = local.user_assigned_managed_identity_principal_id
   use_private_networking                  = var.use_private_networking
   subnet_id                               = local.container_registry_private_endpoint_subnet_id
-  private_dns_zone_id = local.container_registry_dns_zone_id
+  private_dns_zone_id                     = local.container_registry_dns_zone_id
   tags                                    = var.tags
 
   images = local.container_images

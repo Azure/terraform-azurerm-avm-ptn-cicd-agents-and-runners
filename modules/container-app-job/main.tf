@@ -47,7 +47,7 @@ resource "azapi_resource" "placeholder" {
         replicaTimeout    = var.placeholder_replica_timeout
         registries        = local.container_registies
         scheduleTriggerConfig = {
-          cronExpression = var.placeholder_cron_expression
+          cronExpression         = var.placeholder_cron_expression
           parallelism            = 1
           replicaCompletionCount = 1
         }

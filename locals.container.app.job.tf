@@ -54,8 +54,8 @@ locals {
       value = var.version_control_system_runner_group
     }
   ]
-  environment_variables_final        = var.version_control_system_type == local.version_control_system_azure_devops ? jsonencode(local.environment_variables_azure_devops) : jsonencode(local.environment_variables_github)
-  environment_variables              = concat(tolist(jsondecode(local.environment_variables_final)), tolist(var.container_app_environment_variables))
+  environment_variables_final = var.version_control_system_type == local.version_control_system_azure_devops ? jsonencode(local.environment_variables_azure_devops) : jsonencode(local.environment_variables_github)
+  environment_variables       = concat(tolist(jsondecode(local.environment_variables_final)), tolist(var.container_app_environment_variables))
 }
 
 locals {
