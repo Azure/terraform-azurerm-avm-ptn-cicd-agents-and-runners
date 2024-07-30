@@ -1,6 +1,8 @@
 locals {
   job_name             = var.job_name == null ? "caj-${var.postfix}" : var.job_name
-  placeholder_job_name = var.placeholder_job_name == null ? "caj-${var.postfix}-ph" : var.placeholder_job_name
+  placeholder_job_name = var.placeholder_job_name == null ? "${local.job_name}-ph" : var.placeholder_job_name
+  job_container_name       = var.job_container_name == null ? "caj-${var.postfix}" : var.job_container_name
+  placeholder_container_name = var.placeholder_container_name == null ? "${local.job_container_name}-ph" : var.placeholder_container_name
 }
 
 locals {
@@ -34,9 +36,9 @@ locals {
       identity = var.user_assigned_managed_identity_id
     }
   ]
-  
+
   container_job = {
-    name  = var.container_name
+    name  = local.job_container_name
     image = "${var.registry_login_server}/${var.container_image_name}"
     resources = {
       cpu    = var.container_cpu
@@ -46,13 +48,13 @@ locals {
   }
 
   container_placeholder = {
-    name  = var.placeholder_container_name
+    name  = local.placeholder_container_name
     image = "${var.registry_login_server}/${var.container_image_name}"
     resources = {
       cpu    = var.container_cpu
       memory = var.container_memory
     }
-    env = concat(local.placeholder_environment_variables, local.placeholder_environment_variables)
+    env = concat(local.final_environment_variables, local.placeholder_environment_variables)
   }
 }
 

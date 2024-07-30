@@ -46,12 +46,13 @@ resource "azapi_resource" "placeholder" {
         replicaRetryLimit = var.placeholder_replica_retry_limit
         replicaTimeout    = var.placeholder_replica_timeout
         registries        = local.container_registies
-        manualTriggerConfig = {
+        scheduleTriggerConfig = {
+          cronExpression = var.placeholder_cron_expression
           parallelism            = 1
           replicaCompletionCount = 1
         }
         secrets     = local.secrets
-        triggerType = "Manual"
+        triggerType = "Schedule"
       }
       template = {
         containers = [local.container_placeholder]

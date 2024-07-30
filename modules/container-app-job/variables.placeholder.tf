@@ -27,3 +27,9 @@ variable "placeholder_replica_timeout" {
   description = "The timeout in seconds for the placeholder Container Apps job."
   default     = 300
 }
+
+variable "placeholder_cron_expression" {
+  type        = string
+  description = "The cron expression for the placeholder Container Apps job."
+  default     = null
+}

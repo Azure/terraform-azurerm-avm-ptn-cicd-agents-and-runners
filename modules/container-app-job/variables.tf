@@ -57,13 +57,17 @@ variable "registry_login_server" {
   description = "The login server of the container registry."
 }
 
-variable "container_image_name" {
-  type        = string
-  description = "Fully qualified name of the Docker image the agents should run."
-  nullable    = false
-}
-
 variable "user_assigned_managed_identity_id" {
   type        = string
   description = "The resource Id of the user assigned managed identity."
+}
+
+variable "keda_meta_data" {
+  type        = map(string)
+  description = "The metadata for the KEDA scaler."
+}
+
+variable "keda_rule_type" {
+  type        = string
+  description = "The type of the KEDA rule."
 }

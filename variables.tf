@@ -125,3 +125,9 @@ variable "version_control_system_enterprise" {
   description = "The enterprise name for the version control system."
   default     = null
 }
+
+variable "version_control_system_agent_target_queue_length" {
+  type        = number
+  default     = 1
+  description = "The target value for the amound of pending jobs to scale on."
+}

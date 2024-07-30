@@ -25,23 +25,22 @@ fi
 export AGENT_ALLOW_RUNASROOT="1"
 
 cleanup() {
-  trap "" EXIT
   # If $AZP_PLACEHOLDER is set, skip cleanup
   if [ -n "$AZP_PLACEHOLDER" ]; then
     echo 'Running in placeholder mode, skipping cleanup'
-    return
-  fi
-  if [ -e ./config.sh ]; then
-    print_header "Cleanup. Removing Azure Pipelines agent..."
+  else
+    if [ -e ./config.sh ]; then
+      print_header "Cleanup. Removing Azure Pipelines agent..."
 
-    # If the agent has some running jobs, the configuration removal process will fail.
-    # So, give it some time to finish the job.
-    while true; do
-      ./config.sh remove --unattended --auth "PAT" --token $(cat "${AZP_TOKEN_FILE}") && break
+      # If the agent has some running jobs, the configuration removal process will fail.
+      # So, give it some time to finish the job.
+      while true; do
+        ./config.sh remove --unattended --auth "PAT" --token $(cat "${AZP_TOKEN_FILE}") && break
 
-      echo "Retrying in 30 seconds..."
-      sleep 30
-    done
+        echo "Retrying in 30 seconds..."
+        sleep 30
+      done
+    fi
   fi
 }
 

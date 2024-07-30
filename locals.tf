@@ -1,7 +1,7 @@
 locals {
   role_definition_resource_substring                = "/providers/Microsoft.Authorization/roleDefinitions"
   resource_group_name                               = var.resource_group_creation_enabled ? azurerm_resource_group.this[0].name : var.resource_group_name
-  resource_group_name_container_apps_infrastructure = var.container_apps_infrastructure_resource_group_name == null ? "rg-${var.postfix}-container-apps-infrastructure" : var.container_apps_infrastructure_resource_group_name
+  resource_group_name_container_app_infrastructure = var.container_app_infrastructure_resource_group_name == null ? "rg-${var.postfix}-container-apps-infrastructure" : var.container_app_infrastructure_resource_group_name
   resource_group_id                                 = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${local.resource_group_name}"
   container_app_subnet_id                           = var.create_virtual_network ? module.virtual_network[0].subnets["container_app"].resource_id : var.container_app_subnet_id
   container_registry_private_endpoint_subnet_id     = var.create_virtual_network ? module.virtual_network[0].subnets["container_registry_private_endpoint"].resource_id : var.container_registry_private_endpoint_subnet_id

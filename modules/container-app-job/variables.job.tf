@@ -1,16 +1,11 @@
-variable "keda_meta_data" {
-  type        = map(string)
-  description = "The metadata for the KEDA scaler."
-}
-
-variable "keda_rule_type" {
-  type        = string
-  description = "The type of the KEDA rule."
-}
-
 variable "job_name" {
   type        = string
   description = "The name of the Container App job."
+}
+
+variable "job_container_name" {
+  type        = string
+  description = "The name of the container for the runner Container Apps job."
 }
 
 variable "max_execution_count" {
