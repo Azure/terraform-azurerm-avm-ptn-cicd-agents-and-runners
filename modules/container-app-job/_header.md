@@ -1,3 +1,3 @@
-# ca-azure-devops-agents
+# CI/CD Agents and Runners - Container Apps Job
 
-This submodule deploys an Azure Container App Environment, and job, as an Azure DevOps agent.
+This submodule deploys an Azure Container Apps Job for CI/CD agents and runners.

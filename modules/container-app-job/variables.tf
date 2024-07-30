@@ -31,6 +31,16 @@ variable "environment_variables" {
   description = "List of environment variables to pass to the container."
 }
 
+variable "environment_variables_placeholder" {
+  type = set(object({
+    name  = string
+    value = string
+  }))
+  description = "List of environment variables to pass only to the placeholder container."
+  default = []
+  nullable = false
+}
+
 variable "sensitive_environment_variables" {
   type = set(object({
     name                      = string

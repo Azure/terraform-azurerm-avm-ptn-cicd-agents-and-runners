@@ -60,10 +60,21 @@ locals {
       name  = "RUNNER_GROUP"
       value = var.version_control_system_runner_group
     }
-
   ]
   environment_variables_final        = var.version_control_system_type == local.version_control_system_azure_devops ? jsonencode(local.environment_variables_azure_devops) : jsonencode(local.environment_variables_github)
   environment_variables              = concat(tolist(jsondecode(local.environment_variables_final)), tolist(var.environment_variables))
+}
+
+locals {
+  environment_variables_placeholder_azure_devops = [
+    {
+      name  = "AZP_PLACEHOLDER"
+      value = "true"
+    }
+  ]
+  environment_variables_placeholder_github = []
+  environment_variables_placeholder_final  = var.version_control_system_type == local.version_control_system_azure_devops ? jsonencode(local.environment_variables_placeholder_azure_devops) : jsonencode(local.environment_variables_placeholder_github)
+  environment_variables_plceholder         = tolist(jsondecode(local.environment_variables_final))
 }
 
 locals {
@@ -103,15 +114,15 @@ module "container_app_job" {
   keda_rule_type    = var.version_control_system_type == local.version_control_system_azure_devops ? "azure-pipelines" : "github-runner"
   keda_meta_data    = local.keda_meta_data
 
-  environment_variables           = local.environment_variables
-  sensitive_environment_variables = local.sensitive_environment_variables
+  environment_variables             = local.environment_variables
+  environment_variables_placeholder = local.environment_variables_plceholder
+  sensitive_environment_variables   = local.sensitive_environment_variables
 
   container_app_environment_id = azurerm_container_app_environment.this.id
 
   registry_login_server = var.create_container_registry ? module.container_registry[0].login_server : var.custom_container_registry_login_server
 
   create_placeholder_job            = var.version_control_system_type == local.version_control_system_azure_devops
-  placeholder_agent_name            = var.placeholder_agent_name
   placeholder_container_name        = var.placeholder_container_name
   placeholder_replica_retry_limit   = var.placeholder_replica_retry_limit
   placeholder_replica_timeout       = var.placeholder_replica_timeout

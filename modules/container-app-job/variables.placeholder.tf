@@ -10,12 +10,6 @@ variable "placeholder_job_name" {
   default     = null
 }
 
-variable "placeholder_agent_name" {
-  type        = string
-  description = "The name of the agent / runner that will appear in Azure DevOps / GitHub for the placeholder agent."
-  default     = null
-}
-
 variable "placeholder_container_name" {
   type        = string
   description = "The name of the container for the placeholder Container Apps job."

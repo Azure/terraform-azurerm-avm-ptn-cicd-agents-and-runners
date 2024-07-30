@@ -20,6 +20,11 @@ locals {
   }]
 
   final_environment_variables = concat(local.environment_variables, local.secret_environment_variables)
+
+  placeholder_environment_variables = [for env in var.environment_variables_placeholder : {
+    name  = env.name
+    value = env.value
+  }]
 }
 
 locals {
@@ -29,7 +34,8 @@ locals {
       identity = var.user_assigned_managed_identity_id
     }
   ]
-  containers = [{
+  
+  container_job = {
     name  = var.container_name
     image = "${var.registry_login_server}/${var.container_image_name}"
     resources = {
@@ -37,7 +43,17 @@ locals {
       memory = var.container_memory
     }
     env = local.final_environment_variables
-  }]
+  }
+
+  container_placeholder = {
+    name  = var.placeholder_container_name
+    image = "${var.registry_login_server}/${var.container_image_name}"
+    resources = {
+      cpu    = var.container_cpu
+      memory = var.container_memory
+    }
+    env = concat(local.placeholder_environment_variables, local.placeholder_environment_variables)
+  }
 }
 
 locals {

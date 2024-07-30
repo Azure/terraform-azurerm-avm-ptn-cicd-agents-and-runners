@@ -21,7 +21,7 @@ resource "azapi_resource" "job" {
         triggerType = "Event"
       }
       template = {
-        containers = local.containers
+        containers = [local.container_job]
       }
     }
   }))
@@ -54,7 +54,7 @@ resource "azapi_resource" "placeholder" {
         triggerType = "Manual"
       }
       template = {
-        containers = local.containers
+        containers = [local.container_placeholder]
       }
     }
   })

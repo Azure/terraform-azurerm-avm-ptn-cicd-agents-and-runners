@@ -28,15 +28,9 @@ variable "min_execution_count" {
   description = "The minimum number of executions (ADO jobs) to spawn per polling interval."
 }
 
-variable "placeholder_agent_name" {
-  type        = string
-  default     = "placeholder-agent"
-  description = "The name of the agent that will appear in Azure DevOps for the placeholder agent."
-}
-
 variable "placeholder_container_name" {
   type        = string
-  default     = "ado-agent-linux"
+  default     = null
   description = "The name of the container for the placeholder Container Apps job."
 }
 
@@ -72,7 +66,7 @@ variable "container_memory" {
 
 variable "container_name" {
   type        = string
-  default     = "ado-agent-linux"
+  default     = null
   description = "The name of the container for the runner Container Apps job."
 }
 
