@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 GH_RUNNER_VERSION=$1
 TARGETPLATFORM=$2
 
