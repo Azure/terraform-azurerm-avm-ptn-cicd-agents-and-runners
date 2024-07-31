@@ -23,7 +23,7 @@ The original Dockerfile and shell scripts are derived from [myoung34/docker-gith
 ## Build it
 
 ```bash
-docker build -t YOUR_IMAGE_NAME:YOUR_IMAGE_TAG .
+docker build --progress=plain --no-cache -t YOUR_IMAGE_NAME:YOUR_IMAGE_TAG .
 ```
 
 ## Push it

@@ -11,6 +11,7 @@ RUN apt-get update \
         curl \
         jq \
         git \
+        dumb-init \
         sudo \
         iputils-ping \
         libcurl4 \
@@ -43,7 +44,6 @@ RUN chmod +x /actions-runner/install_actions.sh \
 
 COPY token.sh entrypoint.sh app_token.sh /
 RUN chmod +x /token.sh /entrypoint.sh /app_token.sh
-RUN echo $(ls /)
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
