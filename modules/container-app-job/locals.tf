@@ -9,24 +9,24 @@ locals {
   environment_variables = [for env in var.environment_variables : {
     name  = env.name
     value = env.value
-  }]
+  } if env.value != null && env.value != null ]
 
   secrets = [for env in var.sensitive_environment_variables : {
     name  = env.container_app_secret_name
     value = env.value
-  }]
+  } if env.value != null && env.value != null ]
 
   secret_environment_variables = [for env in var.sensitive_environment_variables : {
     name      = env.name
     secretRef = env.container_app_secret_name
-  }]
+  } if env.value != null && env.value != null ]
 
   final_environment_variables = concat(local.environment_variables, local.secret_environment_variables)
 
   placeholder_environment_variables = [for env in var.environment_variables_placeholder : {
     name  = env.name
     value = env.value
-  }]
+  } if env.value != null && env.value != null]
 }
 
 locals {

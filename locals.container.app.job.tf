@@ -3,7 +3,7 @@ locals {
     owner                     = var.version_control_system_organization
     repos                     = var.version_control_system_repository
     targetWorkflowQueueLength = var.version_control_system_agent_target_queue_length
-    runnerScope               = var.version_control_system_scope
+    runnerScope               = var.version_control_system_runner_scope
   }
   keda_meta_data_azure_devops = {
     poolName                   = var.version_control_system_pool_name
@@ -35,7 +35,7 @@ locals {
     },
     {
       name  = "RUNNER_SCOPE"
-      value = var.version_control_system_scope
+      value = var.version_control_system_runner_scope
     },
     {
       name  = "EPHEMERAL"

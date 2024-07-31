@@ -90,12 +90,6 @@ variable "version_control_system_repository" {
   default     = null
 }
 
-variable "version_control_system_scope" {
-  type        = string
-  description = "The scope of the version control system to deploy the agents too."
-  default     = null
-}
-
 variable "version_control_system_pool_name" {
   type        = string
   description = "The name of the agent pool in the version control system."
@@ -108,9 +102,9 @@ variable "version_control_system_agent_name_prefix" {
   default     = null
 }
 
-variable "version_control_system_agent_scope" {
+variable "version_control_system_runner_scope" {
   type        = string
-  description = "The scope of the agent / runner. Must be `ent`, `org`, or `repo`. This is ignored for Azure DevOps."
+  description = "The scope of the runner. Must be `ent`, `org`, or `repo`. This is ignored for Azure DevOps."
   default     = "repo"
 }
 

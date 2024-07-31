@@ -40,8 +40,6 @@ variable "container_app_min_execution_count" {
   description = "The minimum number of executions (ADO jobs) to spawn per polling interval."
 }
 
-
-
 variable "container_app_placeholder_replica_retry_limit" {
   type        = number
   default     = 0
