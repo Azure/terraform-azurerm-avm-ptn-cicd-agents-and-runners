@@ -19,20 +19,22 @@ module "container_registry" {
 }
 
 resource "azurerm_container_registry_task" "this" {
-  for_each              = var.images
-  name                  = each.value.task_name
+  for_each = var.images
+
   container_registry_id = module.container_registry.resource_id
-  platform {
-    os = "Linux"
-  }
+  name                  = each.value.task_name
+
   docker_step {
-    dockerfile_path      = each.value.dockerfile_path
-    context_path         = each.value.context_path
     context_access_token = each.value.context_access_token
+    context_path         = each.value.context_path
+    dockerfile_path      = each.value.dockerfile_path
     image_names          = each.value.image_names
   }
   identity {
     type = "SystemAssigned" # Note this has to be a System Assigned Identity to work with private networking and `network_rule_bypass_option` set to `AzureServices`
+  }
+  platform {
+    os = "Linux"
   }
   registry_credential {
     custom {
@@ -43,23 +45,27 @@ resource "azurerm_container_registry_task" "this" {
 }
 
 resource "azurerm_container_registry_task_schedule_run_now" "this" {
-  for_each                   = var.images
+  for_each = var.images
+
   container_registry_task_id = azurerm_container_registry_task.this[each.key].id
+
+  depends_on = [azurerm_role_assignment.container_registry_push_for_task]
+
   lifecycle {
     replace_triggered_by = [azurerm_container_registry_task.this]
   }
-  depends_on = [azurerm_role_assignment.container_registry_push_for_task]
 }
 
 resource "azurerm_role_assignment" "container_registry_pull_for_container_instance" {
+  principal_id         = var.container_compute_identity_principal_id
   scope                = module.container_registry.resource_id
   role_definition_name = "AcrPull"
-  principal_id         = var.container_compute_identity_principal_id
 }
 
 resource "azurerm_role_assignment" "container_registry_push_for_task" {
-  for_each             = var.images
+  for_each = var.images
+
+  principal_id         = azurerm_container_registry_task.this[each.key].identity[0].principal_id
   scope                = module.container_registry.resource_id
   role_definition_name = "AcrPush"
-  principal_id         = azurerm_container_registry_task.this[each.key].identity[0].principal_id
 }

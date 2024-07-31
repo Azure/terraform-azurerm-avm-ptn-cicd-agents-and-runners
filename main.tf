@@ -6,6 +6,7 @@ resource "azurerm_resource_group" "this" {
 }
 
 resource "time_offset" "placeholder_job" {
+  offset_minutes = var.container_app_placeholder_schedule_offset_minutes
   triggers = {
     container_image                   = local.container_images["default"].image_names[0]
     offset_minutes                    = var.container_app_placeholder_schedule_offset_minutes
@@ -14,7 +15,6 @@ resource "time_offset" "placeholder_job" {
     environment_variables_placeholder = jsonencode(local.environment_variables_placeholder)
     image_version                     = var.default_image_repository_commit
   }
-  offset_minutes = var.container_app_placeholder_schedule_offset_minutes
 
   depends_on = [module.container_registry]
 }

@@ -1,9 +1,26 @@
 <!-- BEGIN_TF_DOCS -->
-# Default example
+# GitHub minimal example
 
-This deploys the module in its simplest form.
+This example deploys GitHub Runners to Azure Container Apps using the minimal set of required variables.
 
 ```hcl
+variable "github_organization_name" {
+  type        = string
+  description = "GitHub Organisation Name"
+}
+
+variable "github_personal_access_token" {
+  type        = string
+  description = "The personal access token used for authentication to GitHub."
+  sensitive   = true
+}
+
+variable "github_runners_personal_access_token" {
+  description = "Personal access token for GitHub self-hosted runners (the token requires the 'repo' scope and should not expire)."
+  type        = string
+  sensitive   = true
+}
+
 locals {
   tags = {
     scenario = "default"
@@ -11,15 +28,19 @@ locals {
 }
 
 terraform {
-  required_version = ">= 1.3.0"
+  required_version = ">= 1.9"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 3.7.0, < 4.0.0"
+      version = "~> 3.113"
+    }
+    github = {
+      source  = "integrations/github"
+      version = "~> 5.36"
     }
     random = {
       source  = "hashicorp/random"
-      version = ">= 3.5.0, < 4.0.0"
+      version = "~> 3.5"
     }
   }
 }
@@ -28,62 +49,63 @@ provider "azurerm" {
   features {}
 }
 
-## Section to provide a random Azure region for the resource group
-# This allows us to randomize the region for the resource group.
+provider "github" {
+  token = var.github_personal_access_token
+  owner = var.github_organization_name
+}
+
 module "regions" {
   source  = "Azure/regions/azurerm"
   version = ">= 0.3.0"
 }
 
-# This allows us to randomize the region for the resource group.
 resource "random_integer" "region_index" {
   max = length(module.regions.regions) - 1
   min = 0
 }
-## End of section to provide a random Azure region for the resource group
 
-# This ensures we have unique CAF compliant names for our resources.
+resource "random_string" "name" {
+  length  = 6
+  numeric = true
+  special = false
+  upper   = false
+}
+
 module "naming" {
   source  = "Azure/naming/azurerm"
   version = ">= 0.3.0"
 }
 
+data "github_organization" "alz" {
+  name = var.github_organization_name
+}
+
+locals {
+  enterprise_plan = "enterprise"
+  free_plan       = "free"
+}
+
+resource "github_repository" "alz" {
+  name                 = random_string.name.result
+  description          = random_string.name.result
+  auto_init            = true
+  visibility           = data.github_organization.alz.plan == local.free_plan ? "public" : "private"
+  allow_update_branch  = true
+  allow_merge_commit   = false
+  allow_rebase_merge   = false
+  vulnerability_alerts = true
+}
+
 # This is the module call
-module "avm-ptn-cicd-agents-and-runners-ca" {
-  source = "../.."
-  # source             = "Azure/avm-ptn-cicd-agents-and-runners-ca/azurerm"
-
-  managed_identities = {
-    system_assigned = true
-  }
-
-  name                          = module.naming.container_app.name_unique
-  location                      = module.regions.regions[random_integer.region_index.result].name
-  cicd_system                   = "GitHub"
-  pat_token_value               = var.personal_access_token
-  container_image_name          = "microsoftavm/github-runner:1.0.1"
-  subnet_address_prefix         = "10.0.2.0/23"
-  virtual_network_address_space = "10.0.0.0/16"
-
-  github_keda_metadata = {
-    owner       = "BlakeWills-BJSS"
-    runnerScope = "repo"
-    repos       = join(",", ["terraform-azurerm-avm-ptn-cicd-agents-and-runners"])
-  }
-
-  pat_env_var_name = "GH_RUNNER_TOKEN"
-  environment_variables = [
-    {
-      name  = "GH_RUNNER_URL",
-      value = "https://github.com/BlakeWills-BJSS/terraform-azurerm-avm-ptn-cicd-agents-and-runners"
-    },
-    {
-      name  = "GH_RUNNER_NAME"
-      value = "container-app-agent"
-    }
-  ]
-
-  enable_telemetry = true
+module "github_runners" {
+  source                                       = "../.."
+  postfix                                      = random_string.name.result
+  location                                     = module.regions.regions[random_integer.region_index.result].name
+  version_control_system_type                  = "github"
+  version_control_system_personal_access_token = var.github_runners_personal_access_token
+  version_control_system_organization          = var.github_organization_name
+  version_control_system_repository            = github_repository.alz.name
+  virtual_network_address_space                = "10.0.0.0/16"
 }
 ```
 
@@ -92,32 +114,43 @@ module "avm-ptn-cicd-agents-and-runners-ca" {
 
 The following requirements are needed by this module:
 
-- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.3.0)
+- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.7.0, < 4.0.0)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.113)
 
-- <a name="requirement_random"></a> [random](#requirement\_random) (>= 3.5.0, < 4.0.0)
+- <a name="requirement_github"></a> [github](#requirement\_github) (~> 5.36)
 
-## Providers
-
-The following providers are used by this module:
-
-- <a name="provider_random"></a> [random](#provider\_random) (>= 3.5.0, < 4.0.0)
+- <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
 ## Resources
 
 The following resources are used by this module:
 
+- [github_repository.alz](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
+- [random_string.name](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
+- [github_organization.alz](https://registry.terraform.io/providers/integrations/github/latest/docs/data-sources/organization) (data source)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_personal_access_token"></a> [personal\_access\_token](#input\_personal\_access\_token)
+### <a name="input_github_organization_name"></a> [github\_organization\_name](#input\_github\_organization\_name)
 
-Description: The personal access token used for agent authentication to Azure DevOps.
+Description: GitHub Organisation Name
+
+Type: `string`
+
+### <a name="input_github_personal_access_token"></a> [github\_personal\_access\_token](#input\_github\_personal\_access\_token)
+
+Description: The personal access token used for authentication to GitHub.
+
+Type: `string`
+
+### <a name="input_github_runners_personal_access_token"></a> [github\_runners\_personal\_access\_token](#input\_github\_runners\_personal\_access\_token)
+
+Description: Personal access token for GitHub self-hosted runners (the token requires the 'repo' scope and should not expire).
 
 Type: `string`
 
@@ -133,7 +166,7 @@ No outputs.
 
 The following Modules are called:
 
-### <a name="module_avm-ptn-cicd-agents-and-runners-ca"></a> [avm-ptn-cicd-agents-and-runners-ca](#module\_avm-ptn-cicd-agents-and-runners-ca)
+### <a name="module_github_runners"></a> [github\_runners](#module\_github\_runners)
 
 Source: ../..
 

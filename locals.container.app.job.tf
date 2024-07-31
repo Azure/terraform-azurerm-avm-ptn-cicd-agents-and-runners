@@ -1,19 +1,20 @@
 locals {
+  keda_meta_data = tomap(jsondecode(local.keda_meta_data_final))
+  keda_meta_data_azure_devops = {
+    poolName                   = var.version_control_system_pool_name
+    targetPipelinesQueueLength = var.version_control_system_agent_target_queue_length
+  }
+  keda_meta_data_final = var.version_control_system_type == local.version_control_system_azure_devops ? jsonencode(local.keda_meta_data_azure_devops) : jsonencode(local.keda_meta_data_github)
   keda_meta_data_github = {
     owner                     = var.version_control_system_organization
     repos                     = var.version_control_system_repository
     targetWorkflowQueueLength = var.version_control_system_agent_target_queue_length
     runnerScope               = var.version_control_system_runner_scope
   }
-  keda_meta_data_azure_devops = {
-    poolName                   = var.version_control_system_pool_name
-    targetPipelinesQueueLength = var.version_control_system_agent_target_queue_length
-  }
-  keda_meta_data_final = var.version_control_system_type == local.version_control_system_azure_devops ? jsonencode(local.keda_meta_data_azure_devops) : jsonencode(local.keda_meta_data_github)
-  keda_meta_data       = tomap(jsondecode(local.keda_meta_data_final))
 }
 
 locals {
+  environment_variables = concat(tolist(jsondecode(local.environment_variables_final)), tolist(var.container_app_environment_variables))
   environment_variables_azure_devops = [
     {
       name  = "AZP_POOL"
@@ -24,6 +25,7 @@ locals {
       value = local.version_control_system_agent_name_prefix
     }
   ]
+  environment_variables_final = var.version_control_system_type == local.version_control_system_azure_devops ? jsonencode(local.environment_variables_azure_devops) : jsonencode(local.environment_variables_github)
   environment_variables_github = [
     {
       name  = "RUNNER_NAME_PREFIX"
@@ -54,23 +56,22 @@ locals {
       value = var.version_control_system_runner_group
     }
   ]
-  environment_variables_final = var.version_control_system_type == local.version_control_system_azure_devops ? jsonencode(local.environment_variables_azure_devops) : jsonencode(local.environment_variables_github)
-  environment_variables       = concat(tolist(jsondecode(local.environment_variables_final)), tolist(var.container_app_environment_variables))
 }
 
 locals {
+  environment_variables_placeholder = tolist(jsondecode(local.environment_variables_placeholder_final))
   environment_variables_placeholder_azure_devops = [
     {
       name  = "AZP_PLACEHOLDER"
       value = "true"
     }
   ]
-  environment_variables_placeholder_github = []
   environment_variables_placeholder_final  = var.version_control_system_type == local.version_control_system_azure_devops ? jsonencode(local.environment_variables_placeholder_azure_devops) : jsonencode(local.environment_variables_placeholder_github)
-  environment_variables_placeholder        = tolist(jsondecode(local.environment_variables_placeholder_final))
+  environment_variables_placeholder_github = []
 }
 
 locals {
+  sensitive_environment_variables = concat(tolist(jsondecode(local.sensitive_environment_variables_final)), tolist(var.container_app_sensitive_environment_variables))
   sensitive_environment_variables_azure_devops = [
     {
       name                      = "AZP_URL"
@@ -85,6 +86,7 @@ locals {
       keda_auth_name            = "personalAccessToken"
     }
   ]
+  sensitive_environment_variables_final = var.version_control_system_type == local.version_control_system_azure_devops ? jsonencode(local.sensitive_environment_variables_azure_devops) : jsonencode(local.sensitive_environment_variables_github)
   sensitive_environment_variables_github = [
     {
       name                      = "ACCESS_TOKEN"
@@ -93,7 +95,4 @@ locals {
       keda_auth_name            = "personalAccessToken"
     }
   ]
-
-  sensitive_environment_variables_final = var.version_control_system_type == local.version_control_system_azure_devops ? jsonencode(local.sensitive_environment_variables_azure_devops) : jsonencode(local.sensitive_environment_variables_github)
-  sensitive_environment_variables       = concat(tolist(jsondecode(local.sensitive_environment_variables_final)), tolist(var.container_app_sensitive_environment_variables))
 }

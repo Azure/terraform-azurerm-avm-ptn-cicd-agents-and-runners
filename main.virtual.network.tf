@@ -30,15 +30,17 @@ module "virtual_network" {
 }
 
 resource "azurerm_private_dns_zone" "container_registry" {
-  count               = var.use_private_networking && var.create_container_registry_private_dns_zone ? 1 : 0
+  count = var.use_private_networking && var.create_container_registry_private_dns_zone ? 1 : 0
+
   name                = "privatelink.azurecr.io"
   resource_group_name = local.resource_group_name
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "container_registry" {
-  count                 = var.use_private_networking && var.create_container_registry_private_dns_zone ? 1 : 0
+  count = var.use_private_networking && var.create_container_registry_private_dns_zone ? 1 : 0
+
   name                  = "privatelink.azurecr.io"
-  resource_group_name   = local.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.container_registry[0].name
+  resource_group_name   = local.resource_group_name
   virtual_network_id    = module.virtual_network[0].resource_id
 }

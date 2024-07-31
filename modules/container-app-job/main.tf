@@ -38,7 +38,8 @@ resource "azapi_resource" "job" {
 
 resource "azapi_resource" "placeholder" {
   count = var.create_placeholder_job ? 1 : 0
-  type  = "Microsoft.App/jobs@2023-05-01"
+
+  type = "Microsoft.App/jobs@2023-05-01"
   body = jsonencode({
     properties = {
       environmentId = var.container_app_environment_id

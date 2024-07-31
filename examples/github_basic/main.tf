@@ -22,11 +22,11 @@ locals {
 }
 
 terraform {
-  required_version = ">= 1.3.0"
+  required_version = ">= 1.9"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 3.7.0, < 4.0.0"
+      version = "~> 3.113"
     }
     github = {
       source  = "integrations/github"
@@ -34,7 +34,7 @@ terraform {
     }
     random = {
       source  = "hashicorp/random"
-      version = ">= 3.5.0, < 4.0.0"
+      version = "~> 3.5"
     }
   }
 }
@@ -60,8 +60,8 @@ resource "random_integer" "region_index" {
 
 resource "random_string" "name" {
   length  = 6
-  special = false
   numeric = true
+  special = false
   upper   = false
 }
 
@@ -75,8 +75,8 @@ data "github_organization" "alz" {
 }
 
 locals {
-  free_plan       = "free"
   enterprise_plan = "enterprise"
+  free_plan       = "free"
 }
 
 resource "github_repository" "alz" {

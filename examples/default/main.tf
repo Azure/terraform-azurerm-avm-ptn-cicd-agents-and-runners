@@ -22,7 +22,7 @@ locals {
 }
 
 terraform {
-  required_version = ">= 1.3.0"
+  required_version = ">= 1.9"
   required_providers {
     azuredevops = {
       source  = "microsoft/azuredevops"
@@ -30,11 +30,11 @@ terraform {
     }
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 3.7.0, < 4.0.0"
+      version = "~> 3.113"
     }
     random = {
       source  = "hashicorp/random"
-      version = ">= 3.5.0, < 4.0.0"
+      version = "~> 3.5"
     }
   }
 }
@@ -64,8 +64,8 @@ resource "random_integer" "region_index" {
 
 resource "random_string" "name" {
   length  = 6
-  special = false
   numeric = true
+  special = false
   upper   = false
 }
 

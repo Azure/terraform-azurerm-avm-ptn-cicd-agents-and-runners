@@ -1,3 +1,38 @@
+variable "container_compute_identity_principal_id" {
+  type        = string
+  description = "The principal id of the managed identity used by the container compute to pull images from the container registry"
+}
+
+variable "enable_telemetry" {
+  type        = bool
+  description = "Whether to enable telemetry for the container registry"
+}
+
+variable "location" {
+  type        = string
+  description = "The location of the container registry"
+}
+
+variable "name" {
+  type        = string
+  description = "The name of the container registry"
+}
+
+variable "resource_group_name" {
+  type        = string
+  description = "The name of the resource group in which to create the container registry"
+}
+
+variable "tags" {
+  type        = map(string)
+  description = "A mapping of tags to assign to the resource"
+}
+
+variable "use_private_networking" {
+  type        = bool
+  description = "Whether to use private networking for the container registry"
+}
+
 variable "images" {
   type = map(object({
     task_name            = string
@@ -17,49 +52,14 @@ A map of objects that define the images to build in the container registry. The 
 DESCRIPTION
 }
 
-variable "name" {
-  description = "The name of the container registry"
+variable "private_dns_zone_id" {
   type        = string
-}
-
-variable "resource_group_name" {
-  description = "The name of the resource group in which to create the container registry"
-  type        = string
-}
-
-variable "location" {
-  description = "The location of the container registry"
-  type        = string
-}
-
-variable "container_compute_identity_principal_id" {
-  description = "The principal id of the managed identity used by the container compute to pull images from the container registry"
-  type        = string
-}
-
-variable "use_private_networking" {
-  description = "Whether to use private networking for the container registry"
-  type        = bool
+  default     = null
+  description = "The id of the private DNS zone to create for the container registry. Only required if `create_private_dns_zone` is `false`."
 }
 
 variable "subnet_id" {
+  type        = string
+  default     = null
   description = "The id of the subnet to use for the private endpoint"
-  type        = string
-  default     = null
-}
-
-variable "private_dns_zone_id" {
-  description = "The id of the private DNS zone to create for the container registry. Only required if `create_private_dns_zone` is `false`."
-  type        = string
-  default     = null
-}
-
-variable "tags" {
-  description = "A mapping of tags to assign to the resource"
-  type        = map(string)
-}
-
-variable "enable_telemetry" {
-  description = "Whether to enable telemetry for the container registry"
-  type        = bool
 }

@@ -1,9 +1,26 @@
 <!-- BEGIN_TF_DOCS -->
-# Default example
+# Azure DevOps minimal example
 
-This deploys the module in its simplest form.
+This example deploys Azure DevOps Agents to Azure Container Apps using the minimal set of required variables.
 
 ```hcl
+variable "azure_devops_organization_name" {
+  type        = string
+  description = "Azure DevOps Organisation Name"
+}
+
+variable "azure_devops_personal_access_token" {
+  type        = string
+  description = "The personal access token used for agent authentication to Azure DevOps."
+  sensitive   = true
+}
+
+variable "azure_devops_agents_personal_access_token" {
+  description = "Personal access token for Azure DevOps self-hosted agents (the token requires the 'Agent Pools - Read & Manage' scope and should have the maximum expiry)."
+  type        = string
+  sensitive   = true
+}
+
 locals {
   tags = {
     scenario = "default"
@@ -11,15 +28,19 @@ locals {
 }
 
 terraform {
-  required_version = ">= 1.3.0"
+  required_version = ">= 1.9"
   required_providers {
+    azuredevops = {
+      source  = "microsoft/azuredevops"
+      version = "~> 1.1"
+    }
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 3.7.0, < 4.0.0"
+      version = "~> 3.113"
     }
     random = {
       source  = "hashicorp/random"
-      version = ">= 3.5.0, < 4.0.0"
+      version = "~> 3.5"
     }
   }
 }
@@ -28,48 +49,62 @@ provider "azurerm" {
   features {}
 }
 
-## Section to provide a random Azure region for the resource group
-# This allows us to randomize the region for the resource group.
+locals {
+  azure_devops_organization_url = "https://dev.azure.com/${var.azure_devops_organization_name}"
+}
+
+provider "azuredevops" {
+  personal_access_token = var.azure_devops_personal_access_token
+  org_service_url       = local.azure_devops_organization_url
+}
+
 module "regions" {
   source  = "Azure/regions/azurerm"
   version = ">= 0.3.0"
 }
 
-# This allows us to randomize the region for the resource group.
 resource "random_integer" "region_index" {
   max = length(module.regions.regions) - 1
   min = 0
 }
-## End of section to provide a random Azure region for the resource group
 
-# This ensures we have unique CAF compliant names for our resources.
+resource "random_string" "name" {
+  length  = 6
+  numeric = true
+  special = false
+  upper   = false
+}
+
 module "naming" {
   source  = "Azure/naming/azurerm"
   version = ">= 0.3.0"
 }
 
+resource "azuredevops_project" "this" {
+  name = random_string.name.result
+}
+
+resource "azuredevops_agent_pool" "this" {
+  name           = random_string.name.result
+  auto_provision = false
+  auto_update    = true
+}
+
+resource "azuredevops_agent_queue" "alz" {
+  project_id    = azuredevops_project.this.id
+  agent_pool_id = azuredevops_agent_pool.this.id
+}
+
 # This is the module call
-module "avm-ptn-cicd-agents-and-runners-ca" {
-  source = "../.."
-  # source             = "Azure/avm-ptn-cicd-agents-and-runners-ca/azurerm"
-
-  managed_identities = {
-    system_assigned = true
-  }
-
-  name                          = module.naming.container_app.name_unique
-  location                      = module.regions.regions[random_integer.region_index.result].name
-  cicd_system                   = "AzureDevOps" # or GitHub
-  pat_token_value               = var.personal_access_token
-  container_image_name          = "microsoftavm/azure-devops-agent:1.1.0"
-  subnet_address_prefix         = "10.0.2.0/23"
-  virtual_network_address_space = "10.0.0.0/16"
-
-  # For Azure Pipelines
-  azp_pool_name = "ca-adoagent-pool"
-  azp_url       = var.ado_organization_url
-
-  enable_telemetry = true
+module "azure_devops_agents" {
+  source                                       = "../.."
+  postfix                                      = random_string.name.result
+  location                                     = module.regions.regions[random_integer.region_index.result].name
+  version_control_system_type                  = "azuredevops"
+  version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
+  version_control_system_organization          = local.azure_devops_organization_url
+  version_control_system_pool_name             = azuredevops_agent_pool.this.name
+  virtual_network_address_space                = "10.0.0.0/16"
 }
 ```
 
@@ -78,36 +113,42 @@ module "avm-ptn-cicd-agents-and-runners-ca" {
 
 The following requirements are needed by this module:
 
-- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.3.0)
+- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.7.0, < 4.0.0)
+- <a name="requirement_azuredevops"></a> [azuredevops](#requirement\_azuredevops) (~> 1.1)
 
-- <a name="requirement_random"></a> [random](#requirement\_random) (>= 3.5.0, < 4.0.0)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.113)
 
-## Providers
-
-The following providers are used by this module:
-
-- <a name="provider_random"></a> [random](#provider\_random) (>= 3.5.0, < 4.0.0)
+- <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
 ## Resources
 
 The following resources are used by this module:
 
+- [azuredevops_agent_pool.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/agent_pool) (resource)
+- [azuredevops_agent_queue.alz](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/agent_queue) (resource)
+- [azuredevops_project.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/project) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
+- [random_string.name](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_ado_organization_url"></a> [ado\_organization\_url](#input\_ado\_organization\_url)
+### <a name="input_azure_devops_agents_personal_access_token"></a> [azure\_devops\_agents\_personal\_access\_token](#input\_azure\_devops\_agents\_personal\_access\_token)
 
-Description: Azure DevOps Organisation URL
+Description: Personal access token for Azure DevOps self-hosted agents (the token requires the 'Agent Pools - Read & Manage' scope and should have the maximum expiry).
 
 Type: `string`
 
-### <a name="input_personal_access_token"></a> [personal\_access\_token](#input\_personal\_access\_token)
+### <a name="input_azure_devops_organization_name"></a> [azure\_devops\_organization\_name](#input\_azure\_devops\_organization\_name)
+
+Description: Azure DevOps Organisation Name
+
+Type: `string`
+
+### <a name="input_azure_devops_personal_access_token"></a> [azure\_devops\_personal\_access\_token](#input\_azure\_devops\_personal\_access\_token)
 
 Description: The personal access token used for agent authentication to Azure DevOps.
 
@@ -125,7 +166,7 @@ No outputs.
 
 The following Modules are called:
 
-### <a name="module_avm-ptn-cicd-agents-and-runners-ca"></a> [avm-ptn-cicd-agents-and-runners-ca](#module\_avm-ptn-cicd-agents-and-runners-ca)
+### <a name="module_azure_devops_agents"></a> [azure\_devops\_agents](#module\_azure\_devops\_agents)
 
 Source: ../..
 
