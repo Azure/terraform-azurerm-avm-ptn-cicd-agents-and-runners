@@ -27,6 +27,11 @@ RUN groupadd -g 121 runner \
   && useradd -mr -d /home/runner -u 1001 -g 121 runner \
   && usermod -aG sudo runner
 
+ENV AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache
+RUN mkdir -p /opt/hostedtoolcache
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 WORKDIR /actions-runner
 
 COPY install_actions.sh /actions-runner
