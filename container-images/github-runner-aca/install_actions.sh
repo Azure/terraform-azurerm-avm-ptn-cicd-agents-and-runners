@@ -14,7 +14,7 @@ if [[ $GH_RUNNER_VERSION == "" ]]; then
 fi
 
 ReplaceWith=""
-GH_RUNNER_VERSION=Result=${GH_RUNNER_VERSION/v/${ReplaceWith}}
+GH_RUNNER_VERSION=${GH_RUNNER_VERSION/v/${ReplaceWith}}
 
 curl -L "https://github.com/actions/runner/releases/download/${GH_RUNNER_VERSION}/actions-runner-linux-${TARGET_ARCH}-${GH_RUNNER_VERSION}.tar.gz" > actions.tar.gz
 tar -zxf actions.tar.gz
