@@ -11,6 +11,7 @@ RUN apt-get update \
         curl \
         jq \
         git \
+        sudo \
         iputils-ping \
         libcurl4 \
         libunwind8 \
@@ -21,6 +22,10 @@ RUN apt-get update \
         nodejs
 
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
+RUN groupadd -g 121 runner \
+  && useradd -mr -d /home/runner -u 1001 -g 121 runner \
+  && usermod -aG sudo runner
 
 WORKDIR /actions-runner
 
