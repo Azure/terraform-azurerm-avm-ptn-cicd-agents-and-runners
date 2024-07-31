@@ -20,6 +20,7 @@ locals {
   user_assigned_managed_identity_name             = var.user_assigned_managed_identity_name != null ? var.user_assigned_managed_identity_name : "uami-${var.postfix}"
   user_assigned_managed_identity_id               = var.user_assigned_managed_identity_id != null ? var.user_assigned_managed_identity_id : module.user_assigned_managed_identity[0].resource_id
   version_control_system_agent_name_prefix        = var.version_control_system_agent_name_prefix != null ? var.version_control_system_agent_name_prefix : var.version_control_system_type == local.version_control_system_azure_devops ? "agent-${var.postfix}" : "runner-${var.postfix}"
+  github_repository_url                           = var.version_control_system_repository != null ? (startswith(var.version_control_system_repository, "https") ? var.version_control_system_repository : "https://github.com/${var.version_control_system_organization}/${var.version_control_system_repository}") : ""
 }
 
 locals {

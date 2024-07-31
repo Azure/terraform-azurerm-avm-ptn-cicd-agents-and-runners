@@ -1,6 +1,6 @@
 variable "azure_devops_organization_name" {
   type        = string
-  description = "Azure DevOps Organisation URL"
+  description = "Azure DevOps Organisation Name"
 }
 
 variable "azure_devops_personal_access_token" {
@@ -23,7 +23,7 @@ locals {
 
 terraform {
   required_version = ">= 1.3.0"
-  required_providers { #
+  required_providers {
     azuredevops = {
       source  = "microsoft/azuredevops"
       version = "~> 1.1"
@@ -52,21 +52,16 @@ provider "azuredevops" {
   org_service_url       = local.azure_devops_organization_url
 }
 
-## Section to provide a random Azure region for the resource group
-# This allows us to randomize the region for the resource group.
 module "regions" {
   source  = "Azure/regions/azurerm"
   version = ">= 0.3.0"
 }
 
-# This allows us to randomize the region for the resource group.
 resource "random_integer" "region_index" {
   max = length(module.regions.regions) - 1
   min = 0
 }
-## End of section to provide a random Azure region for the resource group
 
-# This ensures we have unique CAF compliant names for our resources.
 resource "random_string" "name" {
   length  = 6
   special = false
@@ -96,8 +91,7 @@ resource "azuredevops_agent_queue" "alz" {
 
 # This is the module call
 module "azure_devops_agents" {
-  source = "../.."
-
+  source                                       = "../.."
   postfix                                      = random_string.name.result
   location                                     = module.regions.regions[random_integer.region_index.result].name
   version_control_system_type                  = "azuredevops"

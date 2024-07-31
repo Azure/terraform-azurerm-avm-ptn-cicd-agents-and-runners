@@ -16,7 +16,7 @@ resource "time_offset" "placeholder_job" {
   }
   offset_minutes = var.container_app_placeholder_schedule_offset_minutes
 
-  depends_on = [ module.container_registry ]
+  depends_on = [module.container_registry]
 }
 
 locals {

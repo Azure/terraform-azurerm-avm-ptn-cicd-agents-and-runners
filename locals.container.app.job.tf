@@ -31,7 +31,7 @@ locals {
     },
     {
       name  = "REPO_URL"
-      value = var.version_control_system_repository
+      value = local.github_repository_url
     },
     {
       name  = "RUNNER_SCOPE"
