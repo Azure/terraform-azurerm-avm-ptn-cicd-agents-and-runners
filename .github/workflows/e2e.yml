@@ -64,7 +64,7 @@ jobs:
           eval "$(echo $SECRETS_CONTEXT | jq -r 'to_entries[] | @sh "secrets[\(.key|tostring)]=\(.value|tostring)"')"
 
           declare -A variables
-          eval "$(echo $SECRETS_CONTEXT | jq -r 'to_entries[] | @sh "variables[\(.key|tostring)]=\(.value|tostring)"')"
+          eval "$(echo $VARS_CONTEXT | jq -r 'to_entries[] | @sh "variables[\(.key|tostring)]=\(.value|tostring)"')"
 
           for key in "${!secrets[@]}"; do
             if [[ $key = \TF_VAR_* ]]; then
