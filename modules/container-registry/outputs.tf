@@ -8,7 +8,7 @@ output "resource_id" {
   value       = module.container_registry.resource_id
 }
 
-output "resource_name" {
+output "name" {
   description = "The name of the container registry"
   value       = module.container_registry.name
 }

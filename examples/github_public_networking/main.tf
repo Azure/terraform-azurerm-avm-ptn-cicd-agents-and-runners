@@ -111,5 +111,5 @@ module "github_runners" {
   version_control_system_personal_access_token = var.github_runners_personal_access_token
   version_control_system_organization          = var.github_organization_name
   version_control_system_repository            = github_repository.this.name
-  virtual_network_address_space                = "10.0.0.0/16"
+  use_private_networking = false
 }

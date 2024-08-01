@@ -36,7 +36,7 @@ module "container_app_job" {
   environment_variables_placeholder = local.environment_variables_placeholder
   sensitive_environment_variables   = local.sensitive_environment_variables
 
-  container_app_environment_id = azurerm_container_app_environment.this.id
+  container_app_environment_id = local.container_app_environment_id
 
   registry_login_server = var.create_container_registry ? module.container_registry[0].login_server : var.custom_container_registry_login_server
   container_image_name  = local.container_images["default"].image_names[0]

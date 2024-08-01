@@ -90,7 +90,7 @@ resource "azuredevops_agent_queue" "this" {
 }
 
 locals {
-  default_branch = "main"
+  default_branch = "refs/heads/main"
   pipeline_file  = "pipeline.yml"
   repository_name = "example-repo"
 }
@@ -147,7 +147,7 @@ module "azure_devops_agents" {
   version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
   version_control_system_organization          = local.azure_devops_organization_url
   version_control_system_pool_name             = azuredevops_agent_pool.this.name
-  virtual_network_address_space                = "10.0.0.0/16"
+  use_private_networking                       = false
 }
 
 output "container_app_environment_resource_id" {

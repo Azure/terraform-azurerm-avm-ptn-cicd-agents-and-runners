@@ -1,3 +1,3 @@
-# GitHub minimal example
+# GitHub minimal example with private networking
 
-This example deploys GitHub Runners to Azure Container Apps using the minimal set of required variables.
+This example deploys GitHub Runners to Azure Container Apps using the minimal set of required variables using private networking.
