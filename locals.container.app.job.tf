@@ -96,3 +96,7 @@ locals {
     }
   ]
 }
+
+locals {
+  cron_expression = local.deploy_container_app ? "${time_offset.placeholder_job[0].minute} ${time_offset.placeholder_job[0].hour} ${time_offset.placeholder_job[0].day} ${time_offset.placeholder_job[0].month} *" : ""
+}

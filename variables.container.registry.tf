@@ -42,17 +42,17 @@ variable "use_default_container_image" {
   description = "Whether or not to use the default container image provided by the module."
 }
 
-variable "custom_container_registry_image" {
-  type = object({
+variable "custom_container_registry_images" {
+  type = map(object({
     task_name            = string
     dockerfile_path      = string
     context_path         = string
     context_access_token = optional(string, "a") # This `a` is a dummy value because the context_access_token should not be required in the provider
     image_names          = list(string)
-  })
+  }))
   default     = null
   description = <<DESCRIPTION
-An image to build and push to the container registry. This is only relevant if `create_container_registry` is `true` and `use_default_container_image` is set to `false`.
+The images to build and push to the container registry. This is only relevant if `create_container_registry` is `true` and `use_default_container_image` is set to `false`.
 
 - task_name: The name of the task to create for building the image (e.g. `image-build-task`)
 - dockerfile_path: The path to the Dockerfile to use for building the image (e.g. `dockerfile`)
@@ -79,8 +79,10 @@ variable "default_image_repository_folder_paths" {
   type        = map(string)
   description = "The default image repository folder path to use if no custom image is provided."
   default = {
-    azuredevops = "container-images/azure-devops-agent-aca"
-    github      = "container-images/github-runner-aca"
+    azuredevops-container-app = "container-images/azure-devops-agent-aca"
+    github-container-app      = "container-images/github-runner-aca"
+    azuredevops-container-instance = "container-images/azure-devops-agent-aci"
+    github-container-instance      = "container-images/github-runner-aci"
   }
 }
 

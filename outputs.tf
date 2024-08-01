@@ -1,30 +1,30 @@
 output "resource_id" {
-  value = local.container_app_environment_id
+  value = local.deploy_container_app ? local.container_app_environment_id : null
   description = "The resource id of the container app environment."
 }
 
 output "name" {
-  value = local.container_app_environment_name
+  value = local.deploy_container_app ? local.container_app_environment_name : null
   description = "The name of the container app environment."
 }
 
 output "job_resource_id" {
-  value = module.container_app_job.resource_id
+  value = local.deploy_container_app ? module.container_app_job[0].resource_id : null
   description = "The resource id of the container app job."
 }
 
 output "job_name" {
-  value = module.container_app_job.name
+  value = local.deploy_container_app ? module.container_app_job[0].name : null
   description = "The name of the container app job."
 }
 
 output "placeholder_job_resource_id" {
-  value = module.container_app_job.placeholder_job_resource_id
+  value = local.deploy_container_app ? module.container_app_job[0].placeholder_job_resource_id : null
   description = "The resource id of the placeholder job."
 }
 
 output "placeholder_job_name" {
-  value = module.container_app_job.placeholder_job_name
+  value = local.deploy_container_app ? module.container_app_job[0].placeholder_job_name : null
   description = "The name of the placeholder job."
 }
 
@@ -70,4 +70,14 @@ output "user_assigned_managed_identity_id" {
 output "user_assigned_managed_identity_principal_id" {
   value = var.create_user_assigned_managed_identity ? module.user_assigned_managed_identity[0].principal_id : var.user_assigned_managed_identity_principal_id
   description = "The principal id of the user assigned managed identity." 
+}
+
+output "container_instance_resource_ids" {
+  value = local.deploy_container_instance ? { for key, value in module.container_instance : key => value.resource_id } : null
+  description = "The resource ids of the container instances."
+}
+
+output "container_instance_names" {
+  value = local.deploy_container_instance ? { for key, value in module.container_instance : key => value.name } : null
+  description = "The names of the container instances."
 }

@@ -1,12 +1,5 @@
-module "virtual_network" {
-  count   = var.use_private_networking && var.create_virtual_network ? 1 : 0
-  source  = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version = "~> 0.4"
-  name                = local.virtual_network_name
-  resource_group_name = local.resource_group_name
-  location            = var.location
-  address_space       = [var.virtual_network_address_space]
-  subnets = {
+locals {
+  subnet_container_app = local.deploy_container_app ? {
     container_app = {
       name           = local.container_app_subnet_name
       address_prefix = local.container_app_subnet_address_prefix
@@ -23,11 +16,44 @@ module "virtual_network" {
         id = local.nat_gateway_id 
       }
     }
+  } : {}
+
+  subnet_container_instance = local.deploy_container_instance ? {
+    container_instance = {
+      name           = local.container_instance_subnet_name
+      address_prefix = local.container_instance_subnet_address_prefix
+      delegation = [
+        {
+          name = "Microsoft.ContainerInstance/containerGroups"
+          service_delegation = {
+            name    = "Microsoft.ContainerInstance/containerGroups"
+            actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+          }
+        }
+      ]
+      nat_gateway = { 
+        id = local.nat_gateway_id 
+      }
+    }
+  } : {}
+
+  final_subnets = merge(local.subnet_container_app, local.subnet_container_instance)
+}
+
+module "virtual_network" {
+  count   = var.use_private_networking && var.create_virtual_network ? 1 : 0
+  source  = "Azure/avm-res-network-virtualnetwork/azurerm"
+  version = "~> 0.4"
+  name                = local.virtual_network_name
+  resource_group_name = local.resource_group_name
+  location            = var.location
+  address_space       = [var.virtual_network_address_space]
+  subnets = merge(local.final_subnets, {
     container_registry_private_endpoint = {
       name           = local.container_registry_private_endpoint_subnet_name
       address_prefix = local.container_registry_private_endpoint_subnet_address_prefix
     }
-  }
+  })
 }
 
 resource "azurerm_private_dns_zone" "container_registry" {

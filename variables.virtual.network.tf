@@ -22,6 +22,12 @@ variable "container_app_subnet_name" {
   description = "The name of the subnet. Must be specified if `create_virtual_network == false`."
 }
 
+variable "container_app_subnet_cidr_size" {
+  type        = number
+  default     = 27
+  description = "The CIDR size for the container instance subnet."
+}
+
 variable "container_app_subnet_address_prefix" {
   type        = string
   default     = null
@@ -40,6 +46,12 @@ variable "container_instance_subnet_name" {
   description = "The name of the subnet. Must be specified if `create_virtual_network == false`."
 }
 
+variable "container_instance_subnet_cidr_size" {
+  type        = number
+  default     = 28
+  description = "The CIDR size for the container instance subnet."
+}
+
 variable "container_instance_subnet_address_prefix" {
   type        = string
   default     = null
@@ -56,6 +68,12 @@ variable "container_registry_private_endpoint_subnet_name" {
   type        = string
   default     = null
   description = "The name of the subnet. Must be specified if `create_virtual_network == false`."
+}
+
+variable "container_registry_subnet_cidr_size" {
+  type        = number
+  default     = 29
+  description = "The CIDR size for the container registry subnet."
 }
 
 variable "container_registry_private_endpoint_subnet_address_prefix" {
