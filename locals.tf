@@ -9,6 +9,8 @@ locals {
   resource_group_name_container_app_infrastructure = var.container_app_infrastructure_resource_group_name == null ? "rg-${var.postfix}-container-apps-infrastructure" : var.container_app_infrastructure_resource_group_name
   role_definition_resource_substring               = "/providers/Microsoft.Authorization/roleDefinitions"
   user_assigned_managed_identity_principal_id      = var.create_user_assigned_managed_identity ? module.user_assigned_managed_identity[0].principal_id : var.user_assigned_managed_identity_principal_id
+  nat_gateway_id                                   = var.use_private_networking ? (var.create_nat_gateway ? azurerm_nat_gateway.this[0].id : var.nat_gateway_id) : ""
+  public_ip_id                                     = var.use_private_networking ? (var.create_public_ip ? azurerm_public_ip.this[0].id : var.public_ip_id) : ""
 }
 
 locals {
@@ -22,6 +24,8 @@ locals {
   user_assigned_managed_identity_name             = var.user_assigned_managed_identity_name != null ? var.user_assigned_managed_identity_name : "uami-${var.postfix}"
   version_control_system_agent_name_prefix        = var.version_control_system_agent_name_prefix != null ? var.version_control_system_agent_name_prefix : var.version_control_system_type == local.version_control_system_azure_devops ? "agent-${var.postfix}" : "runner-${var.postfix}"
   virtual_network_name                            = var.virtual_network_name != null ? var.virtual_network_name : "vnet-${var.postfix}"
+  public_ip_name                                  = var.public_ip_name != null ? var.public_ip_name : "pip-${var.postfix}"
+  nat_gateway_name                                = var.nat_gateway_name != null ? var.nat_gateway_name : "natgw-${var.postfix}"
 }
 
 locals {

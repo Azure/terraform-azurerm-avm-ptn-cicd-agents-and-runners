@@ -111,7 +111,7 @@ module "regions" {
 }
 
 resource "random_integer" "region_index" {
-  max = length(module.regions.regions) - 1
+  max = length(local.regions) - 1
   min = 0
 }
 
@@ -171,5 +171,5 @@ locals {
   excluded_regions = [
     "westeurope"  # Capacity issues
   ]
-  selected_region = local.regions[random_integer.region_index.result].name
+  selected_region = local.regions[random_integer.region_index.result]
 }

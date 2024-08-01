@@ -70,3 +70,39 @@ variable "container_registry_dns_zone_id" {
   default     = null
   description = "The ID of the private DNS zone to create for the container registry. Only required if `create_private_dns_zone` is `false`."
 }
+
+variable "create_public_ip" {
+  type        = bool
+  default     = true
+  description = "Whether or not to create a public IP."
+}
+
+variable "public_ip_name" {
+  type        = string
+  default     = null
+  description = "The name of the public IP."
+}
+
+variable "public_ip_id" {
+  type        = string
+  default     = null
+  description = "The ID of the public IP. Only required if `create_public_ip` is `false`."
+}
+
+variable "create_nat_gateway" {
+  type        = bool
+  default     = true
+  description = "Whether or not to create a NAT Gateway."
+}
+
+variable "nat_gateway_name" {
+  type        = string
+  default     = null
+  description = "The name of the NAT Gateway."
+}
+
+variable "nat_gateway_id" {
+  type        = string
+  default     = null
+  description = "The ID of the NAT Gateway. Only required if `create_nat_gateway` is `false`."
+}

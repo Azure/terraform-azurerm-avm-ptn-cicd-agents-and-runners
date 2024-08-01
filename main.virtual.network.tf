@@ -2,12 +2,10 @@ module "virtual_network" {
   count   = var.use_private_networking && var.create_virtual_network ? 1 : 0
   source  = "Azure/avm-res-network-virtualnetwork/azurerm"
   version = "~> 0.4"
-
   name                = local.virtual_network_name
   resource_group_name = local.resource_group_name
   location            = var.location
   address_space       = [var.virtual_network_address_space]
-
   subnets = {
     container_app = {
       name           = local.container_app_subnet_name
@@ -21,6 +19,7 @@ module "virtual_network" {
           }
         }
       ]
+      nat_gateway_id = local.nat_gateway_id
     }
     container_registry_private_endpoint = {
       name           = local.container_registry_private_endpoint_subnet_name
@@ -31,16 +30,43 @@ module "virtual_network" {
 
 resource "azurerm_private_dns_zone" "container_registry" {
   count = var.use_private_networking && var.create_container_registry_private_dns_zone ? 1 : 0
-
   name                = "privatelink.azurecr.io"
   resource_group_name = local.resource_group_name
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "container_registry" {
   count = var.use_private_networking && var.create_container_registry_private_dns_zone ? 1 : 0
-
   name                  = "privatelink.azurecr.io"
   private_dns_zone_name = azurerm_private_dns_zone.container_registry[0].name
   resource_group_name   = local.resource_group_name
   virtual_network_id    = module.virtual_network[0].resource_id
+}
+
+resource "azurerm_public_ip" "this" {
+  count               = var.use_private_networking && var.create_public_ip ? 1 : 0
+  name                = local.public_ip_name
+  location            = var.location
+  resource_group_name = local.resource_group_name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+}
+
+resource "azurerm_nat_gateway" "this" {
+  count               = var.use_private_networking && var.create_nat_gateway ? 1 : 0
+  name                = local.nat_gateway_name
+  location            = var.location
+  resource_group_name = local.resource_group_name
+  sku_name            = "Standard"
+}
+
+resource "azurerm_nat_gateway_public_ip_association" "this" {
+  count                = var.use_private_networking && var.create_nat_gateway ? 1 : 0
+  nat_gateway_id       = azurerm_nat_gateway.this[0].id
+  public_ip_address_id = local.public_ip_id
+}
+
+resource "azurerm_subnet_nat_gateway_association" "this" {
+  count          = var.use_private_networking && var.create_virtual_network ? 1 : 0
+  subnet_id      = local.container_app_subnet_id
+  nat_gateway_id = local.nat_gateway_id
 }
