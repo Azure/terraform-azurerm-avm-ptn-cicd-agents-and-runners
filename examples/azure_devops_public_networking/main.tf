@@ -58,8 +58,16 @@ module "regions" {
 }
 
 resource "random_integer" "region_index" {
-  max = length(module.regions.regions) - 1
+  max = length(local.regions) - 1
   min = 0
+}
+
+locals {
+  regions = [ for region in module.regions.regions : region.name if !contains(local.excluded_regions, region.name) ]
+  excluded_regions = [
+    "westeurope"  # Capacity issues
+  ]
+  selected_region = local.regions[random_integer.region_index.result].name
 }
 
 resource "random_string" "name" {
@@ -142,7 +150,7 @@ resource "azuredevops_pipeline_authorization" "this" {
 module "azure_devops_agents" {
   source                                       = "../.."
   postfix                                      = random_string.name.result
-  location                                     = module.regions.regions[random_integer.region_index.result].name
+  location                                     = local.selected_region
   version_control_system_type                  = "azuredevops"
   version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
   version_control_system_organization          = local.azure_devops_organization_url

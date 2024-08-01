@@ -58,6 +58,14 @@ resource "random_integer" "region_index" {
   min = 0
 }
 
+locals {
+  regions = [ for region in module.regions.regions : region.name if !contains(local.excluded_regions, region.name) ]
+  excluded_regions = [
+    "westeurope"  # Capacity issues
+  ]
+  selected_region = local.regions[random_integer.region_index.result].name
+}
+
 resource "random_string" "name" {
   length  = 6
   numeric = true
@@ -106,7 +114,7 @@ resource "github_repository_file" "this" {
 module "github_runners" {
   source                                       = "../.."
   postfix                                      = random_string.name.result
-  location                                     = module.regions.regions[random_integer.region_index.result].name
+  location                                     = local.selected_region
   version_control_system_type                  = "github"
   version_control_system_personal_access_token = var.github_runners_personal_access_token
   version_control_system_organization          = var.github_organization_name
