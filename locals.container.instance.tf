@@ -58,6 +58,6 @@ locals {
 }
 
 locals {
-  container_instance_environment_variables_map = { for env in local.container_instance_environment_variables : env.name => env.value }
-  container_instance_sensitive_environment_variables_map = { for env in local.container_instance_sensitive_environment_variables : env.name => env.value }
+  container_instance_environment_variables_map = { for env in local.container_instance_environment_variables : env.name => env.value if env.value != null && env.value != "" }
+  container_instance_sensitive_environment_variables_map = { for env in local.container_instance_sensitive_environment_variables : env.name => env.value if env.value != null && env.value != "" }
 }

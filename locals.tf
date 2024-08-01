@@ -25,7 +25,7 @@ locals {
   log_analytics_workspace_name                    = var.log_analytics_workspace_name != null ? var.log_analytics_workspace_name : "laws-${var.postfix}"
   user_assigned_managed_identity_id               = var.user_assigned_managed_identity_id != null ? var.user_assigned_managed_identity_id : module.user_assigned_managed_identity[0].resource_id
   user_assigned_managed_identity_name             = var.user_assigned_managed_identity_name != null ? var.user_assigned_managed_identity_name : "uami-${var.postfix}"
-  version_control_system_agent_name_prefix        = var.version_control_system_agent_name_prefix != null ? var.version_control_system_agent_name_prefix : var.version_control_system_type == local.version_control_system_azure_devops ? "agent-${var.postfix}" : "runner-${var.postfix}"
+  version_control_system_agent_name_prefix        = var.version_control_system_agent_name_prefix != null ? var.version_control_system_agent_name_prefix : (var.version_control_system_type == local.version_control_system_azure_devops ? "agent-${var.postfix}" : "runner-${var.postfix}")
   virtual_network_name                            = var.virtual_network_name != null ? var.virtual_network_name : "vnet-${var.postfix}"
   public_ip_name                                  = var.public_ip_name != null ? var.public_ip_name : "pip-${var.postfix}"
   nat_gateway_name                                = var.nat_gateway_name != null ? var.nat_gateway_name : "natgw-${var.postfix}"
