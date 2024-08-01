@@ -111,7 +111,7 @@ variable "container_app_sensitive_environment_variables" {
     container_app_secret_name = string
     keda_auth_name            = optional(string)
   }))
-  sensitive = true
+  sensitive   = true
   nullable    = true
   default     = []
   description = "List of additional sensitive environment variables to pass to the container."

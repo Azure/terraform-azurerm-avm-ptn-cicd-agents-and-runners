@@ -1,5 +1,6 @@
-resource "time_offset" "placeholder_job" { 
+resource "time_offset" "placeholder_job" {
   count = local.deploy_container_app ? 1 : 0
+
   offset_minutes = var.container_app_placeholder_schedule_offset_minutes
   triggers = {
     container_image                   = local.container_images["container_app"].image_names[0]
@@ -16,7 +17,7 @@ resource "time_offset" "placeholder_job" {
 
 
 module "container_app_job" {
-  count = local.deploy_container_app ? 1 : 0
+  count  = local.deploy_container_app ? 1 : 0
   source = "./modules/container-app-job"
 
   resource_group_id = local.resource_group_id

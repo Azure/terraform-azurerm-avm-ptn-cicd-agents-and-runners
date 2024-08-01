@@ -320,13 +320,29 @@ Default: `300`
 
 The following outputs are exported:
 
-### <a name="output_resource_placeholder_job"></a> [resource\_placeholder\_job](#output\_resource\_placeholder\_job)
+### <a name="output_name"></a> [name](#output\_name)
 
-Description: The placeholder job.
+Description: The name of the container app job.
 
-### <a name="output_resource_runner_job"></a> [resource\_runner\_job](#output\_resource\_runner\_job)
+### <a name="output_placeholder_job_name"></a> [placeholder\_job\_name](#output\_placeholder\_job\_name)
 
-Description: The runner job.
+Description: The name of the placeholder job.
+
+### <a name="output_placeholder_job_resource"></a> [placeholder\_job\_resource](#output\_placeholder\_job\_resource)
+
+Description: The placeholder job resource.
+
+### <a name="output_placeholder_job_resource_id"></a> [placeholder\_job\_resource\_id](#output\_placeholder\_job\_resource\_id)
+
+Description: The resource id of the placeholder job.
+
+### <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id)
+
+Description: The resource id of the container app job.
+
+### <a name="output_runner_job_resource"></a> [runner\_job\_resource](#output\_runner\_job\_resource)
+
+Description: The job resource.
 
 ## Modules
 

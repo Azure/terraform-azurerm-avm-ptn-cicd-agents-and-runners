@@ -65,10 +65,10 @@ data "github_organization" "alz" {
 }
 
 locals {
-  enterprise_plan = "enterprise"
-  free_plan       = "free"
+  action_file          = "action.yml"
   default_commit_email = "demo@microsoft.com"
-  action_file = "action.yml"
+  enterprise_plan      = "enterprise"
+  free_plan            = "free"
 }
 
 resource "github_repository" "this" {
@@ -95,7 +95,7 @@ resource "github_repository_file" "this" {
 # This is the module call
 module "github_runners" {
   source                                       = "../.."
-  compute_types = ["azure_container_instance"]
+  compute_types                                = ["azure_container_instance"]
   postfix                                      = random_string.name.result
   location                                     = local.selected_region
   version_control_system_type                  = "github"
@@ -117,7 +117,9 @@ resource "random_integer" "region_index" {
 }
 
 locals {
-  regions = [ for region in module.regions.regions : region.name if !contains(local.excluded_regions, region.name) && contains(local.included_regions, region.name) ]
+  excluded_regions = [
+    "westeurope" # Capacity issues
+  ]
   included_regions = [
     "eastus",
     "westeurope",
@@ -169,8 +171,6 @@ locals {
     "italynorth",
     "spaincentral"
   ]
-  excluded_regions = [
-    "westeurope"  # Capacity issues
-  ]
+  regions         = [for region in module.regions.regions : region.name if !contains(local.excluded_regions, region.name) && contains(local.included_regions, region.name)]
   selected_region = local.regions[random_integer.region_index.result]
 }

@@ -29,8 +29,11 @@ The following requirements are needed by this module:
 The following resources are used by this module:
 
 - [azurerm_container_app_environment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_app_environment) (resource)
+- [azurerm_nat_gateway.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/nat_gateway) (resource)
+- [azurerm_nat_gateway_public_ip_association.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/nat_gateway_public_ip_association) (resource)
 - [azurerm_private_dns_zone.container_registry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone) (resource)
 - [azurerm_private_dns_zone_virtual_network_link.container_registry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone_virtual_network_link) (resource)
+- [azurerm_public_ip.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/public_ip) (resource)
 - [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
 - [modtm_telemetry.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/resources/telemetry) (resource)
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
@@ -72,6 +75,20 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
+### <a name="input_compute_types"></a> [compute\_types](#input\_compute\_types)
+
+Description: The types of compute to use. Allowed values are 'azure\_container\_app' and 'azure\_container\_instance'.
+
+Type: `set(string)`
+
+Default:
+
+```json
+[
+  "azure_container_app"
+]
+```
+
 ### <a name="input_container_app_container_cpu"></a> [container\_app\_container\_cpu](#input\_container\_app\_container\_cpu)
 
 Description: Required CPU in cores, e.g. 0.5
@@ -88,9 +105,17 @@ Type: `string`
 
 Default: `"2Gi"`
 
+### <a name="input_container_app_environment_id"></a> [container\_app\_environment\_id](#input\_container\_app\_environment\_id)
+
+Description: The resource id of the Container App Environment. Only required if `create_container_app_environment` is `false`.
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_container_app_environment_name"></a> [container\_app\_environment\_name](#input\_container\_app\_environment\_name)
 
-Description: The name of the Container App Environment.
+Description: The name of the Container App Environment. Only required if `create_container_app_environment` is `true`.
 
 Type: `string`
 
@@ -240,6 +265,14 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_container_app_subnet_cidr_size"></a> [container\_app\_subnet\_cidr\_size](#input\_container\_app\_subnet\_cidr\_size)
+
+Description: The CIDR size for the container instance subnet.
+
+Type: `number`
+
+Default: `27`
+
 ### <a name="input_container_app_subnet_id"></a> [container\_app\_subnet\_id](#input\_container\_app\_subnet\_id)
 
 Description: The ID of a pre-existing subnet to use. Required if `create_virtual_network` is `false`.
@@ -249,6 +282,124 @@ Type: `string`
 Default: `null`
 
 ### <a name="input_container_app_subnet_name"></a> [container\_app\_subnet\_name](#input\_container\_app\_subnet\_name)
+
+Description: The name of the subnet. Must be specified if `create_virtual_network == false`.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_container_instance_container_cpu"></a> [container\_instance\_container\_cpu](#input\_container\_instance\_container\_cpu)
+
+Description: The CPU value for the container instance
+
+Type: `number`
+
+Default: `2`
+
+### <a name="input_container_instance_container_cpu_limit"></a> [container\_instance\_container\_cpu\_limit](#input\_container\_instance\_container\_cpu\_limit)
+
+Description: The CPU limit value for the container instance
+
+Type: `number`
+
+Default: `2`
+
+### <a name="input_container_instance_container_memory"></a> [container\_instance\_container\_memory](#input\_container\_instance\_container\_memory)
+
+Description: The memory value for the container instance
+
+Type: `number`
+
+Default: `4`
+
+### <a name="input_container_instance_container_memory_limit"></a> [container\_instance\_container\_memory\_limit](#input\_container\_instance\_container\_memory\_limit)
+
+Description: The memory limit value for the container instance
+
+Type: `number`
+
+Default: `4`
+
+### <a name="input_container_instance_container_name"></a> [container\_instance\_container\_name](#input\_container\_instance\_container\_name)
+
+Description: The name of the container instance
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_container_instance_count"></a> [container\_instance\_count](#input\_container\_instance\_count)
+
+Description: The number of container instances to create
+
+Type: `number`
+
+Default: `2`
+
+### <a name="input_container_instance_environment_variables"></a> [container\_instance\_environment\_variables](#input\_container\_instance\_environment\_variables)
+
+Description: List of additional environment variables to pass to the container.
+
+Type:
+
+```hcl
+set(object({
+    name  = string
+    value = string
+  }))
+```
+
+Default: `[]`
+
+### <a name="input_container_instance_name_prefix"></a> [container\_instance\_name\_prefix](#input\_container\_instance\_name\_prefix)
+
+Description: The name prefix of the container instance
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_container_instance_sensitive_environment_variables"></a> [container\_instance\_sensitive\_environment\_variables](#input\_container\_instance\_sensitive\_environment\_variables)
+
+Description: List of additional sensitive environment variables to pass to the container.
+
+Type:
+
+```hcl
+set(object({
+    name  = string
+    value = string
+  }))
+```
+
+Default: `[]`
+
+### <a name="input_container_instance_subnet_address_prefix"></a> [container\_instance\_subnet\_address\_prefix](#input\_container\_instance\_subnet\_address\_prefix)
+
+Description: The address prefix for the Container App Environment. Either subnet\_id or subnet\_name and subnet\_address\_prefix must be specified.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_container_instance_subnet_cidr_size"></a> [container\_instance\_subnet\_cidr\_size](#input\_container\_instance\_subnet\_cidr\_size)
+
+Description: The CIDR size for the container instance subnet.
+
+Type: `number`
+
+Default: `28`
+
+### <a name="input_container_instance_subnet_id"></a> [container\_instance\_subnet\_id](#input\_container\_instance\_subnet\_id)
+
+Description: The ID of a pre-existing subnet to use. Required if `create_virtual_network` is `false`.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_container_instance_subnet_name"></a> [container\_instance\_subnet\_name](#input\_container\_instance\_subnet\_name)
 
 Description: The name of the subnet. Must be specified if `create_virtual_network == false`.
 
@@ -296,6 +447,22 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_container_registry_subnet_cidr_size"></a> [container\_registry\_subnet\_cidr\_size](#input\_container\_registry\_subnet\_cidr\_size)
+
+Description: The CIDR size for the container registry subnet.
+
+Type: `number`
+
+Default: `29`
+
+### <a name="input_create_container_app_environment"></a> [create\_container\_app\_environment](#input\_create\_container\_app\_environment)
+
+Description: Whether or not to create a Container App Environment.
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_create_container_registry"></a> [create\_container\_registry](#input\_create\_container\_registry)
 
 Description: Whether or not to create a container registry.
@@ -315,6 +482,22 @@ Default: `true`
 ### <a name="input_create_log_analytics_workspace"></a> [create\_log\_analytics\_workspace](#input\_create\_log\_analytics\_workspace)
 
 Description: Whether or not to create a log analytics workspace.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_create_nat_gateway"></a> [create\_nat\_gateway](#input\_create\_nat\_gateway)
+
+Description: Whether or not to create a NAT Gateway.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_create_public_ip"></a> [create\_public\_ip](#input\_create\_public\_ip)
+
+Description: Whether or not to create a public IP.
 
 Type: `bool`
 
@@ -344,9 +527,9 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_custom_container_registry_image"></a> [custom\_container\_registry\_image](#input\_custom\_container\_registry\_image)
+### <a name="input_custom_container_registry_images"></a> [custom\_container\_registry\_images](#input\_custom\_container\_registry\_images)
 
-Description: An image to build and push to the container registry. This is only relevant if `create_container_registry` is `true` and `use_default_container_image` is set to `false`.
+Description: The images to build and push to the container registry. This is only relevant if `create_container_registry` is `true` and `use_default_container_image` is set to `false`.
 
 - task\_name: The name of the task to create for building the image (e.g. `image-build-task`)
 - dockerfile\_path: The path to the Dockerfile to use for building the image (e.g. `dockerfile`)
@@ -357,13 +540,13 @@ Description: An image to build and push to the container registry. This is only 
 Type:
 
 ```hcl
-object({
+map(object({
     task_name            = string
     dockerfile_path      = string
     context_path         = string
     context_access_token = optional(string, "a") # This `a` is a dummy value because the context_access_token should not be required in the provider
     image_names          = list(string)
-  })
+  }))
 ```
 
 Default: `null`
@@ -426,8 +609,10 @@ Default:
 
 ```json
 {
-  "azuredevops": "container-images/azure-devops-agent-aca",
-  "github": "container-images/github-runner-aca"
+  "azuredevops-container-app": "container-images/azure-devops-agent-aca",
+  "azuredevops-container-instance": "container-images/azure-devops-agent-aci",
+  "github-container-app": "container-images/github-runner-aca",
+  "github-container-instance": "container-images/github-runner-aci"
 }
 ```
 
@@ -503,6 +688,38 @@ Description: The SKU of the Log Analytics Workspace.
 Type: `string`
 
 Default: `"PerGB2018"`
+
+### <a name="input_nat_gateway_id"></a> [nat\_gateway\_id](#input\_nat\_gateway\_id)
+
+Description: The ID of the NAT Gateway. Only required if `create_nat_gateway` is `false`.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_nat_gateway_name"></a> [nat\_gateway\_name](#input\_nat\_gateway\_name)
+
+Description: The name of the NAT Gateway.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_public_ip_id"></a> [public\_ip\_id](#input\_public\_ip\_id)
+
+Description: The ID of the public IP. Only required if `create_public_ip` is `false`.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_public_ip_name"></a> [public\_ip\_name](#input\_public\_ip\_name)
+
+Description: The name of the public IP.
+
+Type: `string`
+
+Default: `null`
 
 ### <a name="input_resource_group_creation_enabled"></a> [resource\_group\_creation\_enabled](#input\_resource\_group\_creation\_enabled)
 
@@ -650,7 +867,75 @@ Default: `""`
 
 ## Outputs
 
-No outputs.
+The following outputs are exported:
+
+### <a name="output_container_app_subnet_resource_id"></a> [container\_app\_subnet\_resource\_id](#output\_container\_app\_subnet\_resource\_id)
+
+Description: The subnet id of the container app job.
+
+### <a name="output_container_instance_names"></a> [container\_instance\_names](#output\_container\_instance\_names)
+
+Description: The names of the container instances.
+
+### <a name="output_container_instance_resource_ids"></a> [container\_instance\_resource\_ids](#output\_container\_instance\_resource\_ids)
+
+Description: The resource ids of the container instances.
+
+### <a name="output_container_registry_login_server"></a> [container\_registry\_login\_server](#output\_container\_registry\_login\_server)
+
+Description: The container registry login server.
+
+### <a name="output_container_registry_name"></a> [container\_registry\_name](#output\_container\_registry\_name)
+
+Description: The container registry name.
+
+### <a name="output_container_registry_resource_id"></a> [container\_registry\_resource\_id](#output\_container\_registry\_resource\_id)
+
+Description: The container registry resource id.
+
+### <a name="output_job_name"></a> [job\_name](#output\_job\_name)
+
+Description: The name of the container app job.
+
+### <a name="output_job_resource_id"></a> [job\_resource\_id](#output\_job\_resource\_id)
+
+Description: The resource id of the container app job.
+
+### <a name="output_name"></a> [name](#output\_name)
+
+Description: The name of the container app environment.
+
+### <a name="output_placeholder_job_name"></a> [placeholder\_job\_name](#output\_placeholder\_job\_name)
+
+Description: The name of the placeholder job.
+
+### <a name="output_placeholder_job_resource_id"></a> [placeholder\_job\_resource\_id](#output\_placeholder\_job\_resource\_id)
+
+Description: The resource id of the placeholder job.
+
+### <a name="output_private_dns_zone_subnet_resource_id"></a> [private\_dns\_zone\_subnet\_resource\_id](#output\_private\_dns\_zone\_subnet\_resource\_id)
+
+Description: The private dns zone id of the container app job.
+
+### <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id)
+
+Description: The resource id of the container app environment.
+
+### <a name="output_user_assigned_managed_identity_id"></a> [user\_assigned\_managed\_identity\_id](#output\_user\_assigned\_managed\_identity\_id)
+
+Description: The resource id of the user assigned managed identity.
+
+### <a name="output_user_assigned_managed_identity_principal_id"></a> [user\_assigned\_managed\_identity\_principal\_id](#output\_user\_assigned\_managed\_identity\_principal\_id)
+
+Description: The principal id of the user assigned managed identity.
+
+### <a name="output_virtual_network_name"></a> [virtual\_network\_name](#output\_virtual\_network\_name)
+
+Description: n/a
+
+### <a name="output_virtual_network_resource_id"></a> [virtual\_network\_resource\_id](#output\_virtual\_network\_resource\_id)
+
+Description: The virtual network id of the container app job.
 
 ## Modules
 
@@ -659,6 +944,12 @@ The following Modules are called:
 ### <a name="module_container_app_job"></a> [container\_app\_job](#module\_container\_app\_job)
 
 Source: ./modules/container-app-job
+
+Version:
+
+### <a name="module_container_instance"></a> [container\_instance](#module\_container\_instance)
+
+Source: ./modules/container-instance
 
 Version:
 

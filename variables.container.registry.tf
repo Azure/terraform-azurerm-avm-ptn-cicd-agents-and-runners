@@ -79,8 +79,8 @@ variable "default_image_repository_folder_paths" {
   type        = map(string)
   description = "The default image repository folder path to use if no custom image is provided."
   default = {
-    azuredevops-container-app = "container-images/azure-devops-agent-aca"
-    github-container-app      = "container-images/github-runner-aca"
+    azuredevops-container-app      = "container-images/azure-devops-agent-aca"
+    github-container-app           = "container-images/github-runner-aca"
     azuredevops-container-instance = "container-images/azure-devops-agent-aci"
     github-container-instance      = "container-images/github-runner-aci"
   }

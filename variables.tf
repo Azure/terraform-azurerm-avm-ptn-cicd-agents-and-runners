@@ -1,13 +1,3 @@
-variable "compute_types" {
-  type        = set(string)
-  description = "The types of compute to use. Allowed values are 'azure_container_app' and 'azure_container_instance'."
-  default     = ["azure_container_app"]
-  validation {
-    condition     = alltrue([ for compute_type in var.compute_types : contains(["azure_container_app", "azure_container_instance"], compute_type)])
-    error_message = "compute_types must be a combination of 'azure_container_app' and 'azure_container_instance'"
-  }
-}
-
 variable "postfix" {
   type        = string
   description = "A postfix used to build default names if no name has been supplied for a specific resource type."
@@ -15,6 +5,17 @@ variable "postfix" {
   validation {
     condition     = length(var.postfix) <= 20
     error_message = "Variable 'name' must be less than 20 characters due to container app job naming restrictions. '${var.postfix}' is ${length(var.postfix)} characters."
+  }
+}
+
+variable "compute_types" {
+  type        = set(string)
+  default     = ["azure_container_app"]
+  description = "The types of compute to use. Allowed values are 'azure_container_app' and 'azure_container_instance'."
+
+  validation {
+    condition     = alltrue([for compute_type in var.compute_types : contains(["azure_container_app", "azure_container_instance"], compute_type)])
+    error_message = "compute_types must be a combination of 'azure_container_app' and 'azure_container_instance'"
   }
 }
 

@@ -65,10 +65,10 @@ data "github_organization" "alz" {
 }
 
 locals {
-  enterprise_plan = "enterprise"
-  free_plan       = "free"
+  action_file          = "action.yml"
   default_commit_email = "demo@microsoft.com"
-  action_file = "action.yml"
+  enterprise_plan      = "enterprise"
+  free_plan            = "free"
 }
 
 resource "github_repository" "this" {
@@ -101,7 +101,7 @@ module "github_runners" {
   version_control_system_personal_access_token = var.github_runners_personal_access_token
   version_control_system_organization          = var.github_organization_name
   version_control_system_repository            = github_repository.this.name
-  use_private_networking = false
+  use_private_networking                       = false
 }
 
 # Region helpers
@@ -116,7 +116,9 @@ resource "random_integer" "region_index" {
 }
 
 locals {
-  regions = [ for region in module.regions.regions : region.name if !contains(local.excluded_regions, region.name) && contains(local.included_regions, region.name) ]
+  excluded_regions = [
+    "westeurope" # Capacity issues
+  ]
   included_regions = [
     "eastus",
     "westeurope",
@@ -168,8 +170,6 @@ locals {
     "italynorth",
     "spaincentral"
   ]
-  excluded_regions = [
-    "westeurope"  # Capacity issues
-  ]
+  regions         = [for region in module.regions.regions : region.name if !contains(local.excluded_regions, region.name) && contains(local.included_regions, region.name)]
   selected_region = local.regions[random_integer.region_index.result]
 }

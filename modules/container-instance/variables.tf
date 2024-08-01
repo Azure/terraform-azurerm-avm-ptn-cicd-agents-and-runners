@@ -1,89 +1,89 @@
+variable "container_image" {
+  type        = string
+  description = "Image of the container"
+}
+
 variable "container_instance_name" {
+  type        = string
   description = "Name of the container instance"
-  type        = string
-}
-
-variable "location" {
-  description = "Location of the container instance"
-  type        = string
-}
-
-variable "resource_group_name" {
-  description = "Name of the resource group"
-  type        = string
-}
-
-variable "use_private_networking" {
-  description = "Flag to indicate whether to use private networking"
-  type        = bool
-  default = true
-}
-
-variable "subnet_id" {
-  description = "ID of the subnet"
-  type        = string
-  default = null
-}
-
-variable "availability_zones" {
-  description = "List of availability zones"
-  type        = list(string)
-  default     = [1]
-}
-
-variable "user_assigned_managed_identity_id" {
-  description = "ID of the user-assigned managed identity"
-  type        = string
-}
-
-variable "container_registry_login_server" {
-  description = "Login server of the container registry"
-  type        = string
 }
 
 variable "container_name" {
-  description = "Name of the container"
   type        = string
+  description = "Name of the container"
 }
 
-variable "container_image" {
-  description = "Image of the container"
+variable "container_registry_login_server" {
   type        = string
+  description = "Login server of the container registry"
+}
+
+variable "location" {
+  type        = string
+  description = "Location of the container instance"
+}
+
+variable "resource_group_name" {
+  type        = string
+  description = "Name of the resource group"
+}
+
+variable "user_assigned_managed_identity_id" {
+  type        = string
+  description = "ID of the user-assigned managed identity"
+}
+
+variable "availability_zones" {
+  type        = list(string)
+  default     = [1]
+  description = "List of availability zones"
 }
 
 variable "container_cpu" {
-  description = "CPU value for the container"
   type        = number
   default     = 2
-}
-
-variable "container_memory" {
-  description = "Memory value for the container"
-  type        = number
-  default     =  4
+  description = "CPU value for the container"
 }
 
 variable "container_cpu_limit" {
-  description = "CPU limit for the container"
   type        = number
   default     = 2
+  description = "CPU limit for the container"
+}
+
+variable "container_memory" {
+  type        = number
+  default     = 4
+  description = "Memory value for the container"
 }
 
 variable "container_memory_limit" {
-  description = "Memory limit for the container"
   type        = number
   default     = 4
+  description = "Memory limit for the container"
 }
 
 variable "environment_variables" {
-  description = "Environment variables for the container"
   type        = map(string)
-  default = {}
+  default     = {}
+  description = "Environment variables for the container"
 }
 
 variable "sensitive_environment_variables" {
-  description = "Secure environment variables for the container"
   type        = map(string)
-  sensitive = true
-  default = {}
+  default     = {}
+  description = "Secure environment variables for the container"
+  sensitive   = true
+}
+
+variable "subnet_id" {
+  type        = string
+  default     = null
+  description = "ID of the subnet"
+}
+
+variable "use_private_networking" {
+  type        = bool
+  default     = true
+  description = "Flag to indicate whether to use private networking"
 }

@@ -1,7 +1,7 @@
 <!-- BEGIN_TF_DOCS -->
-# GitHub minimal example
+# GitHub minimal example with public networking
 
-This example deploys GitHub Runners to Azure Container Apps using the minimal set of required variables.
+This example deploys GitHub Runners to Azure Container Apps using the minimal set of required variables using public networking.
 
 ```hcl
 variable "github_organization_name" {
@@ -54,16 +54,6 @@ provider "github" {
   owner = var.github_organization_name
 }
 
-module "regions" {
-  source  = "Azure/regions/azurerm"
-  version = ">= 0.3.0"
-}
-
-resource "random_integer" "region_index" {
-  max = length(module.regions.regions) - 1
-  min = 0
-}
-
 resource "random_string" "name" {
   length  = 6
   numeric = true
@@ -81,11 +71,13 @@ data "github_organization" "alz" {
 }
 
 locals {
-  enterprise_plan = "enterprise"
-  free_plan       = "free"
+  action_file          = "action.yml"
+  default_commit_email = "demo@microsoft.com"
+  enterprise_plan      = "enterprise"
+  free_plan            = "free"
 }
 
-resource "github_repository" "alz" {
+resource "github_repository" "this" {
   name                 = random_string.name.result
   description          = random_string.name.result
   auto_init            = true
@@ -96,16 +88,96 @@ resource "github_repository" "alz" {
   vulnerability_alerts = true
 }
 
+resource "github_repository_file" "this" {
+  repository          = github_repository.this.name
+  file                = ".github/workflows/${local.action_file}"
+  content             = file("${path.module}/${local.action_file}")
+  commit_author       = local.default_commit_email
+  commit_email        = local.default_commit_email
+  commit_message      = "Add ${local.action_file} [skip ci]"
+  overwrite_on_create = true
+}
+
 # This is the module call
 module "github_runners" {
   source                                       = "../.."
   postfix                                      = random_string.name.result
-  location                                     = module.regions.regions[random_integer.region_index.result].name
+  location                                     = local.selected_region
   version_control_system_type                  = "github"
   version_control_system_personal_access_token = var.github_runners_personal_access_token
   version_control_system_organization          = var.github_organization_name
-  version_control_system_repository            = github_repository.alz.name
-  virtual_network_address_space                = "10.0.0.0/16"
+  version_control_system_repository            = github_repository.this.name
+  use_private_networking                       = false
+}
+
+# Region helpers
+module "regions" {
+  source  = "Azure/regions/azurerm"
+  version = ">= 0.3.0"
+}
+
+resource "random_integer" "region_index" {
+  max = length(local.regions) - 1
+  min = 0
+}
+
+locals {
+  excluded_regions = [
+    "westeurope" # Capacity issues
+  ]
+  included_regions = [
+    "eastus",
+    "westeurope",
+    "southeastasia",
+    "australiasoutheast",
+    "westcentralus",
+    "japaneast",
+    "uksouth",
+    "centralindia",
+    "canadacentral",
+    "westus2",
+    "australiacentral",
+    "australiaeast",
+    "francecentral",
+    "koreacentral",
+    "northeurope",
+    "centralus",
+    "eastasia",
+    "eastus2",
+    "southcentralus",
+    "northcentralus",
+    "westus",
+    "ukwest",
+    "southafricanorth",
+    "brazilsouth",
+    "switzerlandnorth",
+    "switzerlandwest",
+    "germanywestcentral",
+    "australiacentral2",
+    "uaecentral",
+    "uaenorth",
+    "japanwest",
+    "brazilsoutheast",
+    "norwayeast",
+    "norwaywest",
+    "francesouth",
+    "southindia",
+    "koreasouth",
+    "jioindiacentral",
+    "jioindiawest",
+    "qatarcentral",
+    "canadaeast",
+    "westus3",
+    "swedencentral",
+    "southafricawest",
+    "germanynorth",
+    "polandcentral",
+    "israelcentral",
+    "italynorth",
+    "spaincentral"
+  ]
+  regions         = [for region in module.regions.regions : region.name if !contains(local.excluded_regions, region.name) && contains(local.included_regions, region.name)]
+  selected_region = local.regions[random_integer.region_index.result]
 }
 ```
 
@@ -126,7 +198,8 @@ The following requirements are needed by this module:
 
 The following resources are used by this module:
 
-- [github_repository.alz](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository) (resource)
+- [github_repository.this](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository) (resource)
+- [github_repository_file.this](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository_file) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
 - [random_string.name](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
 - [github_organization.alz](https://registry.terraform.io/providers/integrations/github/latest/docs/data-sources/organization) (data source)

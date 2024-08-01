@@ -199,13 +199,13 @@ The following outputs are exported:
 
 Description: The login server of the container registry
 
+### <a name="output_name"></a> [name](#output\_name)
+
+Description: The name of the container registry
+
 ### <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id)
 
 Description: The ID of the container registry
-
-### <a name="output_resource_name"></a> [resource\_name](#output\_resource\_name)
-
-Description: The name of the container registry
 
 ## Modules
 

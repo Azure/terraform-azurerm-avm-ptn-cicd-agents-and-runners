@@ -80,8 +80,8 @@ resource "azuredevops_agent_queue" "this" {
 }
 
 locals {
-  default_branch = "refs/heads/main"
-  pipeline_file  = "pipeline.yml"
+  default_branch  = "refs/heads/main"
+  pipeline_file   = "pipeline.yml"
   repository_name = "example-repo"
 }
 
@@ -95,9 +95,9 @@ resource "azuredevops_git_repository" "this" {
 }
 
 resource "azuredevops_git_repository_file" "this" {
-  repository_id       = azuredevops_git_repository.this.id
-  file                = local.pipeline_file
-  content             = templatefile("${path.module}/${local.pipeline_file}", {
+  repository_id = azuredevops_git_repository.this.id
+  file          = local.pipeline_file
+  content = templatefile("${path.module}/${local.pipeline_file}", {
     agent_pool_name = azuredevops_agent_pool.this.name
   })
   branch              = local.default_branch
@@ -168,7 +168,9 @@ resource "random_integer" "region_index" {
 }
 
 locals {
-  regions = [ for region in module.regions.regions : region.name if !contains(local.excluded_regions, region.name) && contains(local.included_regions, region.name) ]
+  excluded_regions = [
+    "westeurope" # Capacity issues
+  ]
   included_regions = [
     "eastus",
     "westeurope",
@@ -220,8 +222,6 @@ locals {
     "italynorth",
     "spaincentral"
   ]
-  excluded_regions = [
-    "westeurope"  # Capacity issues
-  ]
+  regions         = [for region in module.regions.regions : region.name if !contains(local.excluded_regions, region.name) && contains(local.included_regions, region.name)]
   selected_region = local.regions[random_integer.region_index.result]
 }
