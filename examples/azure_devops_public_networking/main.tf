@@ -52,24 +52,6 @@ provider "azuredevops" {
   org_service_url       = local.azure_devops_organization_url
 }
 
-module "regions" {
-  source  = "Azure/regions/azurerm"
-  version = ">= 0.3.0"
-}
-
-resource "random_integer" "region_index" {
-  max = length(local.regions) - 1
-  min = 0
-}
-
-locals {
-  regions = [ for region in module.regions.regions : region.name if !contains(local.excluded_regions, region.name) ]
-  excluded_regions = [
-    "westeurope"  # Capacity issues
-  ]
-  selected_region = local.regions[random_integer.region_index.result].name
-}
-
 resource "random_string" "name" {
   length  = 6
   numeric = true
@@ -172,4 +154,74 @@ output "container_app_job_resource_id" {
 
 output "container_app_job_name" {
   value = module.azure_devops_agents.job_name
+}
+
+# Region helpers
+module "regions" {
+  source  = "Azure/regions/azurerm"
+  version = ">= 0.3.0"
+}
+
+resource "random_integer" "region_index" {
+  max = length(module.regions.regions) - 1
+  min = 0
+}
+
+locals {
+  regions = [ for region in module.regions.regions : region.name if !contains(local.excluded_regions, region.name) && contains(local.included_regions, region.name) ]
+  included_regions = [
+    "eastus",
+    "westeurope",
+    "southeastasia",
+    "australiasoutheast",
+    "westcentralus",
+    "japaneast",
+    "uksouth",
+    "centralindia",
+    "canadacentral",
+    "westus2",
+    "australiacentral",
+    "australiaeast",
+    "francecentral",
+    "koreacentral",
+    "northeurope",
+    "centralus",
+    "eastasia",
+    "eastus2",
+    "southcentralus",
+    "northcentralus",
+    "westus",
+    "ukwest",
+    "southafricanorth",
+    "brazilsouth",
+    "switzerlandnorth",
+    "switzerlandwest",
+    "germanywestcentral",
+    "australiacentral2",
+    "uaecentral",
+    "uaenorth",
+    "japanwest",
+    "brazilsoutheast",
+    "norwayeast",
+    "norwaywest",
+    "francesouth",
+    "southindia",
+    "koreasouth",
+    "jioindiacentral",
+    "jioindiawest",
+    "qatarcentral",
+    "canadaeast",
+    "westus3",
+    "swedencentral",
+    "southafricawest",
+    "germanynorth",
+    "polandcentral",
+    "israelcentral",
+    "italynorth",
+    "spaincentral"
+  ]
+  excluded_regions = [
+    "westeurope"  # Capacity issues
+  ]
+  selected_region = local.regions[random_integer.region_index.result].name
 }
