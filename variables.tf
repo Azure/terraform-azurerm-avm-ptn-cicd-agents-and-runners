@@ -1,3 +1,13 @@
+variable "compute_types" {
+  type        = set(string)
+  description = "The types of compute to use. Allowed values are 'azure_container_app' and 'azure_container_instance'."
+  default     = ["azure_container_app"]
+  validation {
+    condition     = alltrue([ for compute_type in var.compute_types : contains(["azure_container_app", "azure_container_instance"], compute_type)])
+    error_message = "compute_types must be a combination of 'azure_container_app' and 'azure_container_instance'"
+  }
+}
+
 variable "postfix" {
   type        = string
   description = "A postfix used to build default names if no name has been supplied for a specific resource type."
@@ -5,28 +15,6 @@ variable "postfix" {
   validation {
     condition     = length(var.postfix) <= 20
     error_message = "Variable 'name' must be less than 20 characters due to container app job naming restrictions. '${var.postfix}' is ${length(var.postfix)} characters."
-  }
-}
-
-variable "version_control_system_organization" {
-  type        = string
-  description = "The version control system organization to deploy the agents too."
-}
-
-variable "version_control_system_personal_access_token" {
-  type        = string
-  description = "The personal access token for the version control system."
-  sensitive   = true
-}
-
-variable "version_control_system_type" {
-  type        = string
-  description = "The type of the version control system to deploy the agents too. Allowed values are 'azuredevops' or 'github'"
-  nullable    = false
-
-  validation {
-    condition     = contains(["azuredevops", "github"], var.version_control_system_type)
-    error_message = "cicd_system must be one of 'azuredevops' or 'github'"
   }
 }
 

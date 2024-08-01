@@ -42,3 +42,8 @@ locals {
   version_control_system_azure_devops = "azuredevops"
   version_control_system_github       = "github"
 }
+
+locals {
+  deploy_container_app = contains(var.compute_types, "azure_container_app")
+  deploy_container_instance = contains(var.compute_types, "azure_container_instance")
+}

@@ -19,7 +19,9 @@ module "virtual_network" {
           }
         }
       ]
-      nat_gateway_id = local.nat_gateway_id
+      nat_gateway = { 
+        id = local.nat_gateway_id 
+      }
     }
     container_registry_private_endpoint = {
       name           = local.container_registry_private_endpoint_subnet_name
@@ -63,10 +65,4 @@ resource "azurerm_nat_gateway_public_ip_association" "this" {
   count                = var.use_private_networking && var.create_nat_gateway ? 1 : 0
   nat_gateway_id       = azurerm_nat_gateway.this[0].id
   public_ip_address_id = local.public_ip_id
-}
-
-resource "azurerm_subnet_nat_gateway_association" "this" {
-  count          = var.use_private_networking && var.create_virtual_network ? 1 : 0
-  subnet_id      = local.container_app_subnet_id
-  nat_gateway_id = local.nat_gateway_id
 }

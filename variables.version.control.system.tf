@@ -1,3 +1,25 @@
+variable "version_control_system_organization" {
+  type        = string
+  description = "The version control system organization to deploy the agents too."
+}
+
+variable "version_control_system_personal_access_token" {
+  type        = string
+  description = "The personal access token for the version control system."
+  sensitive   = true
+}
+
+variable "version_control_system_type" {
+  type        = string
+  description = "The type of the version control system to deploy the agents too. Allowed values are 'azuredevops' or 'github'"
+  nullable    = false
+
+  validation {
+    condition     = contains(["azuredevops", "github"], var.version_control_system_type)
+    error_message = "cicd_system must be one of 'azuredevops' or 'github'"
+  }
+}
+
 variable "version_control_system_agent_name_prefix" {
   type        = string
   default     = null

@@ -16,7 +16,7 @@ resource "time_offset" "placeholder_job" {
     image_version                     = var.default_image_repository_commit
   }
 
-  depends_on = [module.container_registry]
+  depends_on = [module.container_registry, azurerm_container_app_environment.this]
 }
 
 locals {
