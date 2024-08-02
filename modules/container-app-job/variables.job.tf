@@ -34,6 +34,7 @@ variable "replica_timeout" {
 }
 
 variable "tags" {
-  type        = map(any)
-  description = "The map of tags to be applied to the resource"
+  type        = map(string)
+  default     = null
+  description = "(Optional) Tags of the resource."
 }

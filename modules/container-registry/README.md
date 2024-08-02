@@ -120,7 +120,7 @@ Type: `bool`
 
 ### <a name="input_location"></a> [location](#input\_location)
 
-Description: The location of the container registry
+Description: Azure region where the resource should be deployed.
 
 Type: `string`
 

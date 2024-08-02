@@ -108,6 +108,7 @@ module "github_runners" {
   version_control_system_organization          = var.github_organization_name
   version_control_system_repository            = github_repository.this.name
   use_private_networking                       = false
+  tags                                         = local.tags
 }
 
 # Region helpers

@@ -10,7 +10,8 @@ variable "enable_telemetry" {
 
 variable "location" {
   type        = string
-  description = "The location of the container registry"
+  description = "Azure region where the resource should be deployed."
+  nullable    = false
 }
 
 variable "name" {
@@ -25,7 +26,8 @@ variable "resource_group_name" {
 
 variable "tags" {
   type        = map(string)
-  description = "A mapping of tags to assign to the resource"
+  default     = null
+  description = "(Optional) Tags of the resource."
 }
 
 variable "use_private_networking" {
@@ -44,11 +46,12 @@ variable "images" {
   default     = {}
   description = <<DESCRIPTION
 A map of objects that define the images to build in the container registry. The key of the map is the name of the image and the value is an object with the following attributes:
-- task_name: The name of the task to create for building the image (e.g. `image-build-task`)
-- dockerfile_path: The path to the Dockerfile to use for building the image (e.g. `dockerfile`)
-- context_path: The path to the context of the Dockerfile in three sections `<repository-url>#<repository-commit>:<repository-folder-path>` (e.g. https://github.com/Azure/terraform-azurerm-avm-ptn-cicd-agents-and-runners#8ff4b85:container-images/azure-devops-agent)
-- context_access_token: The access token to use for accessing the context. Supply a PAT if targetting a private repository.
-- image_names: A list of the names of the images to build (e.g. `["image-name:tag"]`)
+
+- `task_name` - The name of the task to create for building the image (e.g. `image-build-task`)
+- `dockerfile_path` - The path to the Dockerfile to use for building the image (e.g. `dockerfile`)
+- `context_path` - The path to the context of the Dockerfile in three sections `<repository-url>#<repository-commit>:<repository-folder-path>` (e.g. https://github.com/Azure/terraform-azurerm-avm-ptn-cicd-agents-and-runners#8ff4b85:container-images/azure-devops-agent)
+- `context_access_token` - The access token to use for accessing the context. Supply a PAT if targetting a private repository.
+- `image_names` - A list of the names of the images to build (e.g. `["image-name:tag"]`)
 DESCRIPTION
 }
 

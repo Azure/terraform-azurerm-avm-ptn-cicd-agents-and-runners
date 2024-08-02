@@ -11,7 +11,6 @@ locals {
   resource_group_id                                = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${local.resource_group_name}"
   resource_group_name                              = var.resource_group_creation_enabled ? azurerm_resource_group.this[0].name : var.resource_group_name
   resource_group_name_container_app_infrastructure = var.container_app_infrastructure_resource_group_name == null ? "rg-${var.postfix}-container-apps-infrastructure" : var.container_app_infrastructure_resource_group_name
-  role_definition_resource_substring               = "/providers/Microsoft.Authorization/roleDefinitions"
   user_assigned_managed_identity_principal_id      = var.create_user_assigned_managed_identity ? module.user_assigned_managed_identity[0].principal_id : var.user_assigned_managed_identity_principal_id
 }
 
@@ -53,12 +52,16 @@ locals {
       image_names          = ["${local.default_image_name}:${var.default_image_repository_commit}"]
     }
   } : {}
-  default_image_name                  = var.default_image_name != null ? var.default_image_name : (var.version_control_system_type == local.version_control_system_azure_devops ? "azure-devops-agent" : "github-runner")
-  version_control_system_azure_devops = "azuredevops"
-  version_control_system_github       = "github"
+  default_image_name = var.default_image_name != null ? var.default_image_name : (var.version_control_system_type == local.version_control_system_azure_devops ? "azure-devops-agent" : "github-runner")
 }
 
 locals {
   deploy_container_app      = contains(var.compute_types, "azure_container_app")
   deploy_container_instance = contains(var.compute_types, "azure_container_instance")
+  valid_version_control_systems = [
+    local.version_control_system_azure_devops,
+    local.version_control_system_github
+  ]
+  version_control_system_azure_devops = "azuredevops"
+  version_control_system_github       = "github"
 }

@@ -23,7 +23,8 @@ variable "keda_rule_type" {
 
 variable "location" {
   type        = string
-  description = "The location where the resources will be deployed."
+  description = "Azure region where the resource should be deployed."
+  nullable    = false
 }
 
 variable "postfix" {
@@ -70,4 +71,17 @@ variable "environment_variables_placeholder" {
   default     = []
   description = "List of environment variables to pass only to the placeholder container."
   nullable    = false
+}
+
+variable "registry_password" {
+  type        = string
+  default     = null
+  description = "Password of the container registry."
+  sensitive   = true
+}
+
+variable "registry_username" {
+  type        = string
+  default     = null
+  description = "Name of the container registry."
 }

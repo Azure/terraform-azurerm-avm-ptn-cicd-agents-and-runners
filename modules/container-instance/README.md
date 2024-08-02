@@ -11,6 +11,7 @@ resource "azurerm_container_group" "alz" {
   resource_group_name = var.resource_group_name
   ip_address_type     = var.use_private_networking ? "Private" : "None"
   subnet_ids          = var.use_private_networking ? [var.subnet_id] : []
+  tags                = var.tags
   zones               = var.availability_zones
 
   container {
@@ -32,9 +33,20 @@ resource "azurerm_container_group" "alz" {
     type         = "UserAssigned"
     identity_ids = [var.user_assigned_managed_identity_id]
   }
-  image_registry_credential {
-    server                    = var.container_registry_login_server
-    user_assigned_identity_id = var.user_assigned_managed_identity_id
+  dynamic "image_registry_credential" {
+    for_each = var.container_registry_password != null ? [1] : []
+    content {
+      server   = var.container_registry_login_server
+      password = var.container_registry_password
+      username = var.container_registry_username
+    }
+  }
+  dynamic "image_registry_credential" {
+    for_each = var.container_registry_password == null ? [1] : []
+    content {
+      server                    = var.container_registry_login_server
+      user_assigned_identity_id = var.user_assigned_managed_identity_id
+    }
   }
 }
 ```
@@ -45,8 +57,6 @@ resource "azurerm_container_group" "alz" {
 The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9)
-
-- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 1.14)
 
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.113)
 
@@ -93,7 +103,7 @@ Type: `string`
 
 ### <a name="input_location"></a> [location](#input\_location)
 
-Description: Location of the container instance
+Description: Azure region where the resource should be deployed.
 
 Type: `string`
 
@@ -159,6 +169,22 @@ Type: `number`
 
 Default: `4`
 
+### <a name="input_container_registry_password"></a> [container\_registry\_password](#input\_container\_registry\_password)
+
+Description: Password of the container registry
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_container_registry_username"></a> [container\_registry\_username](#input\_container\_registry\_username)
+
+Description: Username of the container registry
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_environment_variables"></a> [environment\_variables](#input\_environment\_variables)
 
 Description: Environment variables for the container
@@ -180,6 +206,14 @@ Default: `{}`
 Description: ID of the subnet
 
 Type: `string`
+
+Default: `null`
+
+### <a name="input_tags"></a> [tags](#input\_tags)
+
+Description: (Optional) Tags of the resource.
+
+Type: `map(string)`
 
 Default: `null`
 

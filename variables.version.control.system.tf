@@ -15,7 +15,7 @@ variable "version_control_system_type" {
   nullable    = false
 
   validation {
-    condition     = contains(["azuredevops", "github"], var.version_control_system_type)
+    condition     = contains(local.valid_version_control_systems, var.version_control_system_type)
     error_message = "cicd_system must be one of 'azuredevops' or 'github'"
   }
 }

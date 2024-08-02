@@ -17,4 +17,7 @@ module "container_instance" {
   availability_zones                = each.value.availability_zones
   user_assigned_managed_identity_id = local.user_assigned_managed_identity_id
   container_registry_login_server   = local.registry_login_server
+  container_registry_username       = var.custom_container_registry_username
+  container_registry_password       = var.custom_container_registry_password
 }
+

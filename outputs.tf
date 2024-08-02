@@ -44,17 +44,17 @@ output "name" {
 }
 
 output "placeholder_job_name" {
-  description = "The name of the placeholder job."
+  description = "The name of the placeholder contaienr app job."
   value       = local.deploy_container_app ? module.container_app_job[0].placeholder_job_name : null
 }
 
 output "placeholder_job_resource_id" {
-  description = "The resource id of the placeholder job."
+  description = "The resource id of the placeholder container app job."
   value       = local.deploy_container_app ? module.container_app_job[0].placeholder_job_resource_id : null
 }
 
 output "private_dns_zone_subnet_resource_id" {
-  description = "The private dns zone id of the container app job."
+  description = "The private dns zone id of the container registry."
   value       = local.container_registry_private_endpoint_subnet_id
 }
 
@@ -74,10 +74,11 @@ output "user_assigned_managed_identity_principal_id" {
 }
 
 output "virtual_network_name" {
+  description = "The virtual network name."
   value = var.use_private_networking && var.create_virtual_network ? module.virtual_network[0].name : var.virtual_network_name
 }
 
 output "virtual_network_resource_id" {
-  description = "The virtual network id of the container app job."
+  description = "The virtual network resource id."
   value       = var.use_private_networking && var.create_virtual_network ? module.virtual_network[0].resource_id : null
 }

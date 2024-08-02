@@ -87,8 +87,6 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 1.14)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.113)
-
 ## Providers
 
 The following providers are used by this module:
@@ -170,7 +168,7 @@ Type: `string`
 
 ### <a name="input_location"></a> [location](#input\_location)
 
-Description: The location where the resources will be deployed.
+Description: Azure region where the resource should be deployed.
 
 Type: `string`
 
@@ -236,12 +234,6 @@ set(object({
     keda_auth_name            = optional(string)
   }))
 ```
-
-### <a name="input_tags"></a> [tags](#input\_tags)
-
-Description: The map of tags to be applied to the resource
-
-Type: `map(any)`
 
 ### <a name="input_user_assigned_managed_identity_id"></a> [user\_assigned\_managed\_identity\_id](#input\_user\_assigned\_managed\_identity\_id)
 
@@ -315,6 +307,30 @@ Description: The timeout in seconds for the placeholder Container Apps job.
 Type: `number`
 
 Default: `300`
+
+### <a name="input_registry_password"></a> [registry\_password](#input\_registry\_password)
+
+Description: Password of the container registry.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_registry_username"></a> [registry\_username](#input\_registry\_username)
+
+Description: Name of the container registry.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_tags"></a> [tags](#input\_tags)
+
+Description: (Optional) Tags of the resource.
+
+Type: `map(string)`
+
+Default: `null`
 
 ## Outputs
 

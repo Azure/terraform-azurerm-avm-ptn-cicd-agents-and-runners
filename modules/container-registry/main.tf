@@ -42,6 +42,7 @@ resource "azurerm_container_registry_task" "this" {
       identity     = "[system]"
     }
   }
+  tags = var.tags
 }
 
 resource "azurerm_container_registry_task_schedule_run_now" "this" {
@@ -64,7 +65,6 @@ resource "azurerm_role_assignment" "container_registry_pull_for_container_instan
 
 resource "azurerm_role_assignment" "container_registry_push_for_task" {
   for_each = var.images
-
   principal_id         = azurerm_container_registry_task.this[each.key].identity[0].principal_id
   scope                = module.container_registry.resource_id
   role_definition_name = "AcrPush"

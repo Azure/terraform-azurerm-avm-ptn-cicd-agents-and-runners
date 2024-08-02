@@ -67,7 +67,6 @@ data "github_organization" "alz" {
 locals {
   action_file          = "action.yml"
   default_commit_email = "demo@microsoft.com"
-  enterprise_plan      = "enterprise"
   free_plan            = "free"
 }
 
@@ -103,6 +102,7 @@ module "github_runners" {
   version_control_system_organization          = var.github_organization_name
   version_control_system_repository            = github_repository.this.name
   virtual_network_address_space                = "10.0.0.0/16"
+  tags                                         = local.tags
 }
 
 # Region helpers

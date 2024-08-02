@@ -1,3 +1,9 @@
+variable "location" {
+  type        = string
+  description = "Azure region where the resource should be deployed."
+  nullable    = false
+}
+
 variable "postfix" {
   type        = string
   description = "A postfix used to build default names if no name has been supplied for a specific resource type."
@@ -29,24 +35,22 @@ If it is set to false, then no telemetry will be collected.
 DESCRIPTION
 }
 
-variable "location" {
-  type        = string
-  default     = null
-  description = "Azure region where the resource should be deployed. Must be specified if `resource_group_creation_enabled == true`."
-}
-
 variable "lock" {
   type = object({
+    kind = string
     name = optional(string, null)
-    kind = optional(string, "None")
   })
-  default     = {}
-  description = "The lock level to apply. Default is `None`. Possible values are `None`, `CanNotDelete`, and `ReadOnly`."
-  nullable    = false
+  default     = null
+  description = <<DESCRIPTION
+  Controls the Resource Lock configuration for this resource. The following properties can be specified:
+  
+  - `kind` - (Required) The type of lock. Possible values are `\"CanNotDelete\"` and `\"ReadOnly\"`.
+  - `name` - (Optional) The name of the lock. If not specified, a name will be generated based on the `kind` value. Changing this forces the creation of a new resource.
+  DESCRIPTION
 
   validation {
-    condition     = contains(["CanNotDelete", "ReadOnly", "None"], var.lock.kind)
-    error_message = "The lock level must be one of: 'None', 'CanNotDelete', or 'ReadOnly'."
+    condition     = var.lock != null ? contains(["CanNotDelete", "ReadOnly"], var.lock.kind) : true
+    error_message = "Lock kind must be either `\"CanNotDelete\"` or `\"ReadOnly\"`."
   }
 }
 
@@ -63,9 +67,9 @@ variable "resource_group_name" {
 }
 
 variable "tags" {
-  type        = map(any)
-  default     = {}
-  description = "The map of tags to be applied to the resource"
+  type        = map(string)
+  default     = null
+  description = "(Optional) Tags of the resource."
 }
 
 variable "use_private_networking" {

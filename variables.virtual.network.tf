@@ -88,13 +88,6 @@ variable "container_registry_private_endpoint_subnet_id" {
   description = "The ID of a pre-existing subnet to use. Required if `create_virtual_network` is `false`."
 }
 
-variable "virtual_network_resource_group_name" {
-  type        = string
-  default     = ""
-  description = "The name of the Virtual Network's Resource Group. Must be specified if `virtual_network_creation_enabled` == `false`"
-  nullable    = false
-}
-
 variable "create_container_registry_private_dns_zone" {
   type        = bool
   default     = true

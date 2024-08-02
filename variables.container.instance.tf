@@ -21,7 +21,6 @@ variable "container_instance_environment_variables" {
     name  = string
     value = string
   }))
-  nullable    = true
   default     = []
   description = "List of additional environment variables to pass to the container."
 }
@@ -32,7 +31,6 @@ variable "container_instance_sensitive_environment_variables" {
     value = string
   }))
   sensitive   = true
-  nullable    = true
   default     = []
   description = "List of additional sensitive environment variables to pass to the container."
 }

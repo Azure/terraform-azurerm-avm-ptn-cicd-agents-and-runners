@@ -59,6 +59,7 @@ resource "azurerm_private_dns_zone" "container_registry" {
 
   name                = "privatelink.azurecr.io"
   resource_group_name = local.resource_group_name
+  tags                = var.tags
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "container_registry" {
@@ -68,6 +69,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "container_registry" {
   private_dns_zone_name = azurerm_private_dns_zone.container_registry[0].name
   resource_group_name   = local.resource_group_name
   virtual_network_id    = module.virtual_network[0].resource_id
+  tags                  = var.tags
 }
 
 resource "azurerm_public_ip" "this" {
@@ -78,6 +80,7 @@ resource "azurerm_public_ip" "this" {
   name                = local.public_ip_name
   resource_group_name = local.resource_group_name
   sku                 = "Standard"
+  tags                = var.tags
 }
 
 resource "azurerm_nat_gateway" "this" {
@@ -87,6 +90,7 @@ resource "azurerm_nat_gateway" "this" {
   name                = local.nat_gateway_name
   resource_group_name = local.resource_group_name
   sku_name            = "Standard"
+  tags                = var.tags
 }
 
 resource "azurerm_nat_gateway_public_ip_association" "this" {

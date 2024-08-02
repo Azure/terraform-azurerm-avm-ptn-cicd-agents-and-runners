@@ -20,7 +20,8 @@ variable "container_registry_login_server" {
 
 variable "location" {
   type        = string
-  description = "Location of the container instance"
+  description = "Azure region where the resource should be deployed."
+  nullable    = false
 }
 
 variable "resource_group_name" {
@@ -63,6 +64,19 @@ variable "container_memory_limit" {
   description = "Memory limit for the container"
 }
 
+variable "container_registry_password" {
+  type        = string
+  default     = null
+  description = "Password of the container registry"
+  sensitive   = true
+}
+
+variable "container_registry_username" {
+  type        = string
+  default     = null
+  description = "Username of the container registry"
+}
+
 variable "environment_variables" {
   type        = map(string)
   default     = {}
@@ -80,6 +94,12 @@ variable "subnet_id" {
   type        = string
   default     = null
   description = "ID of the subnet"
+}
+
+variable "tags" {
+  type        = map(string)
+  default     = null
+  description = "(Optional) Tags of the resource."
 }
 
 variable "use_private_networking" {

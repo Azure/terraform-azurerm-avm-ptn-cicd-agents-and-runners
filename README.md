@@ -16,11 +16,11 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9.0)
 
-- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 1.14)
-
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.113)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
+
+- <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
 - <a name="requirement_time"></a> [time](#requirement\_time) (~> 0.12)
 
@@ -29,6 +29,7 @@ The following requirements are needed by this module:
 The following resources are used by this module:
 
 - [azurerm_container_app_environment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_app_environment) (resource)
+- [azurerm_management_lock.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/management_lock) (resource)
 - [azurerm_nat_gateway.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/nat_gateway) (resource)
 - [azurerm_nat_gateway_public_ip_association.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/nat_gateway_public_ip_association) (resource)
 - [azurerm_private_dns_zone.container_registry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone) (resource)
@@ -46,6 +47,12 @@ The following resources are used by this module:
 ## Required Inputs
 
 The following input variables are required:
+
+### <a name="input_location"></a> [location](#input\_location)
+
+Description: Azure region where the resource should be deployed.
+
+Type: `string`
 
 ### <a name="input_postfix"></a> [postfix](#input\_postfix)
 
@@ -519,14 +526,6 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_custom_container_image_name"></a> [custom\_container\_image\_name](#input\_custom\_container\_image\_name)
-
-Description: The image to use in the container registry to use if `create_container_registry` is `false`.
-
-Type: `string`
-
-Default: `null`
-
 ### <a name="input_custom_container_registry_images"></a> [custom\_container\_registry\_images](#input\_custom\_container\_registry\_images)
 
 Description: The images to build and push to the container registry. This is only relevant if `create_container_registry` is `true` and `use_default_container_image` is set to `false`.
@@ -634,28 +633,23 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_location"></a> [location](#input\_location)
-
-Description: Azure region where the resource should be deployed. Must be specified if `resource_group_creation_enabled == true`.
-
-Type: `string`
-
-Default: `null`
-
 ### <a name="input_lock"></a> [lock](#input\_lock)
 
-Description: The lock level to apply. Default is `None`. Possible values are `None`, `CanNotDelete`, and `ReadOnly`.
+Description:   Controls the Resource Lock configuration for this resource. The following properties can be specified:
+
+  - `kind` - (Required) The type of lock. Possible values are `\"CanNotDelete\"` and `\"ReadOnly\"`.
+  - `name` - (Optional) The name of the lock. If not specified, a name will be generated based on the `kind` value. Changing this forces the creation of a new resource.
 
 Type:
 
 ```hcl
 object({
+    kind = string
     name = optional(string, null)
-    kind = optional(string, "None")
   })
 ```
 
-Default: `{}`
+Default: `null`
 
 ### <a name="input_log_analytics_workspace_id"></a> [log\_analytics\_workspace\_id](#input\_log\_analytics\_workspace\_id)
 
@@ -739,11 +733,11 @@ Default: `null`
 
 ### <a name="input_tags"></a> [tags](#input\_tags)
 
-Description: The map of tags to be applied to the resource
+Description: (Optional) Tags of the resource.
 
-Type: `map(any)`
+Type: `map(string)`
 
-Default: `{}`
+Default: `null`
 
 ### <a name="input_use_default_container_image"></a> [use\_default\_container\_image](#input\_use\_default\_container\_image)
 
@@ -856,14 +850,6 @@ Description: The name of the virtual network. Must be specified if `create_virtu
 Type: `string`
 
 Default: `null`
-
-### <a name="input_virtual_network_resource_group_name"></a> [virtual\_network\_resource\_group\_name](#input\_virtual\_network\_resource\_group\_name)
-
-Description: The name of the Virtual Network's Resource Group. Must be specified if `virtual_network_creation_enabled` == `false`
-
-Type: `string`
-
-Default: `""`
 
 ## Outputs
 

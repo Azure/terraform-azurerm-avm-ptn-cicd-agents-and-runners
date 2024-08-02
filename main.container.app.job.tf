@@ -14,8 +14,6 @@ resource "time_offset" "placeholder_job" {
   depends_on = [module.container_registry, azurerm_container_app_environment.this]
 }
 
-
-
 module "container_app_job" {
   count  = local.deploy_container_app ? 1 : 0
   source = "./modules/container-app-job"
@@ -33,6 +31,8 @@ module "container_app_job" {
   container_app_environment_id = local.container_app_environment_id
 
   registry_login_server = local.registry_login_server
+  registry_username     = var.custom_container_registry_username
+  registry_password     = var.custom_container_registry_password
   container_image_name  = local.container_images["container_app"].image_names[0]
 
   job_name            = var.container_app_job_name

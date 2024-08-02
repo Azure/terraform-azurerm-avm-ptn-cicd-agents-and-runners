@@ -30,12 +30,6 @@ variable "custom_container_registry_password" {
   sensitive   = true
 }
 
-variable "custom_container_image_name" {
-  type        = string
-  description = "The image to use in the container registry to use if `create_container_registry` is `false`."
-  default     = null
-}
-
 variable "use_default_container_image" {
   type        = bool
   default     = true
