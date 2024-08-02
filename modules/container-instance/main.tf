@@ -28,7 +28,7 @@ resource "azurerm_container_group" "alz" {
     identity_ids = [var.user_assigned_managed_identity_id]
   }
   dynamic "image_registry_credential" {
-    for_each = var.container_registry_password != null ? [1] : []
+    for_each = var.container_registry_username != null ? ["custom"] : []
     content {
       server   = var.container_registry_login_server
       password = var.container_registry_password
@@ -36,7 +36,7 @@ resource "azurerm_container_group" "alz" {
     }
   }
   dynamic "image_registry_credential" {
-    for_each = var.container_registry_password == null ? [1] : []
+    for_each = var.container_registry_username == null ? ["default"] : []
     content {
       server                    = var.container_registry_login_server
       user_assigned_identity_id = var.user_assigned_managed_identity_id

@@ -6,7 +6,7 @@ This submodule deploys an Azure Container Apps Job for CI/CD agents and runners.
 ```hcl
 resource "azapi_resource" "job" {
   type = "Microsoft.App/jobs@2023-05-01"
-  body = nonsensitive(jsonencode({
+  body = jsonencode({
     properties = {
       environmentId = var.container_app_environment_id
       configuration = {
@@ -30,7 +30,7 @@ resource "azapi_resource" "job" {
         containers = [local.container_job]
       }
     }
-  }))
+  })
   location  = var.location
   name      = local.job_name
   parent_id = var.resource_group_id
