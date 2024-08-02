@@ -33,7 +33,7 @@ module "azure_devops_agents" {
 This example shows how to deploy GitHub Runners to Azure Container Apps using the minimal set of required variables with private networking.
 
 ```hcl
-module "azure_devops_agents" {
+module "github_runners" {
   source                                       = "Azure/avm-ptn-cicd-agents-and-runners/azurerm"
   version                                      = "~> 0.2"
   postfix                                      = "my-runners"
@@ -594,7 +594,7 @@ Description: The default image repository commit to use if no custom image is pr
 
 Type: `string`
 
-Default: `"3b075f0"`
+Default: `"8051c83"`
 
 ### <a name="input_default_image_repository_folder_paths"></a> [default\_image\_repository\_folder\_paths](#input\_default\_image\_repository\_folder\_paths)
 

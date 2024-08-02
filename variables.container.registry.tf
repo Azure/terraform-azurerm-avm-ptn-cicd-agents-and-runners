@@ -66,7 +66,7 @@ variable "default_image_repository_url" {
 variable "default_image_repository_commit" {
   type        = string
   description = "The default image repository commit to use if no custom image is provided."
-  default     = "3b075f0"
+  default     = "8051c83"
 }
 
 variable "default_image_repository_folder_paths" {

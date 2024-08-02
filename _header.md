@@ -32,7 +32,7 @@ module "azure_devops_agents" {
 This example shows how to deploy GitHub Runners to Azure Container Apps using the minimal set of required variables with private networking.
 
 ```hcl
-module "azure_devops_agents" {
+module "github_runners" {
   source                                       = "Azure/avm-ptn-cicd-agents-and-runners/azurerm"
   version                                      = "~> 0.2"
   postfix                                      = "my-runners"
