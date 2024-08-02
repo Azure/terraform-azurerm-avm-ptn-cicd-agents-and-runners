@@ -20,7 +20,7 @@ locals {
   container_instance_container_name               = var.container_instance_container_name != null ? var.container_instance_container_name : "container-${var.postfix}"
   container_instance_name_prefix                  = var.container_instance_name_prefix != null ? var.container_instance_name_prefix : "ci-${var.postfix}"
   container_instance_subnet_name                  = var.container_instance_subnet_name != null ? var.container_instance_subnet_name : "subnet-container-instance-${var.postfix}"
-  container_registry_name                         = var.container_registry_name != null ? var.container_registry_name : "acr${var.postfix}"
+  container_registry_name                         = replace(var.container_registry_name != null ? var.container_registry_name : "acr${var.postfix}", "-", "")
   container_registry_private_endpoint_subnet_name = var.container_registry_private_endpoint_subnet_name != null ? var.container_registry_private_endpoint_subnet_name : "subnet-container-registry-private-endpoint-${var.postfix}"
   github_repository_url                           = var.version_control_system_repository != null ? (startswith(var.version_control_system_repository, "https") ? var.version_control_system_repository : "https://github.com/${var.version_control_system_organization}/${var.version_control_system_repository}") : ""
   log_analytics_workspace_name                    = var.log_analytics_workspace_name != null ? var.log_analytics_workspace_name : "laws-${var.postfix}"
