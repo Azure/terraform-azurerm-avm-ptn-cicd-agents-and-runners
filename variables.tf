@@ -25,6 +25,16 @@ variable "compute_types" {
   }
 }
 
+variable "delays" {
+  type = object({
+    delay_after_container_image_build = number
+  })
+  default = {
+    delay_after_container_image_build = 30
+  }
+  description = "Delays (in seconds) to apply to the module operations."
+}
+
 variable "enable_telemetry" {
   type        = bool
   default     = true

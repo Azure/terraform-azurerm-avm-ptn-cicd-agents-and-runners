@@ -1,13 +1,50 @@
 <!-- BEGIN_TF_DOCS -->
-# terraform-azurerm-avm-ptn-cicd-agents-and-runners
+# Azure Verified Module for CI/CD Agents and Runners
 
-This module is designed to deploy self-hosted Azure DevOps and Github runners.
+This module deploys self-hosted Azure DevOps Agents and Github Runners.
 
 ## Features
 
-- Container App Environments:
-  - Github Runners
-  - Azure DevOps Agents
+- Deploys and configures Azure DevOps Agents
+- Deploys and configures Github Runners
+- Supports Azure Container Apps with auto scaling from zero
+- Supports Azure Container Instances as an alternative or complementary compute option
+- Supports Public or Private Networking
+- Deploys all Azure resource required or optionally supply your own
+
+## Example Usage
+
+This example shows how to deploy Azure DevOps Agents to Azure Container Apps using the minimal set of required variables with private networking.
+
+```hcl
+module "azure_devops_agents" {
+  source                                       = "Azure/avm-ptn-cicd-agents-and-runners/azurerm"
+  version                                      = "~> 0.2"
+  postfix                                      = "my-agents"
+  location                                     = "uksouth"
+  version_control_system_type                  = "azuredevops"
+  version_control_system_personal_access_token = "**************************************"
+  version_control_system_organization          = "my-organization"
+  version_control_system_pool_name             = "my-agent-pool"
+  virtual_network_address_space                = "10.0.0.0/16"
+}
+```
+
+This example shows how to deploy GitHub Runners to Azure Container Apps using the minimal set of required variables with private networking.
+
+```hcl
+module "azure_devops_agents" {
+  source                                       = "Azure/avm-ptn-cicd-agents-and-runners/azurerm"
+  version                                      = "~> 0.2"
+  postfix                                      = "my-runners"
+  location                                     = "uksouth"
+  version_control_system_type                  = "github"
+  version_control_system_personal_access_token = "**************************************"
+  version_control_system_organization          = "my-organization"
+  version_control_system_repository            = "my-reository"
+  virtual_network_address_space                = "10.0.0.0/16"
+}
+```
 
 <!-- markdownlint-disable MD033 -->
 ## Requirements
@@ -39,6 +76,7 @@ The following resources are used by this module:
 - [modtm_telemetry.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/resources/telemetry) (resource)
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
 - [time_offset.placeholder_job](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/offset) (resource)
+- [time_sleep.delay_after_container_image_build](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) (resource)
 - [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
 - [azurerm_client_config.telemetry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
 - [modtm_module_source.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/data-sources/module_source) (data source)
@@ -622,6 +660,26 @@ Description: The default image repository URL to use if no custom image is provi
 Type: `string`
 
 Default: `"https://github.com/Azure/terraform-azurerm-avm-ptn-cicd-agents-and-runners"`
+
+### <a name="input_delays"></a> [delays](#input\_delays)
+
+Description: Delays (in seconds) to apply to the module operations.
+
+Type:
+
+```hcl
+object({
+    delay_after_container_image_build = number
+  })
+```
+
+Default:
+
+```json
+{
+  "delay_after_container_image_build": 30
+}
+```
 
 ### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
 

@@ -12,3 +12,9 @@ module "container_registry" {
   tags                                    = var.tags
   images                                  = local.container_images
 }
+
+resource "time_sleep" "delay_after_container_image_build" {
+  create_duration = "${var.delays.delay_after_container_image_build}s"
+
+  depends_on = [module.container_registry]
+}

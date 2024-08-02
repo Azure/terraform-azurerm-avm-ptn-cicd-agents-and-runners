@@ -11,7 +11,7 @@ resource "time_offset" "placeholder_job" {
     image_version                     = var.default_image_repository_commit
   }
 
-  depends_on = [module.container_registry, azurerm_container_app_environment.this]
+  depends_on = [module.container_registry, azurerm_container_app_environment.this, time_sleep.delay_after_container_image_build]
 }
 
 module "container_app_job" {
@@ -56,5 +56,5 @@ module "container_app_job" {
   tags                              = var.tags
   user_assigned_managed_identity_id = local.user_assigned_managed_identity_id
 
-  depends_on = [module.container_registry, azurerm_private_dns_zone_virtual_network_link.container_registry]
+  depends_on = [module.container_registry, azurerm_private_dns_zone_virtual_network_link.container_registry, time_sleep.delay_after_container_image_build]
 }
