@@ -1,19 +1,46 @@
 <!-- BEGIN_TF_DOCS -->
-# Default example
+# Azure DevOps minimal example with private networking
 
-This deploys the module in its simplest form.
+This example deploys Azure DevOps Agents to Azure Container Apps using the minimal set of required variables using private networking.
 
 ```hcl
+variable "azure_devops_organization_name" {
+  type        = string
+  description = "Azure DevOps Organisation Name"
+}
+
+variable "azure_devops_personal_access_token" {
+  type        = string
+  description = "The personal access token used for agent authentication to Azure DevOps."
+  sensitive   = true
+}
+
+variable "azure_devops_agents_personal_access_token" {
+  description = "Personal access token for Azure DevOps self-hosted agents (the token requires the 'Agent Pools - Read & Manage' scope and should have the maximum expiry)."
+  type        = string
+  sensitive   = true
+}
+
+locals {
+  tags = {
+    scenario = "default"
+  }
+}
+
 terraform {
-  required_version = ">= 1.3.0"
+  required_version = ">= 1.9"
   required_providers {
+    azuredevops = {
+      source  = "microsoft/azuredevops"
+      version = "~> 1.1"
+    }
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 3.7.0, < 4.0.0"
+      version = "~> 3.113"
     }
     random = {
       source  = "hashicorp/random"
-      version = ">= 3.5.0, < 4.0.0"
+      version = "~> 3.5"
     }
   }
 }
@@ -22,44 +49,140 @@ provider "azurerm" {
   features {}
 }
 
-
-## Section to provide a random Azure region for the resource group
-# This allows us to randomize the region for the resource group.
-module "regions" {
-  source  = "Azure/regions/azurerm"
-  version = ">= 0.3.0"
+locals {
+  azure_devops_organization_url = "https://dev.azure.com/${var.azure_devops_organization_name}"
 }
 
-# This allows us to randomize the region for the resource group.
-resource "random_integer" "region_index" {
-  max = length(module.regions.regions) - 1
-  min = 0
+provider "azuredevops" {
+  personal_access_token = var.azure_devops_personal_access_token
+  org_service_url       = local.azure_devops_organization_url
 }
-## End of section to provide a random Azure region for the resource group
 
-# This ensures we have unique CAF compliant names for our resources.
+resource "random_string" "name" {
+  length  = 6
+  numeric = true
+  special = false
+  upper   = false
+}
+
 module "naming" {
   source  = "Azure/naming/azurerm"
   version = ">= 0.3.0"
 }
 
-# This is required for resource modules
-resource "azurerm_resource_group" "this" {
-  location = module.regions.regions[random_integer.region_index.result].name
-  name     = module.naming.resource_group.name_unique
+resource "azuredevops_project" "this" {
+  name = random_string.name.result
+}
+
+resource "azuredevops_agent_pool" "this" {
+  name           = random_string.name.result
+  auto_provision = false
+  auto_update    = true
+}
+
+resource "azuredevops_agent_queue" "this" {
+  project_id    = azuredevops_project.this.id
+  agent_pool_id = azuredevops_agent_pool.this.id
+}
+
+locals {
+  default_branch  = "refs/heads/main"
+  pipeline_file   = "pipeline.yml"
+  repository_name = "example-repo"
+}
+
+resource "azuredevops_git_repository" "this" {
+  project_id     = azuredevops_project.this.id
+  name           = local.repository_name
+  default_branch = local.default_branch
+  initialization {
+    init_type = "Clean"
+  }
+}
+
+resource "azuredevops_git_repository_file" "this" {
+  repository_id = azuredevops_git_repository.this.id
+  file          = local.pipeline_file
+  content = templatefile("${path.module}/${local.pipeline_file}", {
+    agent_pool_name = azuredevops_agent_pool.this.name
+  })
+  branch              = local.default_branch
+  commit_message      = "[skip ci]"
+  overwrite_on_create = true
+}
+
+resource "azuredevops_build_definition" "this" {
+  project_id = azuredevops_project.this.id
+  name       = "Example Build Definition"
+
+  ci_trigger {
+    use_yaml = true
+  }
+
+  repository {
+    repo_type   = "TfsGit"
+    repo_id     = azuredevops_git_repository.this.id
+    branch_name = azuredevops_git_repository.this.default_branch
+    yml_path    = local.pipeline_file
+  }
+}
+
+resource "azuredevops_pipeline_authorization" "this" {
+  project_id  = azuredevops_project.this.id
+  resource_id = azuredevops_agent_queue.this.id
+  type        = "queue"
+  pipeline_id = azuredevops_build_definition.this.id
 }
 
 # This is the module call
-# Do not specify location here due to the randomization above.
-# Leaving location as `null` will cause the module to use the resource group location
-# with a data source.
-module "test" {
-  source = "../../"
-  # source             = "Azure/avm-<res/ptn>-<name>/azurerm"
-  # ...
-  enable_telemetry    = var.enable_telemetry # see variables.tf
-  name                = "TODO"               # TODO update with module.naming.<RESOURCE_TYPE>.name_unique
-  resource_group_name = azurerm_resource_group.this.name
+module "azure_devops_agents" {
+  source                                       = "../.."
+  postfix                                      = random_string.name.result
+  location                                     = local.selected_region
+  version_control_system_type                  = "azuredevops"
+  version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
+  version_control_system_organization          = local.azure_devops_organization_url
+  version_control_system_pool_name             = azuredevops_agent_pool.this.name
+  virtual_network_address_space                = "10.0.0.0/16"
+  tags                                         = local.tags
+}
+
+output "container_app_environment_resource_id" {
+  value = module.azure_devops_agents.resource_id
+}
+
+output "container_app_environment_name" {
+  value = module.azure_devops_agents.name
+}
+
+output "container_app_job_resource_id" {
+  value = module.azure_devops_agents.job_resource_id
+}
+
+output "container_app_job_name" {
+  value = module.azure_devops_agents.job_name
+}
+
+# Region helpers
+module "regions" {
+  source  = "Azure/avm-utl-regions/azurerm"
+  version = "0.1.0"
+}
+
+resource "random_integer" "region_index" {
+  max = length(local.regions) - 1
+  min = 0
+}
+
+locals {
+  excluded_regions = [
+    "westeurope" # Capacity issues
+  ]
+  included_regions = [
+    "northcentralusstage", "westus2", "southeastasia", "swedencentral", "canadacentral", "westeurope", "northeurope", "eastus", "eastus2", "eastasia", "australiaeast", "germanywestcentral", "japaneast", "uksouth", "westus", "centralus", "northcentralus", "southcentralus", "koreacentral", "brazilsouth", "westus3", "francecentral", "southafricanorth", "norwayeast", "switzerlandnorth", "uaenorth", "canadaeast", "westcentralus", "ukwest", "centralindia", "italynorth", "polandcentral", "southindia"
+  ]
+  regions         = [for region in module.regions.regions : region.name if !contains(local.excluded_regions, region.name) && contains(local.included_regions, region.name)]
+  selected_region = local.regions[random_integer.region_index.result]
 }
 ```
 
@@ -68,53 +191,84 @@ module "test" {
 
 The following requirements are needed by this module:
 
-- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.3.0)
+- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.7.0, < 4.0.0)
+- <a name="requirement_azuredevops"></a> [azuredevops](#requirement\_azuredevops) (~> 1.1)
 
-- <a name="requirement_random"></a> [random](#requirement\_random) (>= 3.5.0, < 4.0.0)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.113)
 
-## Providers
-
-The following providers are used by this module:
-
-- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (>= 3.7.0, < 4.0.0)
-
-- <a name="provider_random"></a> [random](#provider\_random) (>= 3.5.0, < 4.0.0)
+- <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
 ## Resources
 
 The following resources are used by this module:
 
-- [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
+- [azuredevops_agent_pool.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/agent_pool) (resource)
+- [azuredevops_agent_queue.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/agent_queue) (resource)
+- [azuredevops_build_definition.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/build_definition) (resource)
+- [azuredevops_git_repository.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/git_repository) (resource)
+- [azuredevops_git_repository_file.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/git_repository_file) (resource)
+- [azuredevops_pipeline_authorization.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/pipeline_authorization) (resource)
+- [azuredevops_project.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/project) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
+- [random_string.name](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
 
-No required inputs.
+The following input variables are required:
+
+### <a name="input_azure_devops_agents_personal_access_token"></a> [azure\_devops\_agents\_personal\_access\_token](#input\_azure\_devops\_agents\_personal\_access\_token)
+
+Description: Personal access token for Azure DevOps self-hosted agents (the token requires the 'Agent Pools - Read & Manage' scope and should have the maximum expiry).
+
+Type: `string`
+
+### <a name="input_azure_devops_organization_name"></a> [azure\_devops\_organization\_name](#input\_azure\_devops\_organization\_name)
+
+Description: Azure DevOps Organisation Name
+
+Type: `string`
+
+### <a name="input_azure_devops_personal_access_token"></a> [azure\_devops\_personal\_access\_token](#input\_azure\_devops\_personal\_access\_token)
+
+Description: The personal access token used for agent authentication to Azure DevOps.
+
+Type: `string`
 
 ## Optional Inputs
 
-The following input variables are optional (have default values):
-
-### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
-
-Description: This variable controls whether or not telemetry is enabled for the module.  
-For more information see <https://aka.ms/avm/telemetryinfo>.  
-If it is set to false, then no telemetry will be collected.
-
-Type: `bool`
-
-Default: `true`
+No optional inputs.
 
 ## Outputs
 
-No outputs.
+The following outputs are exported:
+
+### <a name="output_container_app_environment_name"></a> [container\_app\_environment\_name](#output\_container\_app\_environment\_name)
+
+Description: n/a
+
+### <a name="output_container_app_environment_resource_id"></a> [container\_app\_environment\_resource\_id](#output\_container\_app\_environment\_resource\_id)
+
+Description: n/a
+
+### <a name="output_container_app_job_name"></a> [container\_app\_job\_name](#output\_container\_app\_job\_name)
+
+Description: n/a
+
+### <a name="output_container_app_job_resource_id"></a> [container\_app\_job\_resource\_id](#output\_container\_app\_job\_resource\_id)
+
+Description: n/a
 
 ## Modules
 
 The following Modules are called:
+
+### <a name="module_azure_devops_agents"></a> [azure\_devops\_agents](#module\_azure\_devops\_agents)
+
+Source: ../..
+
+Version:
 
 ### <a name="module_naming"></a> [naming](#module\_naming)
 
@@ -124,15 +278,9 @@ Version: >= 0.3.0
 
 ### <a name="module_regions"></a> [regions](#module\_regions)
 
-Source: Azure/regions/azurerm
+Source: Azure/avm-utl-regions/azurerm
 
-Version: >= 0.3.0
-
-### <a name="module_test"></a> [test](#module\_test)
-
-Source: ../../
-
-Version:
+Version: 0.1.0
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection
