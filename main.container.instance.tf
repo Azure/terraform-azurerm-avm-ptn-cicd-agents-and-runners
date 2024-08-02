@@ -19,5 +19,7 @@ module "container_instance" {
   container_registry_login_server   = local.registry_login_server
   container_registry_username       = var.custom_container_registry_username
   container_registry_password       = var.custom_container_registry_password
+
+  depends_on = [module.container_registry, azurerm_private_dns_zone_virtual_network_link.container_registry]
 }
 
