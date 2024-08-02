@@ -75,7 +75,7 @@ output "user_assigned_managed_identity_principal_id" {
 
 output "virtual_network_name" {
   description = "The virtual network name."
-  value = var.use_private_networking && var.create_virtual_network ? module.virtual_network[0].name : var.virtual_network_name
+  value       = var.use_private_networking && var.create_virtual_network ? module.virtual_network[0].name : var.virtual_network_name
 }
 
 output "virtual_network_resource_id" {

@@ -148,7 +148,7 @@ module "azure_devops_agents" {
   tags                                         = local.tags
 }
 
-output "container_instance_resource_Ids" {
+output "container_instance_resource_ids" {
   value = module.azure_devops_agents.container_instance_resource_ids
 }
 
@@ -289,7 +289,7 @@ The following outputs are exported:
 
 Description: n/a
 
-### <a name="output_container_instance_resource_Ids"></a> [container\_instance\_resource\_Ids](#output\_container\_instance\_resource\_Ids)
+### <a name="output_container_instance_resource_ids"></a> [container\_instance\_resource\_ids](#output\_container\_instance\_resource\_ids)
 
 Description: n/a
 

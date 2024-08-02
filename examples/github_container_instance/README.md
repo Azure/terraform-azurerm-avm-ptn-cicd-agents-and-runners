@@ -73,7 +73,6 @@ data "github_organization" "alz" {
 locals {
   action_file          = "action.yml"
   default_commit_email = "demo@microsoft.com"
-  enterprise_plan      = "enterprise"
   free_plan            = "free"
 }
 

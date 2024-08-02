@@ -29,6 +29,7 @@ resource "azurerm_container_registry_task" "this" {
 
   container_registry_id = module.container_registry.resource_id
   name                  = each.value.task_name
+  tags                  = var.tags
 
   docker_step {
     context_access_token = each.value.context_access_token
@@ -136,12 +137,6 @@ Description: The name of the resource group in which to create the container reg
 
 Type: `string`
 
-### <a name="input_tags"></a> [tags](#input\_tags)
-
-Description: A mapping of tags to assign to the resource
-
-Type: `map(string)`
-
 ### <a name="input_use_private_networking"></a> [use\_private\_networking](#input\_use\_private\_networking)
 
 Description: Whether to use private networking for the container registry
@@ -155,11 +150,12 @@ The following input variables are optional (have default values):
 ### <a name="input_images"></a> [images](#input\_images)
 
 Description: A map of objects that define the images to build in the container registry. The key of the map is the name of the image and the value is an object with the following attributes:
-- task\_name: The name of the task to create for building the image (e.g. `image-build-task`)
-- dockerfile\_path: The path to the Dockerfile to use for building the image (e.g. `dockerfile`)
-- context\_path: The path to the context of the Dockerfile in three sections `<repository-url>#<repository-commit>:<repository-folder-path>` (e.g. https://github.com/Azure/terraform-azurerm-avm-ptn-cicd-agents-and-runners#8ff4b85:container-images/azure-devops-agent)
-- context\_access\_token: The access token to use for accessing the context. Supply a PAT if targetting a private repository.
-- image\_names: A list of the names of the images to build (e.g. `["image-name:tag"]`)
+
+- `task_name` - The name of the task to create for building the image (e.g. `image-build-task`)
+- `dockerfile_path` - The path to the Dockerfile to use for building the image (e.g. `dockerfile`)
+- `context_path` - The path to the context of the Dockerfile in three sections `<repository-url>#<repository-commit>:<repository-folder-path>` (e.g. https://github.com/Azure/terraform-azurerm-avm-ptn-cicd-agents-and-runners#8ff4b85:container-images/azure-devops-agent)
+- `context_access_token` - The access token to use for accessing the context. Supply a PAT if targetting a private repository.
+- `image_names` - A list of the names of the images to build (e.g. `["image-name:tag"]`)
 
 Type:
 
@@ -188,6 +184,14 @@ Default: `null`
 Description: The id of the subnet to use for the private endpoint
 
 Type: `string`
+
+Default: `null`
+
+### <a name="input_tags"></a> [tags](#input\_tags)
+
+Description: (Optional) Tags of the resource.
+
+Type: `map(string)`
 
 Default: `null`
 

@@ -893,15 +893,15 @@ Description: The name of the container app environment.
 
 ### <a name="output_placeholder_job_name"></a> [placeholder\_job\_name](#output\_placeholder\_job\_name)
 
-Description: The name of the placeholder job.
+Description: The name of the placeholder contaienr app job.
 
 ### <a name="output_placeholder_job_resource_id"></a> [placeholder\_job\_resource\_id](#output\_placeholder\_job\_resource\_id)
 
-Description: The resource id of the placeholder job.
+Description: The resource id of the placeholder container app job.
 
 ### <a name="output_private_dns_zone_subnet_resource_id"></a> [private\_dns\_zone\_subnet\_resource\_id](#output\_private\_dns\_zone\_subnet\_resource\_id)
 
-Description: The private dns zone id of the container app job.
+Description: The private dns zone id of the container registry.
 
 ### <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id)
 
@@ -917,11 +917,11 @@ Description: The principal id of the user assigned managed identity.
 
 ### <a name="output_virtual_network_name"></a> [virtual\_network\_name](#output\_virtual\_network\_name)
 
-Description: n/a
+Description: The virtual network name.
 
 ### <a name="output_virtual_network_resource_id"></a> [virtual\_network\_resource\_id](#output\_virtual\_network\_resource\_id)
 
-Description: The virtual network id of the container app job.
+Description: The virtual network resource id.
 
 ## Modules
 

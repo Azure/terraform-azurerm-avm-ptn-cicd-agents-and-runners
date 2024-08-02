@@ -24,12 +24,6 @@ variable "resource_group_name" {
   description = "The name of the resource group in which to create the container registry"
 }
 
-variable "tags" {
-  type        = map(string)
-  default     = null
-  description = "(Optional) Tags of the resource."
-}
-
 variable "use_private_networking" {
   type        = bool
   description = "Whether to use private networking for the container registry"
@@ -65,4 +59,10 @@ variable "subnet_id" {
   type        = string
   default     = null
   description = "The id of the subnet to use for the private endpoint"
+}
+
+variable "tags" {
+  type        = map(string)
+  default     = null
+  description = "(Optional) Tags of the resource."
 }
