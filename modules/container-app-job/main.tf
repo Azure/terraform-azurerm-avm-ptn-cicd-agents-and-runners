@@ -37,7 +37,7 @@ resource "azapi_resource" "job" {
 }
 
 resource "azapi_resource" "placeholder" {
-  count = var.create_placeholder_job ? 1 : 0
+  count = var.placeholder_job_creation_enabled ? 1 : 0
 
   type = "Microsoft.App/jobs@2023-05-01"
   body = jsonencode({

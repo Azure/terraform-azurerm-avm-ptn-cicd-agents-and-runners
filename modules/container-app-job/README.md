@@ -43,7 +43,7 @@ resource "azapi_resource" "job" {
 }
 
 resource "azapi_resource" "placeholder" {
-  count = var.create_placeholder_job ? 1 : 0
+  count = var.placeholder_job_creation_enabled ? 1 : 0
 
   type = "Microsoft.App/jobs@2023-05-01"
   body = jsonencode({
@@ -245,14 +245,6 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_create_placeholder_job"></a> [create\_placeholder\_job](#input\_create\_placeholder\_job)
-
-Description: Whether or not to create a placeholder job.
-
-Type: `bool`
-
-Default: `false`
-
 ### <a name="input_environment_variables_placeholder"></a> [environment\_variables\_placeholder](#input\_environment\_variables\_placeholder)
 
 Description: List of environment variables to pass only to the placeholder container.
@@ -283,6 +275,14 @@ Description: The cron expression for the placeholder Container Apps job.
 Type: `string`
 
 Default: `null`
+
+### <a name="input_placeholder_job_creation_enabled"></a> [placeholder\_job\_creation\_enabled](#input\_placeholder\_job\_creation\_enabled)
+
+Description: Whether or not to create a placeholder job.
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_placeholder_job_name"></a> [placeholder\_job\_name](#input\_placeholder\_job\_name)
 

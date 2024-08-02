@@ -1,21 +1,21 @@
 locals {
-  container_app_environment_id                     = local.deploy_container_app && var.create_container_app_environment ? azurerm_container_app_environment.this[0].id : var.container_app_environment_id
-  container_app_subnet_id                          = var.use_private_networking && local.deploy_container_app ? (var.create_virtual_network ? module.virtual_network[0].subnets["container_app"].resource_id : var.container_app_subnet_id) : ""
-  container_instance_subnet_id                     = var.use_private_networking && local.deploy_container_instance ? (var.create_virtual_network ? module.virtual_network[0].subnets["container_instance"].resource_id : var.container_instance_subnet_id) : ""
-  container_registry_dns_zone_id                   = var.use_private_networking ? (var.create_container_registry_private_dns_zone ? azurerm_private_dns_zone.container_registry[0].id : var.container_registry_dns_zone_id) : ""
-  container_registry_private_endpoint_subnet_id    = var.use_private_networking ? (var.create_virtual_network ? module.virtual_network[0].subnets["container_registry_private_endpoint"].resource_id : var.container_registry_private_endpoint_subnet_id) : ""
-  log_analytics_workspace_id                       = local.deploy_container_app && var.create_log_analytics_workspace ? module.log_analytics_workspace[0].resource_id : var.log_analytics_workspace_id
-  nat_gateway_id                                   = var.use_private_networking ? (var.create_nat_gateway ? azurerm_nat_gateway.this[0].id : var.nat_gateway_id) : ""
-  public_ip_id                                     = var.use_private_networking ? (var.create_public_ip ? azurerm_public_ip.this[0].id : var.public_ip_id) : ""
-  registry_login_server                            = var.create_container_registry ? module.container_registry[0].login_server : var.custom_container_registry_login_server
+  container_app_environment_id                     = local.deploy_container_app && var.container_app_environment_creation_enabled ? azurerm_container_app_environment.this[0].id : var.container_app_environment_id
+  container_app_subnet_id                          = var.use_private_networking && local.deploy_container_app ? (var.virtual_network_creation_enabled ? module.virtual_network[0].subnets["container_app"].resource_id : var.container_app_subnet_id) : ""
+  container_instance_subnet_id                     = var.use_private_networking && local.deploy_container_instance ? (var.virtual_network_creation_enabled ? module.virtual_network[0].subnets["container_instance"].resource_id : var.container_instance_subnet_id) : ""
+  container_registry_dns_zone_id                   = var.use_private_networking ? (var.container_registry_private_dns_zone_creation_enabled ? azurerm_private_dns_zone.container_registry[0].id : var.container_registry_dns_zone_id) : ""
+  container_registry_private_endpoint_subnet_id    = var.use_private_networking ? (var.virtual_network_creation_enabled ? module.virtual_network[0].subnets["container_registry_private_endpoint"].resource_id : var.container_registry_private_endpoint_subnet_id) : ""
+  log_analytics_workspace_id                       = local.deploy_container_app && var.log_analytics_workspace_creation_enabled ? module.log_analytics_workspace[0].resource_id : var.log_analytics_workspace_id
+  nat_gateway_id                                   = var.use_private_networking ? (var.nat_gateway_creation_enabled ? azurerm_nat_gateway.this[0].id : var.nat_gateway_id) : ""
+  public_ip_id                                     = var.use_private_networking ? (var.public_ip_creation_enabled ? azurerm_public_ip.this[0].id : var.public_ip_id) : ""
+  registry_login_server                            = var.container_registry_creation_enabled ? module.container_registry[0].login_server : var.custom_container_registry_login_server
   resource_group_id                                = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${local.resource_group_name}"
   resource_group_name                              = var.resource_group_creation_enabled ? azurerm_resource_group.this[0].name : var.resource_group_name
   resource_group_name_container_app_infrastructure = var.container_app_infrastructure_resource_group_name == null ? "rg-${var.postfix}-container-apps-infrastructure" : var.container_app_infrastructure_resource_group_name
-  user_assigned_managed_identity_principal_id      = var.create_user_assigned_managed_identity ? module.user_assigned_managed_identity[0].principal_id : var.user_assigned_managed_identity_principal_id
+  user_assigned_managed_identity_principal_id      = var.user_assigned_managed_identity_creation_enabled ? module.user_assigned_managed_identity[0].principal_id : var.user_assigned_managed_identity_principal_id
 }
 
 locals {
-  container_app_environment_name                  = var.create_container_app_environment ? (var.container_app_environment_name != null ? var.container_app_environment_name : "cae-${var.postfix}") : ""
+  container_app_environment_name                  = var.container_app_environment_creation_enabled ? (var.container_app_environment_name != null ? var.container_app_environment_name : "cae-${var.postfix}") : ""
   container_app_subnet_name                       = var.container_app_subnet_name != null ? var.container_app_subnet_name : "subnet-container-app-${var.postfix}"
   container_instance_container_name               = var.container_instance_container_name != null ? var.container_instance_container_name : "container-${var.postfix}"
   container_instance_name_prefix                  = var.container_instance_name_prefix != null ? var.container_instance_name_prefix : "ci-${var.postfix}"

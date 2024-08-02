@@ -6,7 +6,7 @@ This submodule deploys an Azure Container Registry and image build tasks for CI/
 ```hcl
 module "container_registry" {
   source                        = "Azure/avm-res-containerregistry-registry/azurerm"
-  version                       = "~> 0.2"
+  version                       = "0.2.0"
   name                          = var.name
   resource_group_name           = var.resource_group_name
   location                      = var.location
@@ -173,7 +173,7 @@ Default: `{}`
 
 ### <a name="input_private_dns_zone_id"></a> [private\_dns\_zone\_id](#input\_private\_dns\_zone\_id)
 
-Description: The id of the private DNS zone to create for the container registry. Only required if `create_private_dns_zone` is `false`.
+Description: The id of the private DNS zone to create for the container registry. Only required if `container_registry_private_dns_zone_creation_enabled` is `false`.
 
 Type: `string`
 
@@ -219,7 +219,7 @@ The following Modules are called:
 
 Source: Azure/avm-res-containerregistry-registry/azurerm
 
-Version: ~> 0.2
+Version: 0.2.0
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection

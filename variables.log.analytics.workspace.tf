@@ -1,4 +1,4 @@
-variable "create_log_analytics_workspace" {
+variable "log_analytics_workspace_creation_enabled" {
   type        = bool
   default     = true
   description = "Whether or not to create a log analytics workspace."
@@ -14,7 +14,7 @@ variable "log_analytics_workspace_id" {
 variable "log_analytics_workspace_name" {
   type        = string
   default     = null
-  description = "The name of the log analytics workspace. Only required if `create_log_analytics_workspace == false`."
+  description = "The name of the log analytics workspace. Only required if `log_analytics_workspace_creation_enabled == false`."
 }
 
 variable "log_analytics_workspace_sku" {

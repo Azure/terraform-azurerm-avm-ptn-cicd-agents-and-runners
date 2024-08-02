@@ -1,4 +1,4 @@
-variable "create_placeholder_job" {
+variable "placeholder_job_creation_enabled" {
   type        = bool
   description = "Whether or not to create a placeholder job."
   default     = false

@@ -1,4 +1,4 @@
-variable "create_container_app_environment" {
+variable "container_app_environment_creation_enabled" {
   type        = bool
   default     = true
   description = "Whether or not to create a Container App Environment."
@@ -7,13 +7,13 @@ variable "create_container_app_environment" {
 variable "container_app_environment_name" {
   type        = string
   default     = null
-  description = "The name of the Container App Environment. Only required if `create_container_app_environment` is `true`."
+  description = "The name of the Container App Environment. Only required if `container_app_environment_creation_enabled` is `true`."
 }
 
 variable "container_app_environment_id" {
   type        = string
   default     = null
-  description = "The resource id of the Container App Environment. Only required if `create_container_app_environment` is `false`."
+  description = "The resource id of the Container App Environment. Only required if `container_app_environment_creation_enabled` is `false`."
 }
 
 variable "container_app_job_name" {

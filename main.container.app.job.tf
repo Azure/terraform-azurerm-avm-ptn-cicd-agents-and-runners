@@ -40,12 +40,12 @@ module "container_app_job" {
   replica_retry_limit = var.container_app_replica_retry_limit
   replica_timeout     = var.container_app_replica_timeout
 
-  create_placeholder_job          = var.version_control_system_type == local.version_control_system_azure_devops
-  placeholder_job_name            = var.container_app_placeholder_job_name
-  placeholder_container_name      = var.container_app_placeholder_container_name
-  placeholder_replica_retry_limit = var.container_app_placeholder_replica_retry_limit
-  placeholder_replica_timeout     = var.container_app_placeholder_replica_timeout
-  placeholder_cron_expression     = local.cron_expression
+  placeholder_job_creation_enabled = var.version_control_system_type == local.version_control_system_azure_devops
+  placeholder_job_name             = var.container_app_placeholder_job_name
+  placeholder_container_name       = var.container_app_placeholder_container_name
+  placeholder_replica_retry_limit  = var.container_app_placeholder_replica_retry_limit
+  placeholder_replica_timeout      = var.container_app_placeholder_replica_timeout
+  placeholder_cron_expression      = local.cron_expression
 
   polling_interval_seconds = var.container_app_polling_interval_seconds
   container_cpu            = var.container_app_container_cpu

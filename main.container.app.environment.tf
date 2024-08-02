@@ -1,5 +1,5 @@
 resource "azurerm_container_app_environment" "this" {
-  count = local.deploy_container_app && var.create_container_app_environment ? 1 : 0
+  count = local.deploy_container_app && var.container_app_environment_creation_enabled ? 1 : 0
 
   location                           = var.location
   name                               = local.container_app_environment_name

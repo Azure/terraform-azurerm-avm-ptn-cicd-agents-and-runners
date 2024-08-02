@@ -52,7 +52,7 @@ DESCRIPTION
 variable "private_dns_zone_id" {
   type        = string
   default     = null
-  description = "The id of the private DNS zone to create for the container registry. Only required if `create_private_dns_zone` is `false`."
+  description = "The id of the private DNS zone to create for the container registry. Only required if `container_registry_private_dns_zone_creation_enabled` is `false`."
 }
 
 variable "subnet_id" {

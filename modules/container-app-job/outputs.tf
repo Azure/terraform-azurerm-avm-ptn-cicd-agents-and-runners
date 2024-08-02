@@ -5,17 +5,17 @@ output "name" {
 
 output "placeholder_job_name" {
   description = "The name of the placeholder job."
-  value       = var.create_placeholder_job ? azapi_resource.placeholder[0].name : null
+  value       = var.placeholder_job_creation_enabled ? azapi_resource.placeholder[0].name : null
 }
 
 output "placeholder_job_resource" {
   description = "The placeholder job resource."
-  value       = var.create_placeholder_job ? azapi_resource.placeholder[0] : null
+  value       = var.placeholder_job_creation_enabled ? azapi_resource.placeholder[0] : null
 }
 
 output "placeholder_job_resource_id" {
   description = "The resource id of the placeholder job."
-  value       = var.create_placeholder_job ? azapi_resource.placeholder[0].id : null
+  value       = var.placeholder_job_creation_enabled ? azapi_resource.placeholder[0].id : null
 }
 
 output "resource_id" {

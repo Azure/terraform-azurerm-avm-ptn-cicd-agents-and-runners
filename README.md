@@ -150,9 +150,17 @@ Type: `string`
 
 Default: `"2Gi"`
 
+### <a name="input_container_app_environment_creation_enabled"></a> [container\_app\_environment\_creation\_enabled](#input\_container\_app\_environment\_creation\_enabled)
+
+Description: Whether or not to create a Container App Environment.
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_container_app_environment_id"></a> [container\_app\_environment\_id](#input\_container\_app\_environment\_id)
 
-Description: The resource id of the Container App Environment. Only required if `create_container_app_environment` is `false`.
+Description: The resource id of the Container App Environment. Only required if `container_app_environment_creation_enabled` is `false`.
 
 Type: `string`
 
@@ -160,7 +168,7 @@ Default: `null`
 
 ### <a name="input_container_app_environment_name"></a> [container\_app\_environment\_name](#input\_container\_app\_environment\_name)
 
-Description: The name of the Container App Environment. Only required if `create_container_app_environment` is `true`.
+Description: The name of the Container App Environment. Only required if `container_app_environment_creation_enabled` is `true`.
 
 Type: `string`
 
@@ -320,7 +328,7 @@ Default: `27`
 
 ### <a name="input_container_app_subnet_id"></a> [container\_app\_subnet\_id](#input\_container\_app\_subnet\_id)
 
-Description: The ID of a pre-existing subnet to use. Required if `create_virtual_network` is `false`.
+Description: The ID of a pre-existing subnet to use. Required if `virtual_network_creation_enabled` is `false`.
 
 Type: `string`
 
@@ -328,7 +336,7 @@ Default: `null`
 
 ### <a name="input_container_app_subnet_name"></a> [container\_app\_subnet\_name](#input\_container\_app\_subnet\_name)
 
-Description: The name of the subnet. Must be specified if `create_virtual_network == false`.
+Description: The name of the subnet. Must be specified if `virtual_network_creation_enabled == false`.
 
 Type: `string`
 
@@ -438,7 +446,7 @@ Default: `28`
 
 ### <a name="input_container_instance_subnet_id"></a> [container\_instance\_subnet\_id](#input\_container\_instance\_subnet\_id)
 
-Description: The ID of a pre-existing subnet to use. Required if `create_virtual_network` is `false`.
+Description: The ID of a pre-existing subnet to use. Required if `virtual_network_creation_enabled` is `false`.
 
 Type: `string`
 
@@ -446,15 +454,23 @@ Default: `null`
 
 ### <a name="input_container_instance_subnet_name"></a> [container\_instance\_subnet\_name](#input\_container\_instance\_subnet\_name)
 
-Description: The name of the subnet. Must be specified if `create_virtual_network == false`.
+Description: The name of the subnet. Must be specified if `virtual_network_creation_enabled == false`.
 
 Type: `string`
 
 Default: `null`
 
+### <a name="input_container_registry_creation_enabled"></a> [container\_registry\_creation\_enabled](#input\_container\_registry\_creation\_enabled)
+
+Description: Whether or not to create a container registry.
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_container_registry_dns_zone_id"></a> [container\_registry\_dns\_zone\_id](#input\_container\_registry\_dns\_zone\_id)
 
-Description: The ID of the private DNS zone to create for the container registry. Only required if `create_private_dns_zone` is `false`.
+Description: The ID of the private DNS zone to create for the container registry. Only required if `container_registry_private_dns_zone_creation_enabled` is `false`.
 
 Type: `string`
 
@@ -462,11 +478,19 @@ Default: `null`
 
 ### <a name="input_container_registry_name"></a> [container\_registry\_name](#input\_container\_registry\_name)
 
-Description: The name of the container registry. Only required if `create_container_registry` is `true`.
+Description: The name of the container registry. Only required if `container_registry_creation_enabled` is `true`.
 
 Type: `string`
 
 Default: `null`
+
+### <a name="input_container_registry_private_dns_zone_creation_enabled"></a> [container\_registry\_private\_dns\_zone\_creation\_enabled](#input\_container\_registry\_private\_dns\_zone\_creation\_enabled)
+
+Description: Whether or not to create a private DNS zone for the container registry.
+
+Type: `bool`
+
+Default: `true`
 
 ### <a name="input_container_registry_private_endpoint_subnet_address_prefix"></a> [container\_registry\_private\_endpoint\_subnet\_address\_prefix](#input\_container\_registry\_private\_endpoint\_subnet\_address\_prefix)
 
@@ -478,7 +502,7 @@ Default: `null`
 
 ### <a name="input_container_registry_private_endpoint_subnet_id"></a> [container\_registry\_private\_endpoint\_subnet\_id](#input\_container\_registry\_private\_endpoint\_subnet\_id)
 
-Description: The ID of a pre-existing subnet to use. Required if `create_virtual_network` is `false`.
+Description: The ID of a pre-existing subnet to use. Required if `virtual_network_creation_enabled` is `false`.
 
 Type: `string`
 
@@ -486,7 +510,7 @@ Default: `null`
 
 ### <a name="input_container_registry_private_endpoint_subnet_name"></a> [container\_registry\_private\_endpoint\_subnet\_name](#input\_container\_registry\_private\_endpoint\_subnet\_name)
 
-Description: The name of the subnet. Must be specified if `create_virtual_network == false`.
+Description: The name of the subnet. Must be specified if `virtual_network_creation_enabled == false`.
 
 Type: `string`
 
@@ -500,73 +524,9 @@ Type: `number`
 
 Default: `29`
 
-### <a name="input_create_container_app_environment"></a> [create\_container\_app\_environment](#input\_create\_container\_app\_environment)
-
-Description: Whether or not to create a Container App Environment.
-
-Type: `bool`
-
-Default: `true`
-
-### <a name="input_create_container_registry"></a> [create\_container\_registry](#input\_create\_container\_registry)
-
-Description: Whether or not to create a container registry.
-
-Type: `bool`
-
-Default: `true`
-
-### <a name="input_create_container_registry_private_dns_zone"></a> [create\_container\_registry\_private\_dns\_zone](#input\_create\_container\_registry\_private\_dns\_zone)
-
-Description: Whether or not to create a private DNS zone for the container registry.
-
-Type: `bool`
-
-Default: `true`
-
-### <a name="input_create_log_analytics_workspace"></a> [create\_log\_analytics\_workspace](#input\_create\_log\_analytics\_workspace)
-
-Description: Whether or not to create a log analytics workspace.
-
-Type: `bool`
-
-Default: `true`
-
-### <a name="input_create_nat_gateway"></a> [create\_nat\_gateway](#input\_create\_nat\_gateway)
-
-Description: Whether or not to create a NAT Gateway.
-
-Type: `bool`
-
-Default: `true`
-
-### <a name="input_create_public_ip"></a> [create\_public\_ip](#input\_create\_public\_ip)
-
-Description: Whether or not to create a public IP.
-
-Type: `bool`
-
-Default: `true`
-
-### <a name="input_create_user_assigned_managed_identity"></a> [create\_user\_assigned\_managed\_identity](#input\_create\_user\_assigned\_managed\_identity)
-
-Description: Whether or not to create a user assigned managed identity.
-
-Type: `bool`
-
-Default: `true`
-
-### <a name="input_create_virtual_network"></a> [create\_virtual\_network](#input\_create\_virtual\_network)
-
-Description: Whether or not to create a virtual network.
-
-Type: `bool`
-
-Default: `true`
-
 ### <a name="input_custom_container_registry_images"></a> [custom\_container\_registry\_images](#input\_custom\_container\_registry\_images)
 
-Description: The images to build and push to the container registry. This is only relevant if `create_container_registry` is `true` and `use_default_container_image` is set to `false`.
+Description: The images to build and push to the container registry. This is only relevant if `container_registry_creation_enabled` is `true` and `use_default_container_image` is set to `false`.
 
 - task\_name: The name of the task to create for building the image (e.g. `image-build-task`)
 - dockerfile\_path: The path to the Dockerfile to use for building the image (e.g. `dockerfile`)
@@ -590,7 +550,7 @@ Default: `null`
 
 ### <a name="input_custom_container_registry_login_server"></a> [custom\_container\_registry\_login\_server](#input\_custom\_container\_registry\_login\_server)
 
-Description: The login server of the container registry to use if `create_container_registry` is `false`.
+Description: The login server of the container registry to use if `container_registry_creation_enabled` is `false`.
 
 Type: `string`
 
@@ -598,7 +558,7 @@ Default: `null`
 
 ### <a name="input_custom_container_registry_password"></a> [custom\_container\_registry\_password](#input\_custom\_container\_registry\_password)
 
-Description: The password of the container registry to use if `create_container_registry` is `false`.
+Description: The password of the container registry to use if `container_registry_creation_enabled` is `false`.
 
 Type: `string`
 
@@ -606,7 +566,7 @@ Default: `null`
 
 ### <a name="input_custom_container_registry_username"></a> [custom\_container\_registry\_username](#input\_custom\_container\_registry\_username)
 
-Description: The username of the container registry to use if `create_container_registry` is `false`.
+Description: The username of the container registry to use if `container_registry_creation_enabled` is `false`.
 
 Type: `string`
 
@@ -709,6 +669,14 @@ object({
 
 Default: `null`
 
+### <a name="input_log_analytics_workspace_creation_enabled"></a> [log\_analytics\_workspace\_creation\_enabled](#input\_log\_analytics\_workspace\_creation\_enabled)
+
+Description: Whether or not to create a log analytics workspace.
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_log_analytics_workspace_id"></a> [log\_analytics\_workspace\_id](#input\_log\_analytics\_workspace\_id)
 
 Description: The resource Id of the Log Analytics Workspace.
@@ -719,7 +687,7 @@ Default: `null`
 
 ### <a name="input_log_analytics_workspace_name"></a> [log\_analytics\_workspace\_name](#input\_log\_analytics\_workspace\_name)
 
-Description: The name of the log analytics workspace. Only required if `create_log_analytics_workspace == false`.
+Description: The name of the log analytics workspace. Only required if `log_analytics_workspace_creation_enabled == false`.
 
 Type: `string`
 
@@ -741,9 +709,17 @@ Type: `string`
 
 Default: `"PerGB2018"`
 
+### <a name="input_nat_gateway_creation_enabled"></a> [nat\_gateway\_creation\_enabled](#input\_nat\_gateway\_creation\_enabled)
+
+Description: Whether or not to create a NAT Gateway.
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_nat_gateway_id"></a> [nat\_gateway\_id](#input\_nat\_gateway\_id)
 
-Description: The ID of the NAT Gateway. Only required if `create_nat_gateway` is `false`.
+Description: The ID of the NAT Gateway. Only required if `nat_gateway_creation_enabled` is `false`.
 
 Type: `string`
 
@@ -757,9 +733,17 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_public_ip_creation_enabled"></a> [public\_ip\_creation\_enabled](#input\_public\_ip\_creation\_enabled)
+
+Description: Whether or not to create a public IP.
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_public_ip_id"></a> [public\_ip\_id](#input\_public\_ip\_id)
 
-Description: The ID of the public IP. Only required if `create_public_ip` is `false`.
+Description: The ID of the public IP. Only required if `public_ip_creation_enabled` is `false`.
 
 Type: `string`
 
@@ -813,9 +797,17 @@ Type: `bool`
 
 Default: `true`
 
+### <a name="input_user_assigned_managed_identity_creation_enabled"></a> [user\_assigned\_managed\_identity\_creation\_enabled](#input\_user\_assigned\_managed\_identity\_creation\_enabled)
+
+Description: Whether or not to create a user assigned managed identity.
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_user_assigned_managed_identity_id"></a> [user\_assigned\_managed\_identity\_id](#input\_user\_assigned\_managed\_identity\_id)
 
-Description: The resource Id of the user assigned managed identity. Only required if `create_user_assigned_managed_identity == false`.
+Description: The resource Id of the user assigned managed identity. Only required if `user_assigned_managed_identity_creation_enabled == false`.
 
 Type: `string`
 
@@ -823,7 +815,7 @@ Default: `null`
 
 ### <a name="input_user_assigned_managed_identity_name"></a> [user\_assigned\_managed\_identity\_name](#input\_user\_assigned\_managed\_identity\_name)
 
-Description: The name of the user assigned managed identity. Must be specified if `create_user_assigned_managed_identity == true`.
+Description: The name of the user assigned managed identity. Must be specified if `user_assigned_managed_identity_creation_enabled == true`.
 
 Type: `string`
 
@@ -831,7 +823,7 @@ Default: `null`
 
 ### <a name="input_user_assigned_managed_identity_principal_id"></a> [user\_assigned\_managed\_identity\_principal\_id](#input\_user\_assigned\_managed\_identity\_principal\_id)
 
-Description: The principal id of the user assigned managed identity. Only required if `create_user_assigned_managed_identity == false`.
+Description: The principal id of the user assigned managed identity. Only required if `user_assigned_managed_identity_creation_enabled == false`.
 
 Type: `string`
 
@@ -895,15 +887,23 @@ Default: `"repo"`
 
 ### <a name="input_virtual_network_address_space"></a> [virtual\_network\_address\_space](#input\_virtual\_network\_address\_space)
 
-Description: The address space for the virtual network. Must be specified if `create_virtual_network == false`.
+Description: The address space for the virtual network. Must be specified if `virtual_network_creation_enabled == false`.
 
 Type: `string`
 
 Default: `null`
 
+### <a name="input_virtual_network_creation_enabled"></a> [virtual\_network\_creation\_enabled](#input\_virtual\_network\_creation\_enabled)
+
+Description: Whether or not to create a virtual network.
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_virtual_network_name"></a> [virtual\_network\_name](#input\_virtual\_network\_name)
 
-Description: The name of the virtual network. Must be specified if `create_virtual_network == false`.
+Description: The name of the virtual network. Must be specified if `virtual_network_creation_enabled == false`.
 
 Type: `string`
 
@@ -1019,7 +1019,7 @@ Version: 0.3.1
 
 Source: Azure/avm-res-network-virtualnetwork/azurerm
 
-Version: ~> 0.4
+Version: 0.4.0
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection

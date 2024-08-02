@@ -15,17 +15,17 @@ output "container_instance_resource_ids" {
 
 output "container_registry_login_server" {
   description = "The container registry login server."
-  value       = var.create_container_registry ? module.container_registry[0].login_server : var.custom_container_registry_login_server
+  value       = var.container_registry_creation_enabled ? module.container_registry[0].login_server : var.custom_container_registry_login_server
 }
 
 output "container_registry_name" {
   description = "The container registry name."
-  value       = var.create_container_registry ? module.container_registry[0].name : null
+  value       = var.container_registry_creation_enabled ? module.container_registry[0].name : null
 }
 
 output "container_registry_resource_id" {
   description = "The container registry resource id."
-  value       = var.create_container_registry ? module.container_registry[0].resource_id : null
+  value       = var.container_registry_creation_enabled ? module.container_registry[0].resource_id : null
 }
 
 output "job_name" {
@@ -65,20 +65,20 @@ output "resource_id" {
 
 output "user_assigned_managed_identity_id" {
   description = "The resource id of the user assigned managed identity."
-  value       = var.create_user_assigned_managed_identity ? module.user_assigned_managed_identity[0].resource_id : var.user_assigned_managed_identity_id
+  value       = var.user_assigned_managed_identity_creation_enabled ? module.user_assigned_managed_identity[0].resource_id : var.user_assigned_managed_identity_id
 }
 
 output "user_assigned_managed_identity_principal_id" {
   description = "The principal id of the user assigned managed identity."
-  value       = var.create_user_assigned_managed_identity ? module.user_assigned_managed_identity[0].principal_id : var.user_assigned_managed_identity_principal_id
+  value       = var.user_assigned_managed_identity_creation_enabled ? module.user_assigned_managed_identity[0].principal_id : var.user_assigned_managed_identity_principal_id
 }
 
 output "virtual_network_name" {
   description = "The virtual network name."
-  value       = var.use_private_networking && var.create_virtual_network ? module.virtual_network[0].name : var.virtual_network_name
+  value       = var.use_private_networking && var.virtual_network_creation_enabled ? module.virtual_network[0].name : var.virtual_network_name
 }
 
 output "virtual_network_resource_id" {
   description = "The virtual network resource id."
-  value       = var.use_private_networking && var.create_virtual_network ? module.virtual_network[0].resource_id : null
+  value       = var.use_private_networking && var.virtual_network_creation_enabled ? module.virtual_network[0].resource_id : null
 }

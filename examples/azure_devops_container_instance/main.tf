@@ -152,8 +152,8 @@ output "container_instance_names" {
 
 # Region helpers
 module "regions" {
-  source  = "Azure/regions/azurerm"
-  version = ">= 0.3.0"
+  source  = "Azure/avm-utl-regions/azurerm"
+  version = "0.1.0"
 }
 
 resource "random_integer" "region_index" {

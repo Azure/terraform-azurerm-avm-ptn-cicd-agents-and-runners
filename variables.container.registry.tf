@@ -1,5 +1,5 @@
 
-variable "create_container_registry" {
+variable "container_registry_creation_enabled" {
   type        = bool
   default     = true
   description = "Whether or not to create a container registry."
@@ -8,24 +8,24 @@ variable "create_container_registry" {
 variable "container_registry_name" {
   type        = string
   default     = null
-  description = "The name of the container registry. Only required if `create_container_registry` is `true`."
+  description = "The name of the container registry. Only required if `container_registry_creation_enabled` is `true`."
 }
 
 variable "custom_container_registry_login_server" {
   type        = string
-  description = "The login server of the container registry to use if `create_container_registry` is `false`."
+  description = "The login server of the container registry to use if `container_registry_creation_enabled` is `false`."
   default     = null
 }
 
 variable "custom_container_registry_username" {
   type        = string
-  description = "The username of the container registry to use if `create_container_registry` is `false`."
+  description = "The username of the container registry to use if `container_registry_creation_enabled` is `false`."
   default     = null
 }
 
 variable "custom_container_registry_password" {
   type        = string
-  description = "The password of the container registry to use if `create_container_registry` is `false`."
+  description = "The password of the container registry to use if `container_registry_creation_enabled` is `false`."
   default     = null
   sensitive   = true
 }
@@ -46,7 +46,7 @@ variable "custom_container_registry_images" {
   }))
   default     = null
   description = <<DESCRIPTION
-The images to build and push to the container registry. This is only relevant if `create_container_registry` is `true` and `use_default_container_image` is set to `false`.
+The images to build and push to the container registry. This is only relevant if `container_registry_creation_enabled` is `true` and `use_default_container_image` is set to `false`.
 
 - task_name: The name of the task to create for building the image (e.g. `image-build-task`)
 - dockerfile_path: The path to the Dockerfile to use for building the image (e.g. `dockerfile`)

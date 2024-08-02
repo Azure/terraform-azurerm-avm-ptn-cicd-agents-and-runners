@@ -1,5 +1,5 @@
 module "log_analytics_workspace" {
-  count   = var.create_log_analytics_workspace && local.deploy_container_app ? 1 : 0
+  count   = var.log_analytics_workspace_creation_enabled && local.deploy_container_app ? 1 : 0
   source  = "Azure/avm-res-operationalinsights-workspace/azurerm"
   version = "0.3.3"
 

@@ -1,5 +1,5 @@
 module "container_registry" {
-  count                                   = var.create_container_registry ? 1 : 0
+  count                                   = var.container_registry_creation_enabled ? 1 : 0
   source                                  = "./modules/container-registry"
   location                                = var.location
   name                                    = local.container_registry_name
