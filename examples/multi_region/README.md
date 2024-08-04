@@ -153,6 +153,7 @@ module "azure_devops_agents_primary" {
   virtual_network_address_space                = "10.0.0.0/16"
   container_app_polling_interval_seconds       = local.primary_polling_interval_prime_number
   tags                                         = local.tags
+  depends_on                                   = [azuredevops_pipeline_authorization.this]
 }
 
 module "azure_devops_agents_secondary" {
@@ -166,6 +167,7 @@ module "azure_devops_agents_secondary" {
   virtual_network_address_space                = "10.1.0.0/16"
   container_app_polling_interval_seconds       = local.secondary_polling_interval_prime_number
   tags                                         = local.tags
+  depends_on                                   = [azuredevops_pipeline_authorization.this]
 }
 
 output "primary_region" {

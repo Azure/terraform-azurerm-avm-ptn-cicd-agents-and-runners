@@ -108,6 +108,7 @@ module "github_runners" {
   version_control_system_repository            = github_repository.this.name
   virtual_network_address_space                = "10.0.0.0/16"
   tags                                         = local.tags
+  depends_on                                   = [github_repository_file.this]
 }
 
 # Region helpers

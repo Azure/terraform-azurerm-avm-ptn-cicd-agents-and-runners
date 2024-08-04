@@ -145,6 +145,7 @@ module "azure_devops_agents" {
   version_control_system_pool_name             = azuredevops_agent_pool.this.name
   use_private_networking                       = false
   tags                                         = local.tags
+  depends_on                                   = [azuredevops_pipeline_authorization.this]
 }
 
 output "container_app_environment_resource_id" {
