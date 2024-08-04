@@ -120,9 +120,3 @@ variable "container_app_infrastructure_resource_group_name" {
   default     = null
   description = "The name of the resource group where the Container Apps infrastructure is deployed."
 }
-
-variable "container_app_placeholder_schedule_offset_minutes" {
-  type        = number
-  default     = 5
-  description = "The offset in minutes for the placeholder job."
-}

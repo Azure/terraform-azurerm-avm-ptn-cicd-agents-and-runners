@@ -1,19 +1,3 @@
-resource "time_offset" "placeholder_job" {
-  count = local.deploy_container_app ? 1 : 0
-
-  offset_minutes = var.container_app_placeholder_schedule_offset_minutes
-  triggers = {
-    container_image                   = local.container_images["container_app"].image_names[0]
-    offset_minutes                    = var.container_app_placeholder_schedule_offset_minutes
-    environment_variables             = jsonencode(local.environment_variables)
-    sensitive_environment_variables   = jsonencode(local.sensitive_environment_variables)
-    environment_variables_placeholder = jsonencode(local.environment_variables_placeholder)
-    image_version                     = var.default_image_repository_commit
-  }
-
-  depends_on = [module.container_registry, azurerm_container_app_environment.this, time_sleep.delay_after_container_image_build]
-}
-
 module "container_app_job" {
   count  = local.deploy_container_app ? 1 : 0
   source = "./modules/container-app-job"
@@ -45,7 +29,6 @@ module "container_app_job" {
   placeholder_container_name       = var.container_app_placeholder_container_name
   placeholder_replica_retry_limit  = var.container_app_placeholder_replica_retry_limit
   placeholder_replica_timeout      = var.container_app_placeholder_replica_timeout
-  placeholder_cron_expression      = local.cron_expression
 
   polling_interval_seconds = var.container_app_polling_interval_seconds
   container_cpu            = var.container_app_container_cpu

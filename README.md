@@ -75,7 +75,6 @@ The following resources are used by this module:
 - [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
 - [modtm_telemetry.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/resources/telemetry) (resource)
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
-- [time_offset.placeholder_job](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/offset) (resource)
 - [time_sleep.delay_after_container_image_build](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) (resource)
 - [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
 - [azurerm_client_config.telemetry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
@@ -260,14 +259,6 @@ Description: The timeout in seconds for the placeholder Container Apps job.
 Type: `number`
 
 Default: `300`
-
-### <a name="input_container_app_placeholder_schedule_offset_minutes"></a> [container\_app\_placeholder\_schedule\_offset\_minutes](#input\_container\_app\_placeholder\_schedule\_offset\_minutes)
-
-Description: The offset in minutes for the placeholder job.
-
-Type: `number`
-
-Default: `5`
 
 ### <a name="input_container_app_polling_interval_seconds"></a> [container\_app\_polling\_interval\_seconds](#input\_container\_app\_polling\_interval\_seconds)
 
@@ -848,6 +839,14 @@ Default: `1`
 ### <a name="input_version_control_system_enterprise"></a> [version\_control\_system\_enterprise](#input\_version\_control\_system\_enterprise)
 
 Description: The enterprise name for the version control system.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_version_control_system_placeholder_agent_name"></a> [version\_control\_system\_placeholder\_agent\_name](#input\_version\_control\_system\_placeholder\_agent\_name)
+
+Description: The version control system placeholder agent name.
 
 Type: `string`
 

@@ -62,6 +62,10 @@ locals {
   environment_variables_placeholder = tolist(jsondecode(local.environment_variables_placeholder_final))
   environment_variables_placeholder_azure_devops = [
     {
+      name  = "AZP_AGENT_NAME"
+      value = local.version_control_system_placeholder_agent_name
+    },
+    {
       name  = "AZP_PLACEHOLDER"
       value = "true"
     }
@@ -95,8 +99,4 @@ locals {
       keda_auth_name            = "personalAccessToken"
     }
   ]
-}
-
-locals {
-  cron_expression = local.deploy_container_app ? "${time_offset.placeholder_job[0].minute} ${time_offset.placeholder_job[0].hour} ${time_offset.placeholder_job[0].day} ${time_offset.placeholder_job[0].month} *" : ""
 }
