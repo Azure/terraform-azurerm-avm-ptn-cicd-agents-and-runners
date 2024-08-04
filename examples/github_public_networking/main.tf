@@ -102,6 +102,7 @@ module "github_runners" {
   version_control_system_repository            = github_repository.this.name
   use_private_networking                       = false
   tags                                         = local.tags
+  depends_on                                   = [github_repository_file.this]
 }
 
 # Region helpers

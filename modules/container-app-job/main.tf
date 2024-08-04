@@ -47,13 +47,12 @@ resource "azapi_resource" "placeholder" {
         replicaRetryLimit = var.placeholder_replica_retry_limit
         replicaTimeout    = var.placeholder_replica_timeout
         registries        = local.container_registies
-        scheduleTriggerConfig = {
-          cronExpression         = var.placeholder_cron_expression
+        manualTriggerConfig = {
           parallelism            = 1
           replicaCompletionCount = 1
         }
         secrets     = local.secrets
-        triggerType = "Schedule"
+        triggerType = "Manual"
       }
       template = {
         containers = [local.container_placeholder]
@@ -68,5 +67,18 @@ resource "azapi_resource" "placeholder" {
   identity {
     type         = "UserAssigned"
     identity_ids = [var.user_assigned_managed_identity_id]
+  }
+}
+
+resource "azapi_resource_action" "placeholder_trigger" {
+  count = var.placeholder_job_creation_enabled ? 1 : 0
+
+  resource_id = azapi_resource.placeholder[0].id
+  type        = "Microsoft.App/jobs@2024-03-01"
+  action      = "start"
+  body        = {}
+
+  lifecycle {
+    replace_triggered_by = [azapi_resource.placeholder]
   }
 }
