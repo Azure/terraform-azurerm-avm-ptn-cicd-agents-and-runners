@@ -521,7 +521,7 @@ Description: The images to build and push to the container registry. This is onl
 
 - task\_name: The name of the task to create for building the image (e.g. `image-build-task`)
 - dockerfile\_path: The path to the Dockerfile to use for building the image (e.g. `dockerfile`)
-- context\_path: The path to the context of the Dockerfile in three sections `<repository-url>#<repository-commit>:<repository-folder-path>` (e.g. https://github.com/Azure/terraform-azurerm-avm-ptn-cicd-agents-and-runners#8ff4b85:container-images/azure-devops-agent)
+- context\_path: The path to the context of the Dockerfile in three sections `<repository-url>#<repository-commit>:<repository-folder-path>` (e.g. https://github.com/Azure/avm-container-images-cicd-agents-and-runners#bc4087f:azure-devops-agent)
 - context\_access\_token: The access token to use for accessing the context. Supply a PAT if targetting a private repository.
 - image\_names: A list of the names of the images to build (e.g. `["image-name:tag"]`)
 
@@ -585,7 +585,7 @@ Description: The default image repository commit to use if no custom image is pr
 
 Type: `string`
 
-Default: `"8051c83"`
+Default: `"bc4087f"`
 
 ### <a name="input_default_image_repository_folder_paths"></a> [default\_image\_repository\_folder\_paths](#input\_default\_image\_repository\_folder\_paths)
 
@@ -597,10 +597,10 @@ Default:
 
 ```json
 {
-  "azuredevops-container-app": "container-images/azure-devops-agent-aca",
-  "azuredevops-container-instance": "container-images/azure-devops-agent-aci",
-  "github-container-app": "container-images/github-runner-aca",
-  "github-container-instance": "container-images/github-runner-aci"
+  "azuredevops-container-app": "azure-devops-agent-aca",
+  "azuredevops-container-instance": "azure-devops-agent-aci",
+  "github-container-app": "github-runner-aca",
+  "github-container-instance": "github-runner-aci"
 }
 ```
 
@@ -610,7 +610,7 @@ Description: The default image repository URL to use if no custom image is provi
 
 Type: `string`
 
-Default: `"https://github.com/Azure/terraform-azurerm-avm-ptn-cicd-agents-and-runners"`
+Default: `"https://github.com/Azure/avm-container-images-cicd-agents-and-runners"`
 
 ### <a name="input_delays"></a> [delays](#input\_delays)
 
