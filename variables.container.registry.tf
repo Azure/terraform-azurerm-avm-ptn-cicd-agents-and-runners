@@ -50,7 +50,7 @@ The images to build and push to the container registry. This is only relevant if
 
 - task_name: The name of the task to create for building the image (e.g. `image-build-task`)
 - dockerfile_path: The path to the Dockerfile to use for building the image (e.g. `dockerfile`)
-- context_path: The path to the context of the Dockerfile in three sections `<repository-url>#<repository-commit>:<repository-folder-path>` (e.g. https://github.com/Azure/terraform-azurerm-avm-ptn-cicd-agents-and-runners#8ff4b85:container-images/azure-devops-agent)
+- context_path: The path to the context of the Dockerfile in three sections `<repository-url>#<repository-commit>:<repository-folder-path>` (e.g. https://github.com/Azure/avm-container-images-cicd-agents-and-runners#bc4087f:azure-devops-agent)
 - context_access_token: The access token to use for accessing the context. Supply a PAT if targetting a private repository.
 - image_names: A list of the names of the images to build (e.g. `["image-name:tag"]`)
 
@@ -60,23 +60,23 @@ DESCRIPTION
 variable "default_image_repository_url" {
   type        = string
   description = "The default image repository URL to use if no custom image is provided."
-  default     = "https://github.com/Azure/terraform-azurerm-avm-ptn-cicd-agents-and-runners"
+  default     = "https://github.com/Azure/avm-container-images-cicd-agents-and-runners"
 }
 
 variable "default_image_repository_commit" {
   type        = string
   description = "The default image repository commit to use if no custom image is provided."
-  default     = "8051c83"
+  default     = "bc4087f"
 }
 
 variable "default_image_repository_folder_paths" {
   type        = map(string)
   description = "The default image repository folder path to use if no custom image is provided."
   default = {
-    azuredevops-container-app      = "container-images/azure-devops-agent-aca"
-    github-container-app           = "container-images/github-runner-aca"
-    azuredevops-container-instance = "container-images/azure-devops-agent-aci"
-    github-container-instance      = "container-images/github-runner-aci"
+    azuredevops-container-app      = "azure-devops-agent-aca"
+    github-container-app           = "github-runner-aca"
+    azuredevops-container-instance = "azure-devops-agent-aci"
+    github-container-instance      = "github-runner-aci"
   }
 }
 
