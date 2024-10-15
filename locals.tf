@@ -1,5 +1,6 @@
 locals {
   container_app_environment_id                     = local.deploy_container_app && var.container_app_environment_creation_enabled ? azurerm_container_app_environment.this[0].id : var.container_app_environment_id
+  virtual_network_id                               = var.use_private_networking ? (var.virtual_network_creation_enabled ? module.virtual_network[0].resource_id : var.virtual_network_id) : ""
   container_app_subnet_id                          = var.use_private_networking && local.deploy_container_app ? (var.virtual_network_creation_enabled ? module.virtual_network[0].subnets["container_app"].resource_id : var.container_app_subnet_id) : ""
   container_instance_subnet_id                     = var.use_private_networking && local.deploy_container_instance ? (var.virtual_network_creation_enabled ? module.virtual_network[0].subnets["container_instance"].resource_id : var.container_instance_subnet_id) : ""
   container_registry_dns_zone_id                   = var.use_private_networking ? (var.container_registry_private_dns_zone_creation_enabled ? azurerm_private_dns_zone.container_registry[0].id : var.container_registry_dns_zone_id) : ""
@@ -30,7 +31,6 @@ locals {
   user_assigned_managed_identity_name             = var.user_assigned_managed_identity_name != null ? var.user_assigned_managed_identity_name : "uami-${var.postfix}"
   version_control_system_agent_name_prefix        = var.version_control_system_agent_name_prefix != null ? var.version_control_system_agent_name_prefix : (var.version_control_system_type == local.version_control_system_azure_devops ? "agent-${var.postfix}" : "runner-${var.postfix}")
   version_control_system_placeholder_agent_name   = var.version_control_system_placeholder_agent_name != null ? var.version_control_system_placeholder_agent_name : "placeholder-${var.postfix}"
-  virtual_network_id                              = var.use_private_networking ? (var.virtual_network_creation_enabled ? module.virtual_network[0].resource_id : var.virtual_network_id) : ""
   virtual_network_name                            = var.virtual_network_name != null ? var.virtual_network_name : "vnet-${var.postfix}"
 }
 
