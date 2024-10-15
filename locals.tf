@@ -1,6 +1,5 @@
 locals {
   container_app_environment_id                     = local.deploy_container_app && var.container_app_environment_creation_enabled ? azurerm_container_app_environment.this[0].id : var.container_app_environment_id
-  virtual_network_id                               = var.use_private_networking ? (var.virtual_network_creation_enabled ? module.virtual_network[0].resource_id : var.virtual_network_id) : ""
   container_app_subnet_id                          = var.use_private_networking && local.deploy_container_app ? (var.virtual_network_creation_enabled ? module.virtual_network[0].subnets["container_app"].resource_id : var.container_app_subnet_id) : ""
   container_instance_subnet_id                     = var.use_private_networking && local.deploy_container_instance ? (var.virtual_network_creation_enabled ? module.virtual_network[0].subnets["container_instance"].resource_id : var.container_instance_subnet_id) : ""
   container_registry_dns_zone_id                   = var.use_private_networking ? (var.container_registry_private_dns_zone_creation_enabled ? azurerm_private_dns_zone.container_registry[0].id : var.container_registry_dns_zone_id) : ""
@@ -13,6 +12,7 @@ locals {
   resource_group_name                              = var.resource_group_creation_enabled ? azurerm_resource_group.this[0].name : var.resource_group_name
   resource_group_name_container_app_infrastructure = var.container_app_infrastructure_resource_group_name == null ? "rg-${var.postfix}-container-apps-infrastructure" : var.container_app_infrastructure_resource_group_name
   user_assigned_managed_identity_principal_id      = var.user_assigned_managed_identity_creation_enabled ? module.user_assigned_managed_identity[0].principal_id : var.user_assigned_managed_identity_principal_id
+  virtual_network_id                               = var.use_private_networking ? (var.virtual_network_creation_enabled ? module.virtual_network[0].resource_id : var.virtual_network_id) : ""
 }
 
 locals {
