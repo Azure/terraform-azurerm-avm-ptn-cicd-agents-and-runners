@@ -7,19 +7,25 @@ variable "virtual_network_creation_enabled" {
 variable "virtual_network_name" {
   type        = string
   default     = null
-  description = "The name of the virtual network. Must be specified if `virtual_network_creation_enabled == false`."
+  description = "The name of the virtual network. Must be specified if `virtual_network_creation_enabled` is `true`."
+}
+
+variable "virtual_network_id" {
+  type        = string
+  default     = null
+  description = "The ID of the virtual network. Only required if `virtual_network_creation_enabled` is `false`."
 }
 
 variable "virtual_network_address_space" {
   type        = string
   default     = null
-  description = "The address space for the virtual network. Must be specified if `virtual_network_creation_enabled == false`."
+  description = "The address space for the virtual network. Must be specified if `virtual_network_creation_enabled` is `true`."
 }
 
 variable "container_app_subnet_name" {
   type        = string
   default     = null
-  description = "The name of the subnet. Must be specified if `virtual_network_creation_enabled == false`."
+  description = "The name of the subnet. Must be specified if `virtual_network_creation_enabled` is `true`."
 }
 
 variable "container_app_subnet_cidr_size" {

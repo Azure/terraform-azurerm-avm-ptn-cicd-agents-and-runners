@@ -327,7 +327,7 @@ Default: `null`
 
 ### <a name="input_container_app_subnet_name"></a> [container\_app\_subnet\_name](#input\_container\_app\_subnet\_name)
 
-Description: The name of the subnet. Must be specified if `virtual_network_creation_enabled == false`.
+Description: The name of the subnet. Must be specified if `virtual_network_creation_enabled` is `true`.
 
 Type: `string`
 
@@ -886,7 +886,7 @@ Default: `"repo"`
 
 ### <a name="input_virtual_network_address_space"></a> [virtual\_network\_address\_space](#input\_virtual\_network\_address\_space)
 
-Description: The address space for the virtual network. Must be specified if `virtual_network_creation_enabled == false`.
+Description: The address space for the virtual network. Must be specified if `virtual_network_creation_enabled` is `true`.
 
 Type: `string`
 
@@ -900,9 +900,17 @@ Type: `bool`
 
 Default: `true`
 
+### <a name="input_virtual_network_id"></a> [virtual\_network\_id](#input\_virtual\_network\_id)
+
+Description: The ID of the virtual network. Only required if `virtual_network_creation_enabled` is `false`.
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_virtual_network_name"></a> [virtual\_network\_name](#input\_virtual\_network\_name)
 
-Description: The name of the virtual network. Must be specified if `virtual_network_creation_enabled == false`.
+Description: The name of the virtual network. Must be specified if `virtual_network_creation_enabled` is `true`.
 
 Type: `string`
 

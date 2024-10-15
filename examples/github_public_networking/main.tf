@@ -24,6 +24,10 @@ locals {
 terraform {
   required_version = ">= 1.9"
   required_providers {
+    azapi = {
+      source  = "azure/azapi"
+      version = "~> 1.14"
+    }
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 3.113"
@@ -89,6 +93,25 @@ resource "github_repository_file" "this" {
   commit_email        = local.default_commit_email
   commit_message      = "Add ${local.action_file} [skip ci]"
   overwrite_on_create = true
+}
+
+locals {
+  resource_providers_to_register = {
+    dev_center = {
+      resource_provider = "Microsoft.App"
+    }
+  }
+}
+
+data "azurerm_client_config" "this" {}
+
+resource "azapi_resource_action" "resource_provider_registration" {
+  for_each = local.resource_providers_to_register
+
+  resource_id = "/subscriptions/${data.azurerm_client_config.this.subscription_id}"
+  type        = "Microsoft.Resources/subscriptions@2021-04-01"
+  action      = "providers/${each.value.resource_provider}/register"
+  method      = "POST"
 }
 
 # This is the module call

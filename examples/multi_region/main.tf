@@ -24,6 +24,10 @@ locals {
 terraform {
   required_version = ">= 1.9"
   required_providers {
+    azapi = {
+      source  = "azure/azapi"
+      version = "~> 1.14"
+    }
     azuredevops = {
       source  = "microsoft/azuredevops"
       version = "~> 1.1"
@@ -131,6 +135,25 @@ resource "azuredevops_pipeline_authorization" "this" {
 locals {
   primary_polling_interval_prime_number   = 17
   secondary_polling_interval_prime_number = 31
+}
+
+locals {
+  resource_providers_to_register = {
+    dev_center = {
+      resource_provider = "Microsoft.App"
+    }
+  }
+}
+
+data "azurerm_client_config" "this" {}
+
+resource "azapi_resource_action" "resource_provider_registration" {
+  for_each = local.resource_providers_to_register
+
+  resource_id = "/subscriptions/${data.azurerm_client_config.this.subscription_id}"
+  type        = "Microsoft.Resources/subscriptions@2021-04-01"
+  action      = "providers/${each.value.resource_provider}/register"
+  method      = "POST"
 }
 
 # This is the module call

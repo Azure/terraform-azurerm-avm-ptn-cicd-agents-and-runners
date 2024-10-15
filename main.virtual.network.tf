@@ -28,7 +28,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "container_registry" {
   name                  = "privatelink.azurecr.io"
   private_dns_zone_name = azurerm_private_dns_zone.container_registry[0].name
   resource_group_name   = local.resource_group_name
-  virtual_network_id    = module.virtual_network[0].resource_id
+  virtual_network_id    = local.virtual_network_id
   tags                  = var.tags
 }
 
