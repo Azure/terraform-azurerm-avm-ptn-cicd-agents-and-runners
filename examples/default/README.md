@@ -30,6 +30,10 @@ locals {
 terraform {
   required_version = ">= 1.9"
   required_providers {
+    azapi = {
+      source  = "azure/azapi"
+      version = "~> 1.14"
+    }
     azuredevops = {
       source  = "microsoft/azuredevops"
       version = "~> 1.1"
@@ -134,6 +138,25 @@ resource "azuredevops_pipeline_authorization" "this" {
   pipeline_id = azuredevops_build_definition.this.id
 }
 
+locals {
+  resource_providers_to_register = {
+    dev_center = {
+      resource_provider = "Microsoft.App"
+    }
+  }
+}
+
+data "azurerm_client_config" "this" {}
+
+resource "azapi_resource_action" "resource_provider_registration" {
+  for_each = local.resource_providers_to_register
+
+  resource_id = "/subscriptions/${data.azurerm_client_config.this.subscription_id}"
+  type        = "Microsoft.Resources/subscriptions@2021-04-01"
+  action      = "providers/${each.value.resource_provider}/register"
+  method      = "POST"
+}
+
 # This is the module call
 module "azure_devops_agents" {
   source                                       = "../.."
@@ -194,6 +217,8 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9)
 
+- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 1.14)
+
 - <a name="requirement_azuredevops"></a> [azuredevops](#requirement\_azuredevops) (~> 1.1)
 
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.113)
@@ -204,6 +229,7 @@ The following requirements are needed by this module:
 
 The following resources are used by this module:
 
+- [azapi_resource_action.resource_provider_registration](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource_action) (resource)
 - [azuredevops_agent_pool.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/agent_pool) (resource)
 - [azuredevops_agent_queue.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/agent_queue) (resource)
 - [azuredevops_build_definition.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/build_definition) (resource)
@@ -213,6 +239,7 @@ The following resources are used by this module:
 - [azuredevops_project.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/project) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
 - [random_string.name](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
+- [azurerm_client_config.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
