@@ -6,4 +6,5 @@ module "user_assigned_managed_identity" {
   location            = var.location
   name                = local.user_assigned_managed_identity_name
   resource_group_name = local.resource_group_name
+  tags                = var.tags
 }
