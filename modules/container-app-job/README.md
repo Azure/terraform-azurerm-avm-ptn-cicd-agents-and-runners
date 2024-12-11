@@ -6,7 +6,7 @@ This submodule deploys an Azure Container Apps Job for CI/CD agents and runners.
 ```hcl
 resource "azapi_resource" "job" {
   type = "Microsoft.App/jobs@2023-05-01"
-  body = jsonencode({
+  body = {
     properties = {
       environmentId = var.container_app_environment_id
       configuration = {
@@ -30,7 +30,7 @@ resource "azapi_resource" "job" {
         containers = [local.container_job]
       }
     }
-  })
+  }
   location  = var.location
   name      = local.job_name
   parent_id = var.resource_group_id
@@ -46,7 +46,7 @@ resource "azapi_resource" "placeholder" {
   count = var.placeholder_job_creation_enabled ? 1 : 0
 
   type = "Microsoft.App/jobs@2023-05-01"
-  body = jsonencode({
+  body = {
     properties = {
       environmentId = var.container_app_environment_id
       configuration = {
@@ -64,7 +64,7 @@ resource "azapi_resource" "placeholder" {
         containers = [local.container_placeholder]
       }
     }
-  })
+  }
   location  = var.location
   name      = local.placeholder_job_name
   parent_id = var.resource_group_id
@@ -97,13 +97,13 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9)
 
-- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 1.14)
+- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.0)
 
 ## Providers
 
 The following providers are used by this module:
 
-- <a name="provider_azapi"></a> [azapi](#provider\_azapi) (~> 1.14)
+- <a name="provider_azapi"></a> [azapi](#provider\_azapi) (~> 2.0)
 
 ## Resources
 

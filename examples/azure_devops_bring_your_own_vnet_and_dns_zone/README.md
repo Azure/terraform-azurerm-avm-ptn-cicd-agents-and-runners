@@ -1,7 +1,7 @@
 <!-- BEGIN_TF_DOCS -->
-# Azure DevOps example with private networking and bring your own virtual network
+# Azure DevOps example with private networking and bring your own virtual network and DNS zone
 
-This example deploys Azure DevOps Agents to Azure Container Apps and Azure Container Instance using private networking and bring your own virtual network.
+This example deploys Azure DevOps Agents to Azure Container Apps and Azure Container Instance using private networking and bring your own virtual network and DNS zone.
 
 ```hcl
 variable "azure_devops_organization_name" {
@@ -206,25 +206,47 @@ module "virtual_network" {
   subnets             = local.subnets
 }
 
+resource "azurerm_private_dns_zone" "container_registry" {
+  name                = "privatelink.azurecr.io"
+  resource_group_name = azurerm_resource_group.this.name
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "container_registry" {
+  name                  = "privatelink.azurecr.io"
+  private_dns_zone_name = azurerm_private_dns_zone.container_registry.name
+  resource_group_name   = azurerm_resource_group.this.name
+  virtual_network_id    = module.virtual_network.resource_id
+  tags                  = local.tags
+}
+
 # This is the module call
 module "azure_devops_agents" {
-  source                                        = "../.."
-  postfix                                       = random_string.name.result
-  location                                      = local.selected_region
-  compute_types                                 = ["azure_container_app", "azure_container_instance"]
-  version_control_system_type                   = "azuredevops"
-  version_control_system_personal_access_token  = var.azure_devops_agents_personal_access_token
-  version_control_system_organization           = local.azure_devops_organization_url
-  version_control_system_pool_name              = azuredevops_agent_pool.this.name
-  virtual_network_id                            = module.virtual_network.resource_id
-  virtual_network_creation_enabled              = false
-  resource_group_creation_enabled               = false
-  resource_group_name                           = azurerm_resource_group.this.name
-  container_app_subnet_id                       = module.virtual_network.subnets["container_app"].resource_id
-  container_instance_subnet_id                  = module.virtual_network.subnets["container_instance"].resource_id
-  container_registry_private_endpoint_subnet_id = module.virtual_network.subnets["container_registry_private_endpoint"].resource_id
-  tags                                          = local.tags
-  depends_on                                    = [azuredevops_pipeline_authorization.this]
+  source   = "../.."
+  postfix  = random_string.name.result
+  location = local.selected_region
+
+  compute_types = ["azure_container_app", "azure_container_instance"]
+
+  version_control_system_type                  = "azuredevops"
+  version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
+  version_control_system_organization          = local.azure_devops_organization_url
+  version_control_system_pool_name             = azuredevops_agent_pool.this.name
+
+  virtual_network_creation_enabled = false
+  virtual_network_id               = module.virtual_network.resource_id
+
+  resource_group_creation_enabled = false
+  resource_group_name             = azurerm_resource_group.this.name
+
+  container_app_subnet_id      = module.virtual_network.subnets["container_app"].resource_id
+  container_instance_subnet_id = module.virtual_network.subnets["container_instance"].resource_id
+
+  container_registry_private_dns_zone_creation_enabled = false
+  container_registry_dns_zone_id                       = azurerm_private_dns_zone.container_registry.id
+  container_registry_private_endpoint_subnet_id        = module.virtual_network.subnets["container_registry_private_endpoint"].resource_id
+
+  tags       = local.tags
+  depends_on = [azuredevops_pipeline_authorization.this, azurerm_private_dns_zone_virtual_network_link.container_registry]
 }
 
 output "container_app_environment_resource_id" {
@@ -273,7 +295,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9)
 
-- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 1.14)
+- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.0)
 
 - <a name="requirement_azuredevops"></a> [azuredevops](#requirement\_azuredevops) (~> 1.1)
 
@@ -293,6 +315,8 @@ The following resources are used by this module:
 - [azuredevops_git_repository_file.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/git_repository_file) (resource)
 - [azuredevops_pipeline_authorization.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/pipeline_authorization) (resource)
 - [azuredevops_project.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/project) (resource)
+- [azurerm_private_dns_zone.container_registry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone) (resource)
+- [azurerm_private_dns_zone_virtual_network_link.container_registry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone_virtual_network_link) (resource)
 - [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
 - [random_string.name](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
@@ -365,13 +389,13 @@ Version: >= 0.3.0
 
 Source: Azure/avm-utl-regions/azurerm
 
-Version: 0.1.0
+Version: 0.3.0
 
 ### <a name="module_virtual_network"></a> [virtual\_network](#module\_virtual\_network)
 
 Source: Azure/avm-res-network-virtualnetwork/azurerm
 
-Version: 0.4.2
+Version: 0.7.1
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection

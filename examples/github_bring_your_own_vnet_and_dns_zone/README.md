@@ -1,22 +1,22 @@
 <!-- BEGIN_TF_DOCS -->
-# Azure DevOps example with private networking and bring your own virtual network
+# GitHub example with private networking and bring your own virtual network  and DNS zone
 
-This example deploys Azure DevOps Agents to Azure Container Apps and Azure Container Instance using private networking and bring your own virtual network.
+This example deploys GitHub Runners to Azure Container Apps and Azure Container Instance using private networking and bring your own virtual network and DNS zone.
 
 ```hcl
-variable "azure_devops_organization_name" {
+variable "github_organization_name" {
   type        = string
-  description = "Azure DevOps Organisation Name"
+  description = "GitHub Organisation Name"
 }
 
-variable "azure_devops_personal_access_token" {
+variable "github_personal_access_token" {
   type        = string
-  description = "The personal access token used for agent authentication to Azure DevOps."
+  description = "The personal access token used for authentication to GitHub."
   sensitive   = true
 }
 
-variable "azure_devops_agents_personal_access_token" {
-  description = "Personal access token for Azure DevOps self-hosted agents (the token requires the 'Agent Pools - Read & Manage' scope and should have the maximum expiry)."
+variable "github_runners_personal_access_token" {
+  description = "Personal access token for GitHub self-hosted runners (the token requires the 'repo' scope and should not expire)."
   type        = string
   sensitive   = true
 }
@@ -34,13 +34,13 @@ terraform {
       source  = "azure/azapi"
       version = "~> 2.0"
     }
-    azuredevops = {
-      source  = "microsoft/azuredevops"
-      version = "~> 1.1"
-    }
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 3.113"
+    }
+    github = {
+      source  = "integrations/github"
+      version = "~> 5.36"
     }
     random = {
       source  = "hashicorp/random"
@@ -53,13 +53,9 @@ provider "azurerm" {
   features {}
 }
 
-locals {
-  azure_devops_organization_url = "https://dev.azure.com/${var.azure_devops_organization_name}"
-}
-
-provider "azuredevops" {
-  personal_access_token = var.azure_devops_personal_access_token
-  org_service_url       = local.azure_devops_organization_url
+provider "github" {
+  token = var.github_personal_access_token
+  owner = var.github_organization_name
 }
 
 resource "random_string" "name" {
@@ -73,69 +69,35 @@ module "naming" {
   source  = "Azure/naming/azurerm"
   version = ">= 0.3.0"
 }
-
-resource "azuredevops_project" "this" {
-  name = random_string.name.result
-}
-
-resource "azuredevops_agent_pool" "this" {
-  name           = random_string.name.result
-  auto_provision = false
-  auto_update    = true
-}
-
-resource "azuredevops_agent_queue" "this" {
-  project_id    = azuredevops_project.this.id
-  agent_pool_id = azuredevops_agent_pool.this.id
+data "github_organization" "alz" {
+  name = var.github_organization_name
 }
 
 locals {
-  default_branch  = "refs/heads/main"
-  pipeline_file   = "pipeline.yml"
-  repository_name = "example-repo"
+  action_file          = "action.yml"
+  default_commit_email = "demo@microsoft.com"
+  free_plan            = "free"
 }
 
-resource "azuredevops_git_repository" "this" {
-  project_id     = azuredevops_project.this.id
-  name           = local.repository_name
-  default_branch = local.default_branch
-  initialization {
-    init_type = "Clean"
-  }
+resource "github_repository" "this" {
+  name                 = random_string.name.result
+  description          = random_string.name.result
+  auto_init            = true
+  visibility           = data.github_organization.alz.plan == local.free_plan ? "public" : "private"
+  allow_update_branch  = true
+  allow_merge_commit   = false
+  allow_rebase_merge   = false
+  vulnerability_alerts = true
 }
 
-resource "azuredevops_git_repository_file" "this" {
-  repository_id = azuredevops_git_repository.this.id
-  file          = local.pipeline_file
-  content = templatefile("${path.module}/${local.pipeline_file}", {
-    agent_pool_name = azuredevops_agent_pool.this.name
-  })
-  branch              = local.default_branch
-  commit_message      = "[skip ci]"
+resource "github_repository_file" "this" {
+  repository          = github_repository.this.name
+  file                = ".github/workflows/${local.action_file}"
+  content             = file("${path.module}/${local.action_file}")
+  commit_author       = local.default_commit_email
+  commit_email        = local.default_commit_email
+  commit_message      = "Add ${local.action_file} [skip ci]"
   overwrite_on_create = true
-}
-
-resource "azuredevops_build_definition" "this" {
-  project_id = azuredevops_project.this.id
-  name       = "Example Build Definition"
-
-  ci_trigger {
-    use_yaml = true
-  }
-
-  repository {
-    repo_type   = "TfsGit"
-    repo_id     = azuredevops_git_repository.this.id
-    branch_name = azuredevops_git_repository.this.default_branch
-    yml_path    = local.pipeline_file
-  }
-}
-
-resource "azuredevops_pipeline_authorization" "this" {
-  project_id  = azuredevops_project.this.id
-  resource_id = azuredevops_agent_queue.this.id
-  type        = "queue"
-  pipeline_id = azuredevops_build_definition.this.id
 }
 
 locals {
@@ -206,25 +168,47 @@ module "virtual_network" {
   subnets             = local.subnets
 }
 
+resource "azurerm_private_dns_zone" "container_registry" {
+  name                = "privatelink.azurecr.io"
+  resource_group_name = azurerm_resource_group.this.name
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "container_registry" {
+  name                  = "privatelink.azurecr.io"
+  private_dns_zone_name = azurerm_private_dns_zone.container_registry.name
+  resource_group_name   = azurerm_resource_group.this.name
+  virtual_network_id    = module.virtual_network.resource_id
+  tags                  = local.tags
+}
+
 # This is the module call
 module "azure_devops_agents" {
-  source                                        = "../.."
-  postfix                                       = random_string.name.result
-  location                                      = local.selected_region
-  compute_types                                 = ["azure_container_app", "azure_container_instance"]
-  version_control_system_type                   = "azuredevops"
-  version_control_system_personal_access_token  = var.azure_devops_agents_personal_access_token
-  version_control_system_organization           = local.azure_devops_organization_url
-  version_control_system_pool_name              = azuredevops_agent_pool.this.name
-  virtual_network_id                            = module.virtual_network.resource_id
-  virtual_network_creation_enabled              = false
-  resource_group_creation_enabled               = false
-  resource_group_name                           = azurerm_resource_group.this.name
-  container_app_subnet_id                       = module.virtual_network.subnets["container_app"].resource_id
-  container_instance_subnet_id                  = module.virtual_network.subnets["container_instance"].resource_id
-  container_registry_private_endpoint_subnet_id = module.virtual_network.subnets["container_registry_private_endpoint"].resource_id
-  tags                                          = local.tags
-  depends_on                                    = [azuredevops_pipeline_authorization.this]
+  source   = "../.."
+  postfix  = random_string.name.result
+  location = local.selected_region
+
+  compute_types = ["azure_container_app", "azure_container_instance"]
+
+  version_control_system_type                  = "github"
+  version_control_system_personal_access_token = var.github_runners_personal_access_token
+  version_control_system_organization          = var.github_organization_name
+  version_control_system_repository            = github_repository.this.name
+
+  virtual_network_creation_enabled = false
+  virtual_network_id               = module.virtual_network.resource_id
+
+  resource_group_creation_enabled = false
+  resource_group_name             = azurerm_resource_group.this.name
+
+  container_app_subnet_id      = module.virtual_network.subnets["container_app"].resource_id
+  container_instance_subnet_id = module.virtual_network.subnets["container_instance"].resource_id
+
+  container_registry_private_dns_zone_creation_enabled = false
+  container_registry_dns_zone_id                       = azurerm_private_dns_zone.container_registry.id
+  container_registry_private_endpoint_subnet_id        = module.virtual_network.subnets["container_registry_private_endpoint"].resource_id
+
+  tags       = local.tags
+  depends_on = [azurerm_private_dns_zone_virtual_network_link.container_registry]
 }
 
 output "container_app_environment_resource_id" {
@@ -262,7 +246,7 @@ locals {
     "northcentralusstage", "westus2", "southeastasia", "canadacentral", "westeurope", "northeurope", "eastus", "eastus2", "eastasia", "australiaeast", "germanywestcentral", "japaneast", "uksouth", "westus", "centralus", "northcentralus", "southcentralus", "koreacentral", "brazilsouth", "westus3", "francecentral", "southafricanorth", "norwayeast", "switzerlandnorth", "uaenorth", "canadaeast", "westcentralus", "ukwest", "centralindia", "italynorth", "polandcentral", "southindia"
   ]
   regions         = [for region in module.regions.regions : region.name if !contains(local.excluded_regions, region.name) && contains(local.included_regions, region.name)]
-  selected_region = local.regions[random_integer.region_index.result]
+  selected_region = "canadacentral"
 }
 ```
 
@@ -273,11 +257,11 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9)
 
-- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 1.14)
-
-- <a name="requirement_azuredevops"></a> [azuredevops](#requirement\_azuredevops) (~> 1.1)
+- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.0)
 
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.113)
+
+- <a name="requirement_github"></a> [github](#requirement\_github) (~> 5.36)
 
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
@@ -286,38 +270,36 @@ The following requirements are needed by this module:
 The following resources are used by this module:
 
 - [azapi_resource_action.resource_provider_registration](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource_action) (resource)
-- [azuredevops_agent_pool.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/agent_pool) (resource)
-- [azuredevops_agent_queue.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/agent_queue) (resource)
-- [azuredevops_build_definition.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/build_definition) (resource)
-- [azuredevops_git_repository.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/git_repository) (resource)
-- [azuredevops_git_repository_file.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/git_repository_file) (resource)
-- [azuredevops_pipeline_authorization.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/pipeline_authorization) (resource)
-- [azuredevops_project.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/project) (resource)
+- [azurerm_private_dns_zone.container_registry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone) (resource)
+- [azurerm_private_dns_zone_virtual_network_link.container_registry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone_virtual_network_link) (resource)
 - [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
+- [github_repository.this](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository) (resource)
+- [github_repository_file.this](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository_file) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
 - [random_string.name](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
 - [azurerm_client_config.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
+- [github_organization.alz](https://registry.terraform.io/providers/integrations/github/latest/docs/data-sources/organization) (data source)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_azure_devops_agents_personal_access_token"></a> [azure\_devops\_agents\_personal\_access\_token](#input\_azure\_devops\_agents\_personal\_access\_token)
+### <a name="input_github_organization_name"></a> [github\_organization\_name](#input\_github\_organization\_name)
 
-Description: Personal access token for Azure DevOps self-hosted agents (the token requires the 'Agent Pools - Read & Manage' scope and should have the maximum expiry).
-
-Type: `string`
-
-### <a name="input_azure_devops_organization_name"></a> [azure\_devops\_organization\_name](#input\_azure\_devops\_organization\_name)
-
-Description: Azure DevOps Organisation Name
+Description: GitHub Organisation Name
 
 Type: `string`
 
-### <a name="input_azure_devops_personal_access_token"></a> [azure\_devops\_personal\_access\_token](#input\_azure\_devops\_personal\_access\_token)
+### <a name="input_github_personal_access_token"></a> [github\_personal\_access\_token](#input\_github\_personal\_access\_token)
 
-Description: The personal access token used for agent authentication to Azure DevOps.
+Description: The personal access token used for authentication to GitHub.
+
+Type: `string`
+
+### <a name="input_github_runners_personal_access_token"></a> [github\_runners\_personal\_access\_token](#input\_github\_runners\_personal\_access\_token)
+
+Description: Personal access token for GitHub self-hosted runners (the token requires the 'repo' scope and should not expire).
 
 Type: `string`
 
@@ -365,13 +347,13 @@ Version: >= 0.3.0
 
 Source: Azure/avm-utl-regions/azurerm
 
-Version: 0.1.0
+Version: 0.3.0
 
 ### <a name="module_virtual_network"></a> [virtual\_network](#module\_virtual\_network)
 
 Source: Azure/avm-res-network-virtualnetwork/azurerm
 
-Version: 0.4.2
+Version: 0.7.1
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection
