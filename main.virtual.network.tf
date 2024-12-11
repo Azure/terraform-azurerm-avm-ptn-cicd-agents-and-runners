@@ -1,7 +1,7 @@
 module "virtual_network" {
   count               = var.use_private_networking && var.virtual_network_creation_enabled ? 1 : 0
   source              = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version             = "0.4.0"
+  version             = "0.7.1"
   name                = local.virtual_network_name
   resource_group_name = local.resource_group_name
   location            = var.location
