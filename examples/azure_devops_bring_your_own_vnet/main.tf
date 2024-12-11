@@ -151,18 +151,74 @@ resource "azapi_resource_action" "resource_provider_registration" {
   method      = "POST"
 }
 
+locals {
+  subnets = {
+    container_registry_private_endpoint = {
+      name           = "subnet-container-registry-private-endpoint"
+      address_prefix = "10.0.0.0/29"
+    }
+    container_app = {
+      name           = "subnet-container-app"
+      address_prefix = "10.0.1.0/27"
+      delegation = [
+        {
+          name = "Microsoft.App/environments"
+          service_delegation = {
+            name = "Microsoft.App/environments"
+          }
+        }
+      ]
+    }
+    container_instance = {
+      name           = "subnet-container-instance"
+      address_prefix = "10.0.2.0/28"
+      delegation = [
+        {
+          name = "Microsoft.ContainerInstance/containerGroups"
+          service_delegation = {
+            name = "Microsoft.ContainerInstance/containerGroups"
+          }
+        }
+      ]
+    }
+  }
+  virtual_network_address_space = "10.0.0.0/16"
+}
+
+resource "azurerm_resource_group" "this" {
+  location = local.selected_region
+  name     = "rg-${random_string.name.result}"
+}
+
+module "virtual_network" {
+  source              = "Azure/avm-res-network-virtualnetwork/azurerm"
+  version             = "0.7.1"
+  name                = "vnet-${random_string.name.result}"
+  resource_group_name = azurerm_resource_group.this.name
+  location            = local.selected_region
+  address_space       = [local.virtual_network_address_space]
+  subnets             = local.subnets
+}
+
 # This is the module call
 module "azure_devops_agents" {
-  source                                       = "../.."
-  postfix                                      = random_string.name.result
-  location                                     = local.selected_region
-  version_control_system_type                  = "azuredevops"
-  version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
-  version_control_system_organization          = local.azure_devops_organization_url
-  version_control_system_pool_name             = azuredevops_agent_pool.this.name
-  use_private_networking                       = false
-  tags                                         = local.tags
-  depends_on                                   = [azuredevops_pipeline_authorization.this]
+  source                                        = "../.."
+  postfix                                       = random_string.name.result
+  location                                      = local.selected_region
+  compute_types                                 = ["azure_container_app", "azure_container_instance"]
+  version_control_system_type                   = "azuredevops"
+  version_control_system_personal_access_token  = var.azure_devops_agents_personal_access_token
+  version_control_system_organization           = local.azure_devops_organization_url
+  version_control_system_pool_name              = azuredevops_agent_pool.this.name
+  virtual_network_id                            = module.virtual_network.resource_id
+  virtual_network_creation_enabled              = false
+  resource_group_creation_enabled               = false
+  resource_group_name                           = azurerm_resource_group.this.name
+  container_app_subnet_id                       = module.virtual_network.subnets["container_app"].resource_id
+  container_instance_subnet_id                  = module.virtual_network.subnets["container_instance"].resource_id
+  container_registry_private_endpoint_subnet_id = module.virtual_network.subnets["container_registry_private_endpoint"].resource_id
+  tags                                          = local.tags
+  depends_on                                    = [azuredevops_pipeline_authorization.this]
 }
 
 output "container_app_environment_resource_id" {
@@ -197,7 +253,7 @@ locals {
     "westeurope" # Capacity issues
   ]
   included_regions = [
-    "northcentralusstage", "westus2", "southeastasia", "swedencentral", "canadacentral", "westeurope", "northeurope", "eastus", "eastus2", "eastasia", "australiaeast", "germanywestcentral", "japaneast", "uksouth", "westus", "centralus", "northcentralus", "southcentralus", "koreacentral", "brazilsouth", "westus3", "francecentral", "southafricanorth", "norwayeast", "switzerlandnorth", "uaenorth", "canadaeast", "westcentralus", "ukwest", "centralindia", "italynorth", "polandcentral", "southindia"
+    "northcentralusstage", "westus2", "southeastasia", "canadacentral", "westeurope", "northeurope", "eastus", "eastus2", "eastasia", "australiaeast", "germanywestcentral", "japaneast", "uksouth", "westus", "centralus", "northcentralus", "southcentralus", "koreacentral", "brazilsouth", "westus3", "francecentral", "southafricanorth", "norwayeast", "switzerlandnorth", "uaenorth", "canadaeast", "westcentralus", "ukwest", "centralindia", "italynorth", "polandcentral", "southindia"
   ]
   regions         = [for region in module.regions.regions : region.name if !contains(local.excluded_regions, region.name) && contains(local.included_regions, region.name)]
   selected_region = local.regions[random_integer.region_index.result]

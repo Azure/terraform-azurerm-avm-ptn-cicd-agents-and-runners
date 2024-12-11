@@ -1,16 +1,16 @@
-variable "azure_devops_organization_name" {
+variable "github_organization_name" {
   type        = string
-  description = "Azure DevOps Organisation Name"
+  description = "GitHub Organisation Name"
 }
 
-variable "azure_devops_personal_access_token" {
+variable "github_personal_access_token" {
   type        = string
-  description = "The personal access token used for agent authentication to Azure DevOps."
+  description = "The personal access token used for authentication to GitHub."
   sensitive   = true
 }
 
-variable "azure_devops_agents_personal_access_token" {
-  description = "Personal access token for Azure DevOps self-hosted agents (the token requires the 'Agent Pools - Read & Manage' scope and should have the maximum expiry)."
+variable "github_runners_personal_access_token" {
+  description = "Personal access token for GitHub self-hosted runners (the token requires the 'repo' scope and should not expire)."
   type        = string
   sensitive   = true
 }
@@ -26,15 +26,15 @@ terraform {
   required_providers {
     azapi = {
       source  = "azure/azapi"
-      version = "~> 1.14"
-    }
-    azuredevops = {
-      source  = "microsoft/azuredevops"
-      version = "~> 1.1"
+      version = "~> 2.0"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 3.113"
+    }
+    github = {
+      source  = "integrations/github"
+      version = "~> 5.36"
     }
     random = {
       source  = "hashicorp/random"
@@ -47,13 +47,9 @@ provider "azurerm" {
   features {}
 }
 
-locals {
-  azure_devops_organization_url = "https://dev.azure.com/${var.azure_devops_organization_name}"
-}
-
-provider "azuredevops" {
-  personal_access_token = var.azure_devops_personal_access_token
-  org_service_url       = local.azure_devops_organization_url
+provider "github" {
+  token = var.github_personal_access_token
+  owner = var.github_organization_name
 }
 
 resource "random_string" "name" {
@@ -67,69 +63,35 @@ module "naming" {
   source  = "Azure/naming/azurerm"
   version = ">= 0.3.0"
 }
-
-resource "azuredevops_project" "this" {
-  name = random_string.name.result
-}
-
-resource "azuredevops_agent_pool" "this" {
-  name           = random_string.name.result
-  auto_provision = false
-  auto_update    = true
-}
-
-resource "azuredevops_agent_queue" "this" {
-  project_id    = azuredevops_project.this.id
-  agent_pool_id = azuredevops_agent_pool.this.id
+data "github_organization" "alz" {
+  name = var.github_organization_name
 }
 
 locals {
-  default_branch  = "refs/heads/main"
-  pipeline_file   = "pipeline.yml"
-  repository_name = "example-repo"
+  action_file          = "action.yml"
+  default_commit_email = "demo@microsoft.com"
+  free_plan            = "free"
 }
 
-resource "azuredevops_git_repository" "this" {
-  project_id     = azuredevops_project.this.id
-  name           = local.repository_name
-  default_branch = local.default_branch
-  initialization {
-    init_type = "Clean"
-  }
+resource "github_repository" "this" {
+  name                 = random_string.name.result
+  description          = random_string.name.result
+  auto_init            = true
+  visibility           = data.github_organization.alz.plan == local.free_plan ? "public" : "private"
+  allow_update_branch  = true
+  allow_merge_commit   = false
+  allow_rebase_merge   = false
+  vulnerability_alerts = true
 }
 
-resource "azuredevops_git_repository_file" "this" {
-  repository_id = azuredevops_git_repository.this.id
-  file          = local.pipeline_file
-  content = templatefile("${path.module}/${local.pipeline_file}", {
-    agent_pool_name = azuredevops_agent_pool.this.name
-  })
-  branch              = local.default_branch
-  commit_message      = "[skip ci]"
+resource "github_repository_file" "this" {
+  repository          = github_repository.this.name
+  file                = ".github/workflows/${local.action_file}"
+  content             = file("${path.module}/${local.action_file}")
+  commit_author       = local.default_commit_email
+  commit_email        = local.default_commit_email
+  commit_message      = "Add ${local.action_file} [skip ci]"
   overwrite_on_create = true
-}
-
-resource "azuredevops_build_definition" "this" {
-  project_id = azuredevops_project.this.id
-  name       = "Example Build Definition"
-
-  ci_trigger {
-    use_yaml = true
-  }
-
-  repository {
-    repo_type   = "TfsGit"
-    repo_id     = azuredevops_git_repository.this.id
-    branch_name = azuredevops_git_repository.this.default_branch
-    yml_path    = local.pipeline_file
-  }
-}
-
-resource "azuredevops_pipeline_authorization" "this" {
-  project_id  = azuredevops_project.this.id
-  resource_id = azuredevops_agent_queue.this.id
-  type        = "queue"
-  pipeline_id = azuredevops_build_definition.this.id
 }
 
 locals {
@@ -192,7 +154,7 @@ resource "azurerm_resource_group" "this" {
 
 module "virtual_network" {
   source              = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version             = "0.4.2"
+  version             = "0.7.1"
   name                = "vnet-${random_string.name.result}"
   resource_group_name = azurerm_resource_group.this.name
   location            = local.selected_region
@@ -200,25 +162,47 @@ module "virtual_network" {
   subnets             = local.subnets
 }
 
+resource "azurerm_private_dns_zone" "container_registry" {
+  name                = "privatelink.azurecr.io"
+  resource_group_name = azurerm_resource_group.this.name
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "container_registry" {
+  name                  = "privatelink.azurecr.io"
+  private_dns_zone_name = azurerm_private_dns_zone.container_registry.name
+  resource_group_name   = azurerm_resource_group.this.name
+  virtual_network_id    = module.virtual_network.resource_id
+  tags                  = local.tags
+}
+
 # This is the module call
 module "azure_devops_agents" {
   source                                        = "../.."
   postfix                                       = random_string.name.result
   location                                      = local.selected_region
+
   compute_types                                 = ["azure_container_app", "azure_container_instance"]
-  version_control_system_type                   = "azuredevops"
-  version_control_system_personal_access_token  = var.azure_devops_agents_personal_access_token
-  version_control_system_organization           = local.azure_devops_organization_url
-  version_control_system_pool_name              = azuredevops_agent_pool.this.name
-  virtual_network_id                            = module.virtual_network.resource_id
+
+  version_control_system_type                  = "github"
+  version_control_system_personal_access_token = var.github_runners_personal_access_token
+  version_control_system_organization          = var.github_organization_name
+  version_control_system_repository            = github_repository.this.name
+
   virtual_network_creation_enabled              = false
+  virtual_network_id                            = module.virtual_network.resource_id
+  
   resource_group_creation_enabled               = false
   resource_group_name                           = azurerm_resource_group.this.name
+
   container_app_subnet_id                       = module.virtual_network.subnets["container_app"].resource_id
   container_instance_subnet_id                  = module.virtual_network.subnets["container_instance"].resource_id
+
+  container_registry_private_dns_zone_creation_enabled = false
+  container_registry_dns_zone_id = azurerm_private_dns_zone.container_registry.id
   container_registry_private_endpoint_subnet_id = module.virtual_network.subnets["container_registry_private_endpoint"].resource_id
+
   tags                                          = local.tags
-  depends_on                                    = [azuredevops_pipeline_authorization.this]
+  depends_on                                    = [azurerm_private_dns_zone_virtual_network_link.container_registry]
 }
 
 output "container_app_environment_resource_id" {
@@ -256,5 +240,5 @@ locals {
     "northcentralusstage", "westus2", "southeastasia", "canadacentral", "westeurope", "northeurope", "eastus", "eastus2", "eastasia", "australiaeast", "germanywestcentral", "japaneast", "uksouth", "westus", "centralus", "northcentralus", "southcentralus", "koreacentral", "brazilsouth", "westus3", "francecentral", "southafricanorth", "norwayeast", "switzerlandnorth", "uaenorth", "canadaeast", "westcentralus", "ukwest", "centralindia", "italynorth", "polandcentral", "southindia"
   ]
   regions         = [for region in module.regions.regions : region.name if !contains(local.excluded_regions, region.name) && contains(local.included_regions, region.name)]
-  selected_region = local.regions[random_integer.region_index.result]
+  selected_region = "canadacentral"
 }
