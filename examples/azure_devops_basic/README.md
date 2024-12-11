@@ -1,7 +1,7 @@
 <!-- BEGIN_TF_DOCS -->
-# Azure DevOps minimal example with public networking
+# Azure DevOps minimal example with private networking
 
-This example deploys Azure DevOps Agents to Azure Container Apps using the minimal set of required variables with public networking.
+This example deploys Azure DevOps Agents to Azure Container Apps using the minimal set of required variables using private networking.
 
 ```hcl
 variable "azure_devops_organization_name" {
@@ -166,7 +166,7 @@ module "azure_devops_agents" {
   version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
   version_control_system_organization          = local.azure_devops_organization_url
   version_control_system_pool_name             = azuredevops_agent_pool.this.name
-  use_private_networking                       = false
+  virtual_network_address_space                = "10.0.0.0/16"
   tags                                         = local.tags
   depends_on                                   = [azuredevops_pipeline_authorization.this]
 }

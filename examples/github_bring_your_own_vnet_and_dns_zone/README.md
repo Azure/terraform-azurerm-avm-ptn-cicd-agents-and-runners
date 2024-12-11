@@ -1,7 +1,7 @@
 <!-- BEGIN_TF_DOCS -->
-# GitHub minimal example with public networking
+# GitHub example with private networking and bring your own virtual network  and DNS zone
 
-This example deploys GitHub Runners to Azure Container Apps using the minimal set of required variables using public networking.
+This example deploys GitHub Runners to Azure Container Apps and Azure Container Instance using private networking and bring your own virtual network and DNS zone.
 
 ```hcl
 variable "github_organization_name" {
@@ -69,7 +69,6 @@ module "naming" {
   source  = "Azure/naming/azurerm"
   version = ">= 0.3.0"
 }
-
 data "github_organization" "alz" {
   name = var.github_organization_name
 }
@@ -120,18 +119,112 @@ resource "azapi_resource_action" "resource_provider_registration" {
   method      = "POST"
 }
 
+locals {
+  subnets = {
+    container_registry_private_endpoint = {
+      name           = "subnet-container-registry-private-endpoint"
+      address_prefix = "10.0.0.0/29"
+    }
+    container_app = {
+      name           = "subnet-container-app"
+      address_prefix = "10.0.1.0/27"
+      delegation = [
+        {
+          name = "Microsoft.App/environments"
+          service_delegation = {
+            name = "Microsoft.App/environments"
+          }
+        }
+      ]
+    }
+    container_instance = {
+      name           = "subnet-container-instance"
+      address_prefix = "10.0.2.0/28"
+      delegation = [
+        {
+          name = "Microsoft.ContainerInstance/containerGroups"
+          service_delegation = {
+            name = "Microsoft.ContainerInstance/containerGroups"
+          }
+        }
+      ]
+    }
+  }
+  virtual_network_address_space = "10.0.0.0/16"
+}
+
+resource "azurerm_resource_group" "this" {
+  location = local.selected_region
+  name     = "rg-${random_string.name.result}"
+}
+
+module "virtual_network" {
+  source              = "Azure/avm-res-network-virtualnetwork/azurerm"
+  version             = "0.7.1"
+  name                = "vnet-${random_string.name.result}"
+  resource_group_name = azurerm_resource_group.this.name
+  location            = local.selected_region
+  address_space       = [local.virtual_network_address_space]
+  subnets             = local.subnets
+}
+
+resource "azurerm_private_dns_zone" "container_registry" {
+  name                = "privatelink.azurecr.io"
+  resource_group_name = azurerm_resource_group.this.name
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "container_registry" {
+  name                  = "privatelink.azurecr.io"
+  private_dns_zone_name = azurerm_private_dns_zone.container_registry.name
+  resource_group_name   = azurerm_resource_group.this.name
+  virtual_network_id    = module.virtual_network.resource_id
+  tags                  = local.tags
+}
+
 # This is the module call
-module "github_runners" {
-  source                                       = "../.."
-  postfix                                      = random_string.name.result
-  location                                     = local.selected_region
+module "azure_devops_agents" {
+  source   = "../.."
+  postfix  = random_string.name.result
+  location = local.selected_region
+
+  compute_types = ["azure_container_app", "azure_container_instance"]
+
   version_control_system_type                  = "github"
   version_control_system_personal_access_token = var.github_runners_personal_access_token
   version_control_system_organization          = var.github_organization_name
   version_control_system_repository            = github_repository.this.name
-  use_private_networking                       = false
-  tags                                         = local.tags
-  depends_on                                   = [github_repository_file.this]
+
+  virtual_network_creation_enabled = false
+  virtual_network_id               = module.virtual_network.resource_id
+
+  resource_group_creation_enabled = false
+  resource_group_name             = azurerm_resource_group.this.name
+
+  container_app_subnet_id      = module.virtual_network.subnets["container_app"].resource_id
+  container_instance_subnet_id = module.virtual_network.subnets["container_instance"].resource_id
+
+  container_registry_private_dns_zone_creation_enabled = false
+  container_registry_dns_zone_id                       = azurerm_private_dns_zone.container_registry.id
+  container_registry_private_endpoint_subnet_id        = module.virtual_network.subnets["container_registry_private_endpoint"].resource_id
+
+  tags       = local.tags
+  depends_on = [azurerm_private_dns_zone_virtual_network_link.container_registry]
+}
+
+output "container_app_environment_resource_id" {
+  value = module.azure_devops_agents.resource_id
+}
+
+output "container_app_environment_name" {
+  value = module.azure_devops_agents.name
+}
+
+output "container_app_job_resource_id" {
+  value = module.azure_devops_agents.job_resource_id
+}
+
+output "container_app_job_name" {
+  value = module.azure_devops_agents.job_name
 }
 
 # Region helpers
@@ -150,10 +243,10 @@ locals {
     "westeurope" # Capacity issues
   ]
   included_regions = [
-    "northcentralusstage", "westus2", "southeastasia", "swedencentral", "canadacentral", "westeurope", "northeurope", "eastus", "eastus2", "eastasia", "australiaeast", "germanywestcentral", "japaneast", "uksouth", "westus", "centralus", "northcentralus", "southcentralus", "koreacentral", "brazilsouth", "westus3", "francecentral", "southafricanorth", "norwayeast", "switzerlandnorth", "uaenorth", "canadaeast", "westcentralus", "ukwest", "centralindia", "italynorth", "polandcentral", "southindia"
+    "northcentralusstage", "westus2", "southeastasia", "canadacentral", "westeurope", "northeurope", "eastus", "eastus2", "eastasia", "australiaeast", "germanywestcentral", "japaneast", "uksouth", "westus", "centralus", "northcentralus", "southcentralus", "koreacentral", "brazilsouth", "westus3", "francecentral", "southafricanorth", "norwayeast", "switzerlandnorth", "uaenorth", "canadaeast", "westcentralus", "ukwest", "centralindia", "italynorth", "polandcentral", "southindia"
   ]
   regions         = [for region in module.regions.regions : region.name if !contains(local.excluded_regions, region.name) && contains(local.included_regions, region.name)]
-  selected_region = local.regions[random_integer.region_index.result]
+  selected_region = "canadacentral"
 }
 ```
 
@@ -177,6 +270,9 @@ The following requirements are needed by this module:
 The following resources are used by this module:
 
 - [azapi_resource_action.resource_provider_registration](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource_action) (resource)
+- [azurerm_private_dns_zone.container_registry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone) (resource)
+- [azurerm_private_dns_zone_virtual_network_link.container_registry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone_virtual_network_link) (resource)
+- [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
 - [github_repository.this](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository) (resource)
 - [github_repository_file.this](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository_file) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
@@ -213,13 +309,29 @@ No optional inputs.
 
 ## Outputs
 
-No outputs.
+The following outputs are exported:
+
+### <a name="output_container_app_environment_name"></a> [container\_app\_environment\_name](#output\_container\_app\_environment\_name)
+
+Description: n/a
+
+### <a name="output_container_app_environment_resource_id"></a> [container\_app\_environment\_resource\_id](#output\_container\_app\_environment\_resource\_id)
+
+Description: n/a
+
+### <a name="output_container_app_job_name"></a> [container\_app\_job\_name](#output\_container\_app\_job\_name)
+
+Description: n/a
+
+### <a name="output_container_app_job_resource_id"></a> [container\_app\_job\_resource\_id](#output\_container\_app\_job\_resource\_id)
+
+Description: n/a
 
 ## Modules
 
 The following Modules are called:
 
-### <a name="module_github_runners"></a> [github\_runners](#module\_github\_runners)
+### <a name="module_azure_devops_agents"></a> [azure\_devops\_agents](#module\_azure\_devops\_agents)
 
 Source: ../..
 
@@ -236,6 +348,12 @@ Version: >= 0.3.0
 Source: Azure/avm-utl-regions/azurerm
 
 Version: 0.3.0
+
+### <a name="module_virtual_network"></a> [virtual\_network](#module\_virtual\_network)
+
+Source: Azure/avm-res-network-virtualnetwork/azurerm
+
+Version: 0.7.1
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection

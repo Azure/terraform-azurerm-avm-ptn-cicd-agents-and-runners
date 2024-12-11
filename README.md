@@ -1026,7 +1026,7 @@ Version: 0.3.1
 
 Source: Azure/avm-res-network-virtualnetwork/azurerm
 
-Version: 0.4.0
+Version: 0.7.1
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection

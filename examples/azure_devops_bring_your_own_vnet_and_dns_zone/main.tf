@@ -26,7 +26,7 @@ terraform {
   required_providers {
     azapi = {
       source  = "azure/azapi"
-      version = "~> 1.14"
+      version = "~> 2.0"
     }
     azuredevops = {
       source  = "microsoft/azuredevops"
@@ -192,7 +192,7 @@ resource "azurerm_resource_group" "this" {
 
 module "virtual_network" {
   source              = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version             = "0.4.2"
+  version             = "0.7.1"
   name                = "vnet-${random_string.name.result}"
   resource_group_name = azurerm_resource_group.this.name
   location            = local.selected_region
@@ -200,25 +200,47 @@ module "virtual_network" {
   subnets             = local.subnets
 }
 
+resource "azurerm_private_dns_zone" "container_registry" {
+  name                = "privatelink.azurecr.io"
+  resource_group_name = azurerm_resource_group.this.name
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "container_registry" {
+  name                  = "privatelink.azurecr.io"
+  private_dns_zone_name = azurerm_private_dns_zone.container_registry.name
+  resource_group_name   = azurerm_resource_group.this.name
+  virtual_network_id    = module.virtual_network.resource_id
+  tags                  = local.tags
+}
+
 # This is the module call
 module "azure_devops_agents" {
-  source                                        = "../.."
-  postfix                                       = random_string.name.result
-  location                                      = local.selected_region
-  compute_types                                 = ["azure_container_app", "azure_container_instance"]
-  version_control_system_type                   = "azuredevops"
-  version_control_system_personal_access_token  = var.azure_devops_agents_personal_access_token
-  version_control_system_organization           = local.azure_devops_organization_url
-  version_control_system_pool_name              = azuredevops_agent_pool.this.name
-  virtual_network_id                            = module.virtual_network.resource_id
-  virtual_network_creation_enabled              = false
-  resource_group_creation_enabled               = false
-  resource_group_name                           = azurerm_resource_group.this.name
-  container_app_subnet_id                       = module.virtual_network.subnets["container_app"].resource_id
-  container_instance_subnet_id                  = module.virtual_network.subnets["container_instance"].resource_id
-  container_registry_private_endpoint_subnet_id = module.virtual_network.subnets["container_registry_private_endpoint"].resource_id
-  tags                                          = local.tags
-  depends_on                                    = [azuredevops_pipeline_authorization.this]
+  source   = "../.."
+  postfix  = random_string.name.result
+  location = local.selected_region
+
+  compute_types = ["azure_container_app", "azure_container_instance"]
+
+  version_control_system_type                  = "azuredevops"
+  version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
+  version_control_system_organization          = local.azure_devops_organization_url
+  version_control_system_pool_name             = azuredevops_agent_pool.this.name
+
+  virtual_network_creation_enabled = false
+  virtual_network_id               = module.virtual_network.resource_id
+
+  resource_group_creation_enabled = false
+  resource_group_name             = azurerm_resource_group.this.name
+
+  container_app_subnet_id      = module.virtual_network.subnets["container_app"].resource_id
+  container_instance_subnet_id = module.virtual_network.subnets["container_instance"].resource_id
+
+  container_registry_private_dns_zone_creation_enabled = false
+  container_registry_dns_zone_id                       = azurerm_private_dns_zone.container_registry.id
+  container_registry_private_endpoint_subnet_id        = module.virtual_network.subnets["container_registry_private_endpoint"].resource_id
+
+  tags       = local.tags
+  depends_on = [azuredevops_pipeline_authorization.this, azurerm_private_dns_zone_virtual_network_link.container_registry]
 }
 
 output "container_app_environment_resource_id" {
@@ -240,7 +262,7 @@ output "container_app_job_name" {
 # Region helpers
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.1.0"
+  version = "0.3.0"
 }
 
 resource "random_integer" "region_index" {

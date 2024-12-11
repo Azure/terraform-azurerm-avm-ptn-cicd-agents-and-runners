@@ -1,6 +1,6 @@
 resource "azapi_resource" "job" {
   type = "Microsoft.App/jobs@2023-05-01"
-  body = jsonencode({
+  body = {
     properties = {
       environmentId = var.container_app_environment_id
       configuration = {
@@ -24,7 +24,7 @@ resource "azapi_resource" "job" {
         containers = [local.container_job]
       }
     }
-  })
+  }
   location  = var.location
   name      = local.job_name
   parent_id = var.resource_group_id
@@ -40,7 +40,7 @@ resource "azapi_resource" "placeholder" {
   count = var.placeholder_job_creation_enabled ? 1 : 0
 
   type = "Microsoft.App/jobs@2023-05-01"
-  body = jsonencode({
+  body = {
     properties = {
       environmentId = var.container_app_environment_id
       configuration = {
@@ -58,7 +58,7 @@ resource "azapi_resource" "placeholder" {
         containers = [local.container_placeholder]
       }
     }
-  })
+  }
   location  = var.location
   name      = local.placeholder_job_name
   parent_id = var.resource_group_id
