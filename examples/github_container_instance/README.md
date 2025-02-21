@@ -32,7 +32,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.113"
+      version = "~> 4.20"
     }
     github = {
       source  = "integrations/github"
@@ -142,7 +142,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.113)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.20)
 
 - <a name="requirement_github"></a> [github](#requirement\_github) (~> 5.36)
 

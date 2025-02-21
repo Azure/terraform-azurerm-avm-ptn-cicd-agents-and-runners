@@ -40,7 +40,7 @@ terraform {
     }
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.113"
+      version = "~> 4.20"
     }
     random = {
       source  = "hashicorp/random"
@@ -277,7 +277,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azuredevops"></a> [azuredevops](#requirement\_azuredevops) (~> 1.1)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.113)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.20)
 
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
