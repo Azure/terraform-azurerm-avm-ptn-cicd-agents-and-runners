@@ -451,6 +451,14 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_container_instance_use_availability_zones"></a> [container\_instance\_use\_availability\_zones](#input\_container\_instance\_use\_availability\_zones)
+
+Description: Whether to use availability zones for the container instance
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_container_registry_creation_enabled"></a> [container\_registry\_creation\_enabled](#input\_container\_registry\_creation\_enabled)
 
 Description: Whether or not to create a container registry.

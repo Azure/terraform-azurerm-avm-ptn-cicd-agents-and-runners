@@ -14,7 +14,7 @@ module "container_instance" {
   sensitive_environment_variables   = local.container_instance_sensitive_environment_variables_map
   use_private_networking            = var.use_private_networking
   subnet_id                         = local.container_instance_subnet_id
-  availability_zones                = each.value.availability_zones
+  availability_zones                = var.container_instance_use_availability_zones ? each.value.availability_zones : null
   user_assigned_managed_identity_id = local.user_assigned_managed_identity_id
   container_registry_login_server   = local.registry_login_server
   container_registry_username       = var.custom_container_registry_username

@@ -1,8 +1,8 @@
 locals {
   container_instances = {
-    for instance in range(1, var.container_instance_count + 1) : instance => {
+    for instance in range(0, var.container_instance_count) : instance => {
       name               = "${local.container_instance_name_prefix}-${instance}"
-      availability_zones = [instance % 3]
+      availability_zones = [(instance % 3) + 1]
     }
   }
 }

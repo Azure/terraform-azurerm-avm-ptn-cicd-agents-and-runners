@@ -36,7 +36,7 @@ variable "user_assigned_managed_identity_id" {
 
 variable "availability_zones" {
   type        = list(string)
-  default     = [1]
+  default     = null
   description = "List of availability zones"
 }
 
