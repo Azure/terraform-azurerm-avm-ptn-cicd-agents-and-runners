@@ -131,13 +131,7 @@ Description: List of availability zones
 
 Type: `list(string)`
 
-Default:
-
-```json
-[
-  1
-]
-```
+Default: `null`
 
 ### <a name="input_container_cpu"></a> [container\_cpu](#input\_container\_cpu)
 
