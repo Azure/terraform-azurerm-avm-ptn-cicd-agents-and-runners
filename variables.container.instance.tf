@@ -58,3 +58,9 @@ variable "container_instance_container_memory_limit" {
   description = "The memory limit value for the container instance"
   default     = 4
 }
+
+variable "container_instance_use_availability_zones" {
+  type        = bool
+  description = "Whether to use availability zones for the container instance"
+  default     = true
+}
