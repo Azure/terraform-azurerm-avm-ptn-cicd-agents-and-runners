@@ -1,10 +1,9 @@
 module "container_registry" {
   source                        = "Azure/avm-res-containerregistry-registry/azurerm"
-  version                       = "0.2.0"
+  version                       = "0.4.0"
   name                          = var.name
   resource_group_name           = var.resource_group_name
   location                      = var.location
-  sku                           = var.use_private_networking ? "Premium" : "Basic"
   public_network_access_enabled = !var.use_private_networking
   zone_redundancy_enabled       = var.use_private_networking
   network_rule_bypass_option    = var.use_private_networking ? "AzureServices" : "None"

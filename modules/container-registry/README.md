@@ -6,11 +6,10 @@ This submodule deploys an Azure Container Registry and image build tasks for CI/
 ```hcl
 module "container_registry" {
   source                        = "Azure/avm-res-containerregistry-registry/azurerm"
-  version                       = "0.2.0"
+  version                       = "0.4.0"
   name                          = var.name
   resource_group_name           = var.resource_group_name
   location                      = var.location
-  sku                           = var.use_private_networking ? "Premium" : "Basic"
   public_network_access_enabled = !var.use_private_networking
   zone_redundancy_enabled       = var.use_private_networking
   network_rule_bypass_option    = var.use_private_networking ? "AzureServices" : "None"
@@ -85,13 +84,13 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.113)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.20)
 
 ## Providers
 
 The following providers are used by this module:
 
-- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (~> 3.113)
+- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (~> 4.20)
 
 ## Resources
 
@@ -219,7 +218,7 @@ The following Modules are called:
 
 Source: Azure/avm-res-containerregistry-registry/azurerm
 
-Version: 0.2.0
+Version: 0.4.0
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection
