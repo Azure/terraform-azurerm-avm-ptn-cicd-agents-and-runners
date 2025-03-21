@@ -118,6 +118,12 @@ variable "public_ip_name" {
   description = "The name of the public IP."
 }
 
+variable "public_ip_zones" {
+  type        = set(string)
+  default     = ["1", "2", "3"]
+  description = "The availability zones for the public IP. Only required if `public_ip_creation_enabled` is `true`."
+}
+
 variable "public_ip_id" {
   type        = string
   default     = null

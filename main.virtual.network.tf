@@ -40,6 +40,7 @@ resource "azurerm_public_ip" "this" {
   name                = local.public_ip_name
   resource_group_name = local.resource_group_name
   sku                 = "Standard"
+  zones               = var.public_ip_zones
   tags                = var.tags
 }
 
