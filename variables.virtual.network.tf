@@ -103,7 +103,7 @@ variable "container_registry_private_dns_zone_creation_enabled" {
 variable "container_registry_dns_zone_id" {
   type        = string
   default     = null
-  description = "The ID of the private DNS zone to create for the container registry. Only required if `container_registry_private_dns_zone_creation_enabled` is `false`."
+  description = "The ID of the private DNS zone to create for the container registry. Only required if `container_registry_private_dns_zone_creation_enabled` is `false` and you are not using policy to update the DNS zone."
 }
 
 variable "public_ip_creation_enabled" {

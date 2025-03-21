@@ -10,7 +10,7 @@ module "container_registry" {
   enable_telemetry              = var.enable_telemetry
   private_endpoints = var.use_private_networking ? {
     container_registry = {
-      private_dns_zone_resource_ids = [var.private_dns_zone_id]
+      private_dns_zone_resource_ids = var.private_dns_zone_id == null || var.private_dns_zone_id == "" ? [] : [var.private_dns_zone_id]
       subnet_resource_id            = var.subnet_id
     }
   } : null
