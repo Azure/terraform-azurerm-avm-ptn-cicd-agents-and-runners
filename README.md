@@ -756,6 +756,22 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_public_ip_zones"></a> [public\_ip\_zones](#input\_public\_ip\_zones)
+
+Description: The availability zones for the public IP. Only required if `public_ip_creation_enabled` is `true`.
+
+Type: `set(string)`
+
+Default:
+
+```json
+[
+  "1",
+  "2",
+  "3"
+]
+```
+
 ### <a name="input_resource_group_creation_enabled"></a> [resource\_group\_creation\_enabled](#input\_resource\_group\_creation\_enabled)
 
 Description: Whether or not to create a resource group.
