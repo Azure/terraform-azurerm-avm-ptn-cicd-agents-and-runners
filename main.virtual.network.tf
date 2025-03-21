@@ -41,6 +41,7 @@ resource "azurerm_public_ip" "this" {
   resource_group_name = local.resource_group_name
   sku                 = "Standard"
   tags                = var.tags
+  zones               = var.public_ip_zones
 }
 
 resource "azurerm_nat_gateway" "this" {

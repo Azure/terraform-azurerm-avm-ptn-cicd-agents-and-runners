@@ -469,7 +469,7 @@ Default: `true`
 
 ### <a name="input_container_registry_dns_zone_id"></a> [container\_registry\_dns\_zone\_id](#input\_container\_registry\_dns\_zone\_id)
 
-Description: The ID of the private DNS zone to create for the container registry. Only required if `container_registry_private_dns_zone_creation_enabled` is `false`.
+Description: The ID of the private DNS zone to create for the container registry. Only required if `container_registry_private_dns_zone_creation_enabled` is `false` and you are not using policy to update the DNS zone.
 
 Type: `string`
 
@@ -755,6 +755,22 @@ Description: The name of the public IP.
 Type: `string`
 
 Default: `null`
+
+### <a name="input_public_ip_zones"></a> [public\_ip\_zones](#input\_public\_ip\_zones)
+
+Description: The availability zones for the public IP. Only required if `public_ip_creation_enabled` is `true`.
+
+Type: `set(string)`
+
+Default:
+
+```json
+[
+  "1",
+  "2",
+  "3"
+]
+```
 
 ### <a name="input_resource_group_creation_enabled"></a> [resource\_group\_creation\_enabled](#input\_resource\_group\_creation\_enabled)
 

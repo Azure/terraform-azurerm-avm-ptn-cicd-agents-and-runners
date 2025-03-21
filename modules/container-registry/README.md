@@ -16,7 +16,7 @@ module "container_registry" {
   enable_telemetry              = var.enable_telemetry
   private_endpoints = var.use_private_networking ? {
     container_registry = {
-      private_dns_zone_resource_ids = [var.private_dns_zone_id]
+      private_dns_zone_resource_ids = var.private_dns_zone_id == null || var.private_dns_zone_id == "" ? [] : [var.private_dns_zone_id]
       subnet_resource_id            = var.subnet_id
     }
   } : null
@@ -172,7 +172,7 @@ Default: `{}`
 
 ### <a name="input_private_dns_zone_id"></a> [private\_dns\_zone\_id](#input\_private\_dns\_zone\_id)
 
-Description: The id of the private DNS zone to create for the container registry. Only required if `container_registry_private_dns_zone_creation_enabled` is `false`.
+Description: The id of the private DNS zone to create for the container registry. Only required if `container_registry_private_dns_zone_creation_enabled` is `false` and you are not using policy to update the DNS zone.
 
 Type: `string`
 
