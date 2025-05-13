@@ -147,12 +147,15 @@ module "azure_devops_agents_primary" {
   source = "../.."
 
   location                                     = local.selected_region_primary
+  source = "../.."
+
+  location                                     = local.selected_region_primary
   postfix                                      = "${random_string.name.result}1"
   version_control_system_organization          = local.azure_devops_organization_url
-  version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
   version_control_system_type                  = "azuredevops"
   container_app_polling_interval_seconds       = local.primary_polling_interval_prime_number
   tags                                         = local.tags
+  version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
   version_control_system_pool_name             = azuredevops_agent_pool.this.name
   virtual_network_address_space                = "10.0.0.0/16"
 
@@ -163,12 +166,15 @@ module "azure_devops_agents_secondary" {
   source = "../.."
 
   location                                     = local.selected_region_secondary
+  source = "../.."
+
+  location                                     = local.selected_region_secondary
   postfix                                      = "${random_string.name.result}2"
   version_control_system_organization          = local.azure_devops_organization_url
-  version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
   version_control_system_type                  = "azuredevops"
   container_app_polling_interval_seconds       = local.secondary_polling_interval_prime_number
   tags                                         = local.tags
+  version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
   version_control_system_pool_name             = azuredevops_agent_pool.this.name
   virtual_network_address_space                = "10.1.0.0/16"
 

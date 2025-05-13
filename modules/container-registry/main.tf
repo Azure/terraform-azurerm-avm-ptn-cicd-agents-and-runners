@@ -7,6 +7,14 @@ module "container_registry" {
   resource_group_name        = var.resource_group_name
   enable_telemetry           = var.enable_telemetry
   network_rule_bypass_option = var.use_private_networking ? "AzureServices" : "None"
+  source  = "Azure/avm-res-containerregistry-registry/azurerm"
+  version = "0.4.0"
+
+  location                   = var.location
+  name                       = var.name
+  resource_group_name        = var.resource_group_name
+  enable_telemetry           = var.enable_telemetry
+  network_rule_bypass_option = var.use_private_networking ? "AzureServices" : "None"
   private_endpoints = var.use_private_networking ? {
     container_registry = {
       private_dns_zone_resource_ids = var.private_dns_zone_id == null || var.private_dns_zone_id == "" ? [] : [var.private_dns_zone_id]

@@ -1,25 +1,8 @@
 
 
-variable "subscription_id" {
-  type        = string
-  description = "The subscription ID to use for the deployment."
-}
 
-variable "github_application_key" {
-  type        = string
-  description = "The application key used for the GitHub App authentication method. Import key file as environment variable: $env:TF_VAR_github_application_key = Get-Content path\to\\[private_key_name].pem -Raw"
-  sensitive   = true
-}
 
-variable "github_application_id" {
-  type        = string
-  description = "The application ID used for the GitHub App authentication method."
-}
 
-variable "github_installation_id" {
-  type        = string
-  description = "The Installation ID used for the GitHub App authentication method."
-}
 
 locals {
   tags = {
@@ -123,20 +106,20 @@ resource "azapi_resource_action" "resource_provider_registration" {
 
 # This is the module call
 module "github_runners" {
-  source                                        = "../.."
-  postfix                                       = random_string.name.result
+  source = "../.."
+
   location                                      = local.selected_region
-  version_control_system_type                   = "github"
-  version_control_system_authentication_method  = "github_app"
-  version_control_system_github_application_key = var.github_application_key
-  version_control_system_github_application_id  = var.github_application_id
-  version_control_system_github_installation_id = var.github_installation_id
+  postfix                                       = random_string.name.result
   version_control_system_organization           = var.github_organization_name
+  version_control_system_type                   = "github"
+  tags                                          = local.tags
+  version_control_system_authentication_method  = "github_app"
+  version_control_system_github_application_id  = var.github_application_id
+  version_control_system_github_application_key = var.github_application_key
+  version_control_system_github_installation_id = var.github_installation_id
   version_control_system_repository             = github_repository.this.name
   virtual_network_address_space                 = "10.0.0.0/16"
 
-
-  tags       = local.tags
   depends_on = [github_repository_file.this]
 }
 

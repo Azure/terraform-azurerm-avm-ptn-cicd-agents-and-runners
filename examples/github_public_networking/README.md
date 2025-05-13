@@ -6,26 +6,9 @@ This example deploys GitHub Runners to Azure Container Apps using the minimal se
 ```hcl
 
 
-variable "subscription_id" {
-  type        = string
-  description = "The subscription ID to use for the deployment."
-}
 
-variable "github_application_key" {
-  type        = string
-  description = "The application key used for the GitHub App authentication method. Import key file as environment variable: $env:TF_VAR_github_application_key = Get-Content path\to\\[private_key_name].pem -Raw"
-  sensitive   = true
-}
 
-variable "github_application_id" {
-  type        = string
-  description = "The application ID used for the GitHub App authentication method."
-}
 
-variable "github_installation_id" {
-  type        = string
-  description = "The Installation ID used for the GitHub App authentication method."
-}
 
 locals {
   tags = {
@@ -129,19 +112,21 @@ resource "azapi_resource_action" "resource_provider_registration" {
 
 # This is the module call
 module "github_runners" {
-  source                                        = "../.."
-  postfix                                       = random_string.name.result
+  source = "../.."
+
   location                                      = local.selected_region
-  version_control_system_type                   = "github"
-  version_control_system_authentication_method  = "github_app"
-  version_control_system_github_application_key = var.github_application_key
-  version_control_system_github_application_id  = var.github_application_id
-  version_control_system_github_installation_id = var.github_installation_id
+  postfix                                       = random_string.name.result
   version_control_system_organization           = var.github_organization_name
-  version_control_system_repository             = github_repository.this.name
-  use_private_networking                        = false
+  version_control_system_type                   = "github"
   tags                                          = local.tags
-  depends_on                                    = [github_repository_file.this]
+  use_private_networking                        = false
+  version_control_system_authentication_method  = "github_app"
+  version_control_system_github_application_id  = var.github_application_id
+  version_control_system_github_application_key = var.github_application_key
+  version_control_system_github_installation_id = var.github_installation_id
+  version_control_system_repository             = github_repository.this.name
+
+  depends_on = [github_repository_file.this]
 }
 
 # Region helpers
@@ -199,6 +184,24 @@ The following resources are used by this module:
 
 The following input variables are required:
 
+### <a name="input_github_application_id"></a> [github\_application\_id](#input\_github\_application\_id)
+
+Description: The application ID used for the GitHub App authentication method.
+
+Type: `string`
+
+### <a name="input_github_application_key"></a> [github\_application\_key](#input\_github\_application\_key)
+
+Description: The application key used for the GitHub App authentication method. Import key file as environment variable: $env:TF\_VAR\_github\_application\_key = Get-Content path	o\[private\_key\_name].pem -Raw
+
+Type: `string`
+
+### <a name="input_github_installation_id"></a> [github\_installation\_id](#input\_github\_installation\_id)
+
+Description: The Installation ID used for the GitHub App authentication method.
+
+Type: `string`
+
 ### <a name="input_github_organization_name"></a> [github\_organization\_name](#input\_github\_organization\_name)
 
 Description: GitHub Organisation Name
@@ -208,23 +211,6 @@ Type: `string`
 ### <a name="input_github_personal_access_token"></a> [github\_personal\_access\_token](#input\_github\_personal\_access\_token)
 
 Description: The personal access token used for authentication to GitHub.
-
-Type: `string`
-
-### <a name="input_github_application_key"></a> [github\_application\_key](#input\_github\_application\_key)
-
-Description: The application key used for the GitHub App authentication method.
-Type: `string`
-
-### <a name="input_github_application_id"></a> [github\_application\_id](#input\_github\_application\_id)
-
-Description: The application ID used for the GitHub App authentication method.
-
-Type: `string`
-
-### <a name="input_github_installation_id"></a> [github\_installation\_id](#input\_github\_installation\_id)
-
-Description: The Installation ID used for the GitHub App authentication method.
 
 Type: `string`
 
