@@ -105,7 +105,25 @@ Type: `string`
 
 ### <a name="input_version_control_system_personal_access_token"></a> [version\_control\_system\_personal\_access\_token](#input\_version\_control\_system\_personal\_access\_token)
 
-Description: The personal access token for the version control system.
+Description: The personal access token for the version control system. Only required if `version_control_system_authentication_method` is set to `pat`.
+
+Type: `string`
+
+### <a name="input_version_control_system_github_application_key"></a> [version\_control\_system\_github\_application\_key](#input\_version\_control\_system\_github\_application\_key)
+
+Description: The GitHub application key to use for authentication. Only required if `version_control_system_authentication_method` is set to `github_app`.
+
+Type: `string`
+
+### <a name="input_version_control_system_github_application_id"></a> [version\_control\_system\_github\_application\_id](#input\_version\_control\_system\_github\_application\_id)
+
+Description: The GitHub application ID to use for authentication. Only required if `version_control_system_authentication_method` is set to `github_app`.
+
+Type: `string`
+
+### <a name="input_version_control_system_github_installation_id"></a> [version\_control\_system\_github\_installation\_id](#input\_version\_control\_system\_github\_installation\_id)
+
+Description: The GitHub installation ID to use for authentication. Only required if `version_control_system_authentication_method` is set to `github_app`.
 
 Type: `string`
 
@@ -128,10 +146,16 @@ Type: `set(string)`
 Default:
 
 ```json
-[
-  "azure_container_app"
-]
+["azure_container_app"]
 ```
+
+### <a name="input_version_control_system_authentication_method"></a> [version\_control\_system\_authentication\_method](#input\_version\_control\_system\_authentication\_method)
+
+Description: The authentication method to use for the version control system. Allowed values are `pat` or `github_app`. `pat` is supported for both azuredevops and github while `github_app` can only be used for github.
+
+Type: `string`
+
+Default: `"pat"`
 
 ### <a name="input_container_app_container_cpu"></a> [container\_app\_container\_cpu](#input\_container\_app\_container\_cpu)
 
