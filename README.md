@@ -884,7 +884,7 @@ Description: The application key for the GitHub App authentication method.
 
 Type: `string`
 
-Default: `""`
+Default: `null`
 
 ### <a name="input_version_control_system_github_installation_id"></a> [version\_control\_system\_github\_installation\_id](#input\_version\_control\_system\_github\_installation\_id)
 
@@ -900,7 +900,7 @@ Description: The personal access token for the version control system.
 
 Type: `string`
 
-Default: `""`
+Default: `null`
 
 ### <a name="input_version_control_system_placeholder_agent_name"></a> [version\_control\_system\_placeholder\_agent\_name](#input\_version\_control\_system\_placeholder\_agent\_name)
 
