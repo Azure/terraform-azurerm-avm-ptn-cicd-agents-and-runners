@@ -996,6 +996,10 @@ Description: The private dns zone id of the container registry.
 
 Description: The resource id of the container app environment.
 
+### <a name="output_user_assigned_managed_identity_client_id"></a> [user\_assigned\_managed\_identity\_client\_id](#output\_user\_assigned\_managed\_identity\_client\_id)
+
+Description: The client id of the user assigned managed identity.
+
 ### <a name="output_user_assigned_managed_identity_id"></a> [user\_assigned\_managed\_identity\_id](#output\_user\_assigned\_managed\_identity\_id)
 
 Description: The resource id of the user assigned managed identity.

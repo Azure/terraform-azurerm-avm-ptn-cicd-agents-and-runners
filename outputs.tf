@@ -63,6 +63,11 @@ output "resource_id" {
   value       = local.deploy_container_app ? local.container_app_environment_id : null
 }
 
+output "user_assigned_managed_identity_client_id" {
+  description = "The client id of the user assigned managed identity."
+  value       = var.user_assigned_managed_identity_creation_enabled ? module.user_assigned_managed_identity[0].client_id : null
+}
+
 output "user_assigned_managed_identity_id" {
   description = "The resource id of the user assigned managed identity."
   value       = var.user_assigned_managed_identity_creation_enabled ? module.user_assigned_managed_identity[0].resource_id : var.user_assigned_managed_identity_id
