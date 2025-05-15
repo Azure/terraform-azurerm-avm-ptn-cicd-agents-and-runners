@@ -67,7 +67,7 @@ variable "version_control_system_github_application_key" {
 
   validation {
     condition = (
-      var.version_control_system_authentication_method == "github_app" ? try(var.version_control_system_github_application_key, "") != "" : true
+      var.version_control_system_authentication_method == "github_app" ? var.version_control_system_github_application_key != "" && var.version_control_system_github_application_key != null : true
     )
     error_message = "Variable version_control_system_github_application_key must be defined when version_control_system_authentication_method is github_app."
   }
@@ -94,7 +94,7 @@ variable "version_control_system_personal_access_token" {
 
   validation {
     condition = (
-      var.version_control_system_authentication_method == "pat" ? try(var.version_control_system_personal_access_token, "") != "" : true
+      var.version_control_system_authentication_method == "pat" ? var.version_control_system_personal_access_token != "" && var.version_control_system_personal_access_token != null : true
     )
     error_message = "Variable version_control_system_personal_access_token must be defined when version_control_system_authentication_method is pat."
   }
