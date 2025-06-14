@@ -101,13 +101,15 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9)
 
+- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.0)
+
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.20)
 
 ## Providers
 
 The following providers are used by this module:
 
-- <a name="provider_azapi"></a> [azapi](#provider\_azapi)
+- <a name="provider_azapi"></a> [azapi](#provider\_azapi) (~> 2.0)
 
 - <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (~> 4.20)
 
@@ -115,7 +117,7 @@ The following providers are used by this module:
 
 The following resources are used by this module:
 
-- [azapi_update_resource.network_rule_bypass_allowed_for_tasks](https://registry.terraform.io/providers/hashicorp/azapi/latest/docs/resources/update_resource) (resource)
+- [azapi_update_resource.network_rule_bypass_allowed_for_tasks](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/update_resource) (resource)
 - [azurerm_container_registry_task.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_registry_task) (resource)
 - [azurerm_container_registry_task_schedule_run_now.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_registry_task_schedule_run_now) (resource)
 - [azurerm_role_assignment.container_registry_pull_for_container_instance](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
