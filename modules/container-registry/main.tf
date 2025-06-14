@@ -21,7 +21,7 @@ module "container_registry" {
 resource "azapi_update_resource" "network_rule_bypass_allowed_for_tasks" {
   count = var.use_private_networking ? 1 : 0
 
-  resource_id = azurerm_container_registry.alz[0].id
+  resource_id = module.container_registry.resource_id
   type        = "Microsoft.ContainerRegistry/registries@2025-05-01-preview"
   body = {
     properties = {
@@ -29,7 +29,6 @@ resource "azapi_update_resource" "network_rule_bypass_allowed_for_tasks" {
     }
   }
 }
-
 
 resource "azurerm_container_registry_task" "this" {
   for_each = var.images
