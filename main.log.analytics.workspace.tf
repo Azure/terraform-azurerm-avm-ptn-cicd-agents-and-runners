@@ -1,7 +1,7 @@
 module "log_analytics_workspace" {
-  count   = var.log_analytics_workspace_creation_enabled && local.deploy_container_app ? 1 : 0
   source  = "Azure/avm-res-operationalinsights-workspace/azurerm"
   version = "0.4.2"
+  count   = var.log_analytics_workspace_creation_enabled && local.deploy_container_app ? 1 : 0
 
   location                                  = var.location
   name                                      = local.log_analytics_workspace_name
