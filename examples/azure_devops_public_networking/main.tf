@@ -1,19 +1,5 @@
-variable "azure_devops_organization_name" {
-  type        = string
-  description = "Azure DevOps Organisation Name"
-}
 
-variable "azure_devops_personal_access_token" {
-  type        = string
-  description = "The personal access token used for agent authentication to Azure DevOps."
-  sensitive   = true
-}
 
-variable "azure_devops_agents_personal_access_token" {
-  description = "Personal access token for Azure DevOps self-hosted agents (the token requires the 'Agent Pools - Read & Manage' scope and should have the maximum expiry)."
-  type        = string
-  sensitive   = true
-}
 
 locals {
   tags = {
@@ -145,41 +131,31 @@ data "azurerm_client_config" "this" {}
 resource "azapi_resource_action" "resource_provider_registration" {
   for_each = local.resource_providers_to_register
 
-  resource_id = "/subscriptions/${data.azurerm_client_config.this.subscription_id}"
-  type        = "Microsoft.Resources/subscriptions@2021-04-01"
   action      = "providers/${each.value.resource_provider}/register"
   method      = "POST"
+  resource_id = "/subscriptions/${data.azurerm_client_config.this.subscription_id}"
+  type        = "Microsoft.Resources/subscriptions@2021-04-01"
 }
 
 # This is the module call
 module "azure_devops_agents" {
-  source                                       = "../.."
-  postfix                                      = random_string.name.result
+  source = "../.."
+
   location                                     = local.selected_region
-  version_control_system_type                  = "azuredevops"
-  version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
+  postfix                                      = random_string.name.result
   version_control_system_organization          = local.azure_devops_organization_url
-  version_control_system_pool_name             = azuredevops_agent_pool.this.name
-  use_private_networking                       = false
+  version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
+  version_control_system_type                  = "azuredevops"
   tags                                         = local.tags
-  depends_on                                   = [azuredevops_pipeline_authorization.this]
+  use_private_networking                       = false
+  version_control_system_pool_name             = azuredevops_agent_pool.this.name
+
+  depends_on = [azuredevops_pipeline_authorization.this]
 }
 
-output "container_app_environment_resource_id" {
-  value = module.azure_devops_agents.resource_id
-}
 
-output "container_app_environment_name" {
-  value = module.azure_devops_agents.name
-}
 
-output "container_app_job_resource_id" {
-  value = module.azure_devops_agents.job_resource_id
-}
 
-output "container_app_job_name" {
-  value = module.azure_devops_agents.job_name
-}
 
 # Region helpers
 module "regions" {

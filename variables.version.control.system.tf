@@ -26,12 +26,6 @@ variable "version_control_system_agent_name_prefix" {
   description = "The version control system agent name prefix."
 }
 
-variable "version_control_system_placeholder_agent_name" {
-  type        = string
-  default     = null
-  description = "The version control system placeholder agent name."
-}
-
 variable "version_control_system_agent_target_queue_length" {
   type        = number
   default     = 1
@@ -42,6 +36,12 @@ variable "version_control_system_enterprise" {
   type        = string
   default     = null
   description = "The enterprise name for the version control system."
+}
+
+variable "version_control_system_placeholder_agent_name" {
+  type        = string
+  default     = null
+  description = "The version control system placeholder agent name."
 }
 
 variable "version_control_system_pool_name" {

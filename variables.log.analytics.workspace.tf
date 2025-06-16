@@ -17,14 +17,14 @@ variable "log_analytics_workspace_name" {
   description = "The name of the log analytics workspace. Only required if `log_analytics_workspace_creation_enabled == false`."
 }
 
-variable "log_analytics_workspace_sku" {
-  type        = string
-  default     = "PerGB2018"
-  description = "The SKU of the Log Analytics Workspace."
-}
-
 variable "log_analytics_workspace_retention_in_days" {
   type        = number
   default     = 30
   description = "The retention period for the Log Analytics Workspace."
+}
+
+variable "log_analytics_workspace_sku" {
+  type        = string
+  default     = "PerGB2018"
+  description = "The SKU of the Log Analytics Workspace."
 }

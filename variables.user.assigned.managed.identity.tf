@@ -5,6 +5,12 @@ variable "user_assigned_managed_identity_creation_enabled" {
   nullable    = false
 }
 
+variable "user_assigned_managed_identity_id" {
+  type        = string
+  default     = null
+  description = "The resource Id of the user assigned managed identity. Only required if `user_assigned_managed_identity_creation_enabled == false`."
+}
+
 variable "user_assigned_managed_identity_name" {
   type        = string
   default     = null
@@ -15,10 +21,4 @@ variable "user_assigned_managed_identity_principal_id" {
   type        = string
   default     = null
   description = "The principal id of the user assigned managed identity. Only required if `user_assigned_managed_identity_creation_enabled == false`."
-}
-
-variable "user_assigned_managed_identity_id" {
-  type        = string
-  default     = null
-  description = "The resource Id of the user assigned managed identity. Only required if `user_assigned_managed_identity_creation_enabled == false`."
 }
