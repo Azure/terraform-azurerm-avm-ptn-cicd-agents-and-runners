@@ -878,6 +878,14 @@ Type: `string`
 
 Default: `""`
 
+### <a name="input_version_control_system_github_application_installation_id"></a> [version\_control\_system\_github\_application\_installation\_id](#input\_version\_control\_system\_github\_application\_installation\_id)
+
+Description: The installation ID for the GitHub App authentication method.
+
+Type: `string`
+
+Default: `""`
+
 ### <a name="input_version_control_system_github_application_key"></a> [version\_control\_system\_github\_application\_key](#input\_version\_control\_system\_github\_application\_key)
 
 Description: The application key for the GitHub App authentication method.
@@ -885,14 +893,6 @@ Description: The application key for the GitHub App authentication method.
 Type: `string`
 
 Default: `null`
-
-### <a name="input_version_control_system_github_installation_id"></a> [version\_control\_system\_github\_installation\_id](#input\_version\_control\_system\_github\_installation\_id)
-
-Description: The installation ID for the GitHub App authentication method.
-
-Type: `string`
-
-Default: `""`
 
 ### <a name="input_version_control_system_personal_access_token"></a> [version\_control\_system\_personal\_access\_token](#input\_version\_control\_system\_personal\_access\_token)
 

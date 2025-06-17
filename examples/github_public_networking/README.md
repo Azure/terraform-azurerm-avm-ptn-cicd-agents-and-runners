@@ -4,12 +4,6 @@
 This example deploys GitHub Runners to Azure Container Apps using the minimal set of required variables using public networking.
 
 ```hcl
-
-
-
-
-
-
 locals {
   tags = {
     scenario = "default"
@@ -40,7 +34,6 @@ terraform {
 
 provider "azurerm" {
   features {}
-  subscription_id = var.subscription_id
 }
 
 provider "github" {
@@ -114,17 +107,17 @@ resource "azapi_resource_action" "resource_provider_registration" {
 module "github_runners" {
   source = "../.."
 
-  location                                      = local.selected_region
-  postfix                                       = random_string.name.result
-  version_control_system_organization           = var.github_organization_name
-  version_control_system_type                   = "github"
-  tags                                          = local.tags
-  use_private_networking                        = false
-  version_control_system_authentication_method  = "github_app"
-  version_control_system_github_application_id  = var.github_application_id
-  version_control_system_github_application_key = var.github_application_key
-  version_control_system_github_installation_id = var.github_installation_id
-  version_control_system_repository             = github_repository.this.name
+  location                                                  = local.selected_region
+  postfix                                                   = random_string.name.result
+  version_control_system_organization                       = var.github_organization_name
+  version_control_system_type                               = "github"
+  tags                                                      = local.tags
+  use_private_networking                                    = false
+  version_control_system_authentication_method              = "github_app"
+  version_control_system_github_application_id              = var.github_application_id
+  version_control_system_github_application_installation_id = var.github_application_installation_id
+  version_control_system_github_application_key             = var.github_application_key
+  version_control_system_repository                         = github_repository.this.name
 
   depends_on = [github_repository_file.this]
 }
@@ -190,15 +183,15 @@ Description: The application ID used for the GitHub App authentication method.
 
 Type: `string`
 
-### <a name="input_github_application_key"></a> [github\_application\_key](#input\_github\_application\_key)
+### <a name="input_github_application_installation_id"></a> [github\_application\_installation\_id](#input\_github\_application\_installation\_id)
 
-Description: The application key used for the GitHub App authentication method. Import key file as environment variable: $env:TF\_VAR\_github\_application\_key = Get-Content path	o\[private\_key\_name].pem -Raw
+Description: The Installation ID used for the GitHub App authentication method.
 
 Type: `string`
 
-### <a name="input_github_installation_id"></a> [github\_installation\_id](#input\_github\_installation\_id)
+### <a name="input_github_application_key"></a> [github\_application\_key](#input\_github\_application\_key)
 
-Description: The Installation ID used for the GitHub App authentication method.
+Description: The application key used for the GitHub App authentication method. Import key file as environment variable: $env:TF\_VAR\_github\_application\_key = Get-Content path	o\[private\_key\_name].pem -Raw
 
 Type: `string`
 
@@ -211,12 +204,6 @@ Type: `string`
 ### <a name="input_github_personal_access_token"></a> [github\_personal\_access\_token](#input\_github\_personal\_access\_token)
 
 Description: The personal access token used for authentication to GitHub.
-
-Type: `string`
-
-### <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id)
-
-Description: The subscription ID to use for the deployment.
 
 Type: `string`
 

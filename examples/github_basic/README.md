@@ -40,7 +40,6 @@ terraform {
 
 provider "azurerm" {
   features {}
-  subscription_id = var.subscription_id
 }
 
 provider "github" {
@@ -114,17 +113,14 @@ resource "azapi_resource_action" "resource_provider_registration" {
 module "github_runners" {
   source = "../.."
 
-  location                                      = local.selected_region
-  postfix                                       = random_string.name.result
-  version_control_system_organization           = var.github_organization_name
-  version_control_system_type                   = "github"
-  tags                                          = local.tags
-  version_control_system_authentication_method  = "github_app"
-  version_control_system_github_application_id  = var.github_application_id
-  version_control_system_github_application_key = var.github_application_key
-  version_control_system_github_installation_id = var.github_installation_id
-  version_control_system_repository             = github_repository.this.name
-  virtual_network_address_space                 = "10.0.0.0/16"
+  location                                     = local.selected_region
+  postfix                                      = random_string.name.result
+  version_control_system_organization          = var.github_organization_name
+  version_control_system_type                  = "github"
+  tags                                         = local.tags
+  version_control_system_personal_access_token = var.github_runners_personal_access_token
+  version_control_system_repository            = github_repository.this.name
+  virtual_network_address_space                = "10.0.0.0/16"
 
   depends_on = [github_repository_file.this]
 }
@@ -214,9 +210,9 @@ Description: The personal access token used for authentication to GitHub.
 
 Type: `string`
 
-### <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id)
+### <a name="input_github_runners_personal_access_token"></a> [github\_runners\_personal\_access\_token](#input\_github\_runners\_personal\_access\_token)
 
-Description: The subscription ID to use for the deployment.
+Description: Personal access token for GitHub self-hosted runners (the token requires the 'repo' scope and should not expire).
 
 Type: `string`
 

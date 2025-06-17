@@ -108,8 +108,8 @@ module "github_runners" {
   tags                                                      = local.tags
   version_control_system_authentication_method              = "github_app"
   version_control_system_github_application_id              = var.github_application_id
-  version_control_system_github_application_key             = var.github_application_key
   version_control_system_github_application_installation_id = var.github_application_installation_id
+  version_control_system_github_application_key             = var.github_application_key
   version_control_system_repository                         = github_repository.this.name
   virtual_network_address_space                             = "10.0.0.0/16"
 
