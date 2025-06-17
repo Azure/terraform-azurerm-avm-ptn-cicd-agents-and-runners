@@ -103,12 +103,6 @@ Description: The version control system organization to deploy the agents too.
 
 Type: `string`
 
-### <a name="input_version_control_system_personal_access_token"></a> [version\_control\_system\_personal\_access\_token](#input\_version\_control\_system\_personal\_access\_token)
-
-Description: The personal access token for the version control system.
-
-Type: `string`
-
 ### <a name="input_version_control_system_type"></a> [version\_control\_system\_type](#input\_version\_control\_system\_type)
 
 Description: The type of the version control system to deploy the agents too. Allowed values are 'azuredevops' or 'github'
@@ -860,9 +854,49 @@ Type: `number`
 
 Default: `1`
 
+### <a name="input_version_control_system_authentication_method"></a> [version\_control\_system\_authentication\_method](#input\_version\_control\_system\_authentication\_method)
+
+Description: GitHub authentication method. Possible values: pat or github\_app
+
+Type: `string`
+
+Default: `"pat"`
+
 ### <a name="input_version_control_system_enterprise"></a> [version\_control\_system\_enterprise](#input\_version\_control\_system\_enterprise)
 
 Description: The enterprise name for the version control system.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_version_control_system_github_application_id"></a> [version\_control\_system\_github\_application\_id](#input\_version\_control\_system\_github\_application\_id)
+
+Description: The application ID for the GitHub App authentication method.
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_version_control_system_github_application_key"></a> [version\_control\_system\_github\_application\_key](#input\_version\_control\_system\_github\_application\_key)
+
+Description: The application key for the GitHub App authentication method.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_version_control_system_github_installation_id"></a> [version\_control\_system\_github\_installation\_id](#input\_version\_control\_system\_github\_installation\_id)
+
+Description: The installation ID for the GitHub App authentication method.
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_version_control_system_personal_access_token"></a> [version\_control\_system\_personal\_access\_token](#input\_version\_control\_system\_personal\_access\_token)
+
+Description: The personal access token for the version control system.
 
 Type: `string`
 
