@@ -6,9 +6,6 @@ This example deploys Azure DevOps Agents to Azure Container Apps using the minim
 >NOTE: Multi-region support may result in duplicated agent scaling, there is no built-in mechanism to prevent this.
 
 ```hcl
-
-
-
 locals {
   tags = {
     scenario = "default"
@@ -155,9 +152,6 @@ module "azure_devops_agents_primary" {
   source = "../.."
 
   location                                     = local.selected_region_primary
-  source = "../.."
-
-  location                                     = local.selected_region_primary
   postfix                                      = "${random_string.name.result}1"
   version_control_system_organization          = local.azure_devops_organization_url
   version_control_system_type                  = "azuredevops"
@@ -174,9 +168,6 @@ module "azure_devops_agents_secondary" {
   source = "../.."
 
   location                                     = local.selected_region_secondary
-  source = "../.."
-
-  location                                     = local.selected_region_secondary
   postfix                                      = "${random_string.name.result}2"
   version_control_system_organization          = local.azure_devops_organization_url
   version_control_system_type                  = "azuredevops"
@@ -188,16 +179,6 @@ module "azure_devops_agents_secondary" {
 
   depends_on = [azuredevops_pipeline_authorization.this]
 }
-
-
-
-
-
-
-
-
-
-
 
 # Region helpers
 module "regions" {

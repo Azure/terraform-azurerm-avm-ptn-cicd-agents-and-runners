@@ -180,13 +180,7 @@ module "virtual_network" {
   source  = "Azure/avm-res-network-virtualnetwork/azurerm"
   version = "0.7.1"
 
-  source  = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version = "0.7.1"
-
   address_space       = [local.virtual_network_address_space]
-  location            = local.selected_region
-  resource_group_name = azurerm_resource_group.this.name
-  name                = "vnet-${random_string.name.result}"
   location            = local.selected_region
   resource_group_name = azurerm_resource_group.this.name
   name                = "vnet-${random_string.name.result}"
@@ -230,10 +224,6 @@ module "azure_devops_agents" {
 
   depends_on = [azuredevops_pipeline_authorization.this, azurerm_private_dns_zone_virtual_network_link.container_registry]
 }
-
-
-
-
 
 # Region helpers
 module "regions" {

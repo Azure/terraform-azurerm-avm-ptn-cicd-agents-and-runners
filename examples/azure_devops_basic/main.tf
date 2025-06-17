@@ -1,6 +1,3 @@
-
-
-
 locals {
   tags = {
     scenario = "default"
@@ -142,9 +139,6 @@ module "azure_devops_agents" {
   source = "../.."
 
   location                                     = local.selected_region
-  source = "../.."
-
-  location                                     = local.selected_region
   postfix                                      = random_string.name.result
   version_control_system_organization          = local.azure_devops_organization_url
   version_control_system_type                  = "azuredevops"
@@ -154,13 +148,7 @@ module "azure_devops_agents" {
   virtual_network_address_space                = "10.0.0.0/16"
 
   depends_on = [azuredevops_pipeline_authorization.this]
-
-  depends_on = [azuredevops_pipeline_authorization.this]
 }
-
-
-
-
 
 # Region helpers
 module "regions" {

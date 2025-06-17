@@ -1,6 +1,3 @@
-
-
-
 locals {
   tags = {
     scenario = "default"
@@ -142,13 +139,7 @@ module "virtual_network" {
   source  = "Azure/avm-res-network-virtualnetwork/azurerm"
   version = "0.7.1"
 
-  source  = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version = "0.7.1"
-
   address_space       = [local.virtual_network_address_space]
-  location            = local.selected_region
-  resource_group_name = azurerm_resource_group.this.name
-  name                = "vnet-${random_string.name.result}"
   location            = local.selected_region
   resource_group_name = azurerm_resource_group.this.name
   name                = "vnet-${random_string.name.result}"
@@ -181,7 +172,6 @@ module "azure_devops_agents" {
   container_instance_subnet_id                         = module.virtual_network.subnets["container_instance"].resource_id
   container_registry_dns_zone_id                       = azurerm_private_dns_zone.container_registry.id
   container_registry_private_dns_zone_creation_enabled = false
-  container_registry_private_dns_zone_creation_enabled = false
   container_registry_private_endpoint_subnet_id        = module.virtual_network.subnets["container_registry_private_endpoint"].resource_id
   resource_group_creation_enabled                      = false
   resource_group_name                                  = azurerm_resource_group.this.name
@@ -193,10 +183,6 @@ module "azure_devops_agents" {
 
   depends_on = [azurerm_private_dns_zone_virtual_network_link.container_registry]
 }
-
-
-
-
 
 # Region helpers
 module "regions" {

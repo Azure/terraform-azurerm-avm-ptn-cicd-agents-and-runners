@@ -1,6 +1,3 @@
-
-
-
 locals {
   tags = {
     scenario = "default"
@@ -147,9 +144,6 @@ module "azure_devops_agents_primary" {
   source = "../.."
 
   location                                     = local.selected_region_primary
-  source = "../.."
-
-  location                                     = local.selected_region_primary
   postfix                                      = "${random_string.name.result}1"
   version_control_system_organization          = local.azure_devops_organization_url
   version_control_system_type                  = "azuredevops"
@@ -166,9 +160,6 @@ module "azure_devops_agents_secondary" {
   source = "../.."
 
   location                                     = local.selected_region_secondary
-  source = "../.."
-
-  location                                     = local.selected_region_secondary
   postfix                                      = "${random_string.name.result}2"
   version_control_system_organization          = local.azure_devops_organization_url
   version_control_system_type                  = "azuredevops"
@@ -180,16 +171,6 @@ module "azure_devops_agents_secondary" {
 
   depends_on = [azuredevops_pipeline_authorization.this]
 }
-
-
-
-
-
-
-
-
-
-
 
 # Region helpers
 module "regions" {
