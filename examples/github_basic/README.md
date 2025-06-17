@@ -180,24 +180,6 @@ The following resources are used by this module:
 
 The following input variables are required:
 
-### <a name="input_github_application_id"></a> [github\_application\_id](#input\_github\_application\_id)
-
-Description: The application ID used for the GitHub App authentication method.
-
-Type: `string`
-
-### <a name="input_github_application_key"></a> [github\_application\_key](#input\_github\_application\_key)
-
-Description: The application key used for the GitHub App authentication method. Import key file as environment variable: $env:TF\_VAR\_github\_application\_key = Get-Content path	o\[private\_key\_name].pem -Raw
-
-Type: `string`
-
-### <a name="input_github_installation_id"></a> [github\_installation\_id](#input\_github\_installation\_id)
-
-Description: The Installation ID used for the GitHub App authentication method.
-
-Type: `string`
-
 ### <a name="input_github_organization_name"></a> [github\_organization\_name](#input\_github\_organization\_name)
 
 Description: GitHub Organisation Name
