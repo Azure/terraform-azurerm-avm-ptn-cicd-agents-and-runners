@@ -8,4 +8,5 @@ module "log_analytics_workspace" {
   resource_group_name                       = local.resource_group_name
   log_analytics_workspace_retention_in_days = var.log_analytics_workspace_retention_in_days
   log_analytics_workspace_sku               = var.log_analytics_workspace_sku
+  tags                                      = var.tags
 }

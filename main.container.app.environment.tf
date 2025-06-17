@@ -18,3 +18,10 @@ resource "azurerm_container_app_environment" "this" {
     minimum_count         = 0
   }
 }
+
+resource "time_sleep" "delay_after_container_app_environment_creation" {
+  create_duration = "${var.delays.delay_after_container_app_environment_creation}s"
+
+  depends_on = [resource.azurerm_container_app_environment.this]
+}
+
