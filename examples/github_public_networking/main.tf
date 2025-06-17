@@ -1,9 +1,3 @@
-
-
-
-
-
-
 locals {
   tags = {
     scenario = "default"
@@ -34,7 +28,6 @@ terraform {
 
 provider "azurerm" {
   features {}
-  subscription_id = var.subscription_id
 }
 
 provider "github" {
@@ -108,17 +101,17 @@ resource "azapi_resource_action" "resource_provider_registration" {
 module "github_runners" {
   source = "../.."
 
-  location                                      = local.selected_region
-  postfix                                       = random_string.name.result
-  version_control_system_organization           = var.github_organization_name
-  version_control_system_type                   = "github"
-  tags                                          = local.tags
-  use_private_networking                        = false
-  version_control_system_authentication_method  = "github_app"
-  version_control_system_github_application_id  = var.github_application_id
-  version_control_system_github_application_key = var.github_application_key
-  version_control_system_github_installation_id = var.github_installation_id
-  version_control_system_repository             = github_repository.this.name
+  location                                                  = local.selected_region
+  postfix                                                   = random_string.name.result
+  version_control_system_organization                       = var.github_organization_name
+  version_control_system_type                               = "github"
+  tags                                                      = local.tags
+  use_private_networking                                    = false
+  version_control_system_authentication_method              = "github_app"
+  version_control_system_github_application_id              = var.github_application_id
+  version_control_system_github_application_key             = var.github_application_key
+  version_control_system_github_application_installation_id = var.github_application_installation_id
+  version_control_system_repository                         = github_repository.this.name
 
   depends_on = [github_repository_file.this]
 }

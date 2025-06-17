@@ -59,19 +59,6 @@ variable "version_control_system_github_application_id" {
   }
 }
 
-variable "version_control_system_github_application_installation_id" {
-  type        = string
-  default     = ""
-  description = "The installation ID for the GitHub App authentication method."
-
-  validation {
-    condition = (
-      var.version_control_system_authentication_method == "github_app" ? length(var.version_control_system_github_application_installation_id) > 0 : true
-    )
-    error_message = "Variable version_control_system_github_application_installation_id must be defined when version_control_system_authentication_method is github_app."
-  }
-}
-
 variable "version_control_system_github_application_key" {
   type        = string
   default     = null
@@ -83,6 +70,19 @@ variable "version_control_system_github_application_key" {
       var.version_control_system_authentication_method == "github_app" ? var.version_control_system_github_application_key != "" && var.version_control_system_github_application_key != null : true
     )
     error_message = "Variable version_control_system_github_application_key must be defined when version_control_system_authentication_method is github_app."
+  }
+}
+
+variable "version_control_system_github_application_installation_id" {
+  type        = string
+  default     = ""
+  description = "The installation ID for the GitHub App authentication method."
+
+  validation {
+    condition = (
+      var.version_control_system_authentication_method == "github_app" ? length(var.version_control_system_github_application_installation_id) > 0 : true
+    )
+    error_message = "Variable version_control_system_github_application_installation_id must be defined when version_control_system_authentication_method is github_app."
   }
 }
 

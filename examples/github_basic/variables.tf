@@ -25,7 +25,8 @@ variable "github_personal_access_token" {
   sensitive   = true
 }
 
-variable "subscription_id" {
+variable "github_runners_personal_access_token" {
   type        = string
-  description = "The subscription ID to use for the deployment."
+  description = "Personal access token for GitHub self-hosted runners (the token requires the 'repo' scope and should not expire)."
+  sensitive   = true
 }
