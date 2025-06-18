@@ -207,7 +207,6 @@ module "azure_devops_agents" {
   location                                             = local.selected_region
   postfix                                              = random_string.name.result
   version_control_system_organization                  = local.azure_devops_organization_url
-  version_control_system_personal_access_token         = var.azure_devops_agents_personal_access_token
   version_control_system_type                          = "azuredevops"
   compute_types                                        = ["azure_container_app", "azure_container_instance"]
   container_app_subnet_id                              = module.virtual_network.subnets["container_app"].resource_id
@@ -218,16 +217,13 @@ module "azure_devops_agents" {
   resource_group_creation_enabled                      = false
   resource_group_name                                  = azurerm_resource_group.this.name
   tags                                                 = local.tags
+  version_control_system_personal_access_token         = var.azure_devops_agents_personal_access_token
   version_control_system_pool_name                     = azuredevops_agent_pool.this.name
   virtual_network_creation_enabled                     = false
   virtual_network_id                                   = module.virtual_network.resource_id
 
   depends_on = [azuredevops_pipeline_authorization.this, azurerm_private_dns_zone_virtual_network_link.container_registry]
 }
-
-
-
-
 
 # Region helpers
 module "regions" {

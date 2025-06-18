@@ -1,7 +1,7 @@
 <!-- BEGIN_TF_DOCS -->
-# GitHub minimal example with public networking
+# GitHub minimal example with private networking and app authentication
 
-This example deploys GitHub Runners to Azure Container Apps using the minimal set of required variables using public networking.
+This example deploys GitHub Runners to Azure Container Apps using the minimal set of required variables using private networking.
 
 ```hcl
 locals {
@@ -112,12 +112,12 @@ module "github_runners" {
   version_control_system_organization                       = var.github_organization_name
   version_control_system_type                               = "github"
   tags                                                      = local.tags
-  use_private_networking                                    = false
   version_control_system_authentication_method              = "github_app"
   version_control_system_github_application_id              = var.github_application_id
   version_control_system_github_application_installation_id = var.github_application_installation_id
   version_control_system_github_application_key             = var.github_application_key
   version_control_system_repository                         = github_repository.this.name
+  virtual_network_address_space                             = "10.0.0.0/16"
 
   depends_on = [github_repository_file.this]
 }

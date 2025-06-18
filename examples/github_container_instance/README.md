@@ -4,9 +4,6 @@
 This example deploys GitHub Runners to Azure Container Instance using the minimal set of required variables using private networking.
 
 ```hcl
-
-
-
 locals {
   tags = {
     scenario = "default"
@@ -90,10 +87,10 @@ module "github_runners" {
   location                                     = local.selected_region
   postfix                                      = random_string.name.result
   version_control_system_organization          = var.github_organization_name
-  version_control_system_personal_access_token = var.github_runners_personal_access_token
   version_control_system_type                  = "github"
   compute_types                                = ["azure_container_instance"]
   tags                                         = local.tags
+  version_control_system_personal_access_token = var.github_runners_personal_access_token
   version_control_system_repository            = github_repository.this.name
   virtual_network_address_space                = "10.0.0.0/16"
 

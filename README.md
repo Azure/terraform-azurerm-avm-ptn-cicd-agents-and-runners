@@ -75,6 +75,7 @@ The following resources are used by this module:
 - [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
 - [modtm_telemetry.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/resources/telemetry) (resource)
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
+- [time_sleep.delay_after_container_app_environment_creation](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) (resource)
 - [time_sleep.delay_after_container_image_build](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) (resource)
 - [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
 - [azurerm_client_config.telemetry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
@@ -100,12 +101,6 @@ Type: `string`
 ### <a name="input_version_control_system_organization"></a> [version\_control\_system\_organization](#input\_version\_control\_system\_organization)
 
 Description: The version control system organization to deploy the agents too.
-
-Type: `string`
-
-### <a name="input_version_control_system_personal_access_token"></a> [version\_control\_system\_personal\_access\_token](#input\_version\_control\_system\_personal\_access\_token)
-
-Description: The personal access token for the version control system.
 
 Type: `string`
 
@@ -628,17 +623,12 @@ Type:
 
 ```hcl
 object({
-    delay_after_container_image_build = number
+    delay_after_container_image_build              = optional(number, 60)
+    delay_after_container_app_environment_creation = optional(number, 120)
   })
 ```
 
-Default:
-
-```json
-{
-  "delay_after_container_image_build": 30
-}
-```
+Default: `{}`
 
 ### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
 
@@ -860,9 +850,49 @@ Type: `number`
 
 Default: `1`
 
+### <a name="input_version_control_system_authentication_method"></a> [version\_control\_system\_authentication\_method](#input\_version\_control\_system\_authentication\_method)
+
+Description: GitHub authentication method. Possible values: pat or github\_app
+
+Type: `string`
+
+Default: `"pat"`
+
 ### <a name="input_version_control_system_enterprise"></a> [version\_control\_system\_enterprise](#input\_version\_control\_system\_enterprise)
 
 Description: The enterprise name for the version control system.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_version_control_system_github_application_id"></a> [version\_control\_system\_github\_application\_id](#input\_version\_control\_system\_github\_application\_id)
+
+Description: The application ID for the GitHub App authentication method.
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_version_control_system_github_application_installation_id"></a> [version\_control\_system\_github\_application\_installation\_id](#input\_version\_control\_system\_github\_application\_installation\_id)
+
+Description: The installation ID for the GitHub App authentication method.
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_version_control_system_github_application_key"></a> [version\_control\_system\_github\_application\_key](#input\_version\_control\_system\_github\_application\_key)
+
+Description: The application key for the GitHub App authentication method.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_version_control_system_personal_access_token"></a> [version\_control\_system\_personal\_access\_token](#input\_version\_control\_system\_personal\_access\_token)
+
+Description: The personal access token for the version control system.
 
 Type: `string`
 
