@@ -5,23 +5,35 @@ This submodule deploys an Azure Container Registry and image build tasks for CI/
 
 ```hcl
 module "container_registry" {
-  source                        = "Azure/avm-res-containerregistry-registry/azurerm"
-  version                       = "0.2.0"
-  name                          = var.name
-  resource_group_name           = var.resource_group_name
-  location                      = var.location
-  sku                           = var.use_private_networking ? "Premium" : "Basic"
-  public_network_access_enabled = !var.use_private_networking
-  zone_redundancy_enabled       = var.use_private_networking
-  network_rule_bypass_option    = var.use_private_networking ? "AzureServices" : "None"
-  enable_telemetry              = var.enable_telemetry
+  source  = "Azure/avm-res-containerregistry-registry/azurerm"
+  version = "0.4.0"
+
+  location                   = var.location
+  name                       = var.name
+  resource_group_name        = var.resource_group_name
+  enable_telemetry           = var.enable_telemetry
+  network_rule_bypass_option = var.use_private_networking ? "AzureServices" : "None"
   private_endpoints = var.use_private_networking ? {
     container_registry = {
-      private_dns_zone_resource_ids = [var.private_dns_zone_id]
+      private_dns_zone_resource_ids = var.private_dns_zone_id == null || var.private_dns_zone_id == "" ? [] : [var.private_dns_zone_id]
       subnet_resource_id            = var.subnet_id
     }
   } : null
-  tags = var.tags
+  public_network_access_enabled = !var.use_private_networking
+  tags                          = var.tags
+  zone_redundancy_enabled       = var.use_private_networking
+}
+
+resource "azapi_update_resource" "network_rule_bypass_allowed_for_tasks" {
+  count = var.use_private_networking ? 1 : 0
+
+  resource_id = module.container_registry.resource_id
+  type        = "Microsoft.ContainerRegistry/registries@2025-05-01-preview"
+  body = {
+    properties = {
+      networkRuleBypassAllowedForTasks = true
+    }
+  }
 }
 
 resource "azurerm_container_registry_task" "this" {
@@ -56,7 +68,10 @@ resource "azurerm_container_registry_task_schedule_run_now" "this" {
 
   container_registry_task_id = azurerm_container_registry_task.this[each.key].id
 
-  depends_on = [azurerm_role_assignment.container_registry_push_for_task]
+  depends_on = [
+    azurerm_role_assignment.container_registry_push_for_task,
+    azapi_update_resource.network_rule_bypass_allowed_for_tasks
+  ]
 
   lifecycle {
     replace_triggered_by = [azurerm_container_registry_task.this]
@@ -85,18 +100,23 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9, < 2.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.113)
+- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.0)
+
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.20)
 
 ## Providers
 
 The following providers are used by this module:
 
-- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (~> 3.113)
+- <a name="provider_azapi"></a> [azapi](#provider\_azapi) (~> 2.0)
+
+- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (~> 4.20)
 
 ## Resources
 
 The following resources are used by this module:
 
+- [azapi_update_resource.network_rule_bypass_allowed_for_tasks](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/update_resource) (resource)
 - [azurerm_container_registry_task.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_registry_task) (resource)
 - [azurerm_container_registry_task_schedule_run_now.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_registry_task_schedule_run_now) (resource)
 - [azurerm_role_assignment.container_registry_pull_for_container_instance](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
@@ -173,7 +193,7 @@ Default: `{}`
 
 ### <a name="input_private_dns_zone_id"></a> [private\_dns\_zone\_id](#input\_private\_dns\_zone\_id)
 
-Description: The id of the private DNS zone to create for the container registry. Only required if `container_registry_private_dns_zone_creation_enabled` is `false`.
+Description: The id of the private DNS zone to create for the container registry. Only required if `container_registry_private_dns_zone_creation_enabled` is `false` and you are not using policy to update the DNS zone.
 
 Type: `string`
 
@@ -219,7 +239,7 @@ The following Modules are called:
 
 Source: Azure/avm-res-containerregistry-registry/azurerm
 
-Version: 0.2.0
+Version: 0.4.0
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection

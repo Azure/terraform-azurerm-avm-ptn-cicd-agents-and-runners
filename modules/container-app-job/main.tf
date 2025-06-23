@@ -1,5 +1,8 @@
 resource "azapi_resource" "job" {
-  type = "Microsoft.App/jobs@2023-05-01"
+  location  = var.location
+  name      = local.job_name
+  parent_id = var.resource_group_id
+  type      = "Microsoft.App/jobs@2023-05-01"
   body = {
     properties = {
       environmentId = var.container_app_environment_id
@@ -25,10 +28,7 @@ resource "azapi_resource" "job" {
       }
     }
   }
-  location  = var.location
-  name      = local.job_name
-  parent_id = var.resource_group_id
-  tags      = var.tags
+  tags = var.tags
 
   identity {
     type         = "UserAssigned"
@@ -39,7 +39,10 @@ resource "azapi_resource" "job" {
 resource "azapi_resource" "placeholder" {
   count = var.placeholder_job_creation_enabled ? 1 : 0
 
-  type = "Microsoft.App/jobs@2023-05-01"
+  location  = var.location
+  name      = local.placeholder_job_name
+  parent_id = var.resource_group_id
+  type      = "Microsoft.App/jobs@2023-05-01"
   body = {
     properties = {
       environmentId = var.container_app_environment_id
@@ -59,10 +62,7 @@ resource "azapi_resource" "placeholder" {
       }
     }
   }
-  location  = var.location
-  name      = local.placeholder_job_name
-  parent_id = var.resource_group_id
-  tags      = null
+  tags = null
 
   identity {
     type         = "UserAssigned"
@@ -73,9 +73,9 @@ resource "azapi_resource" "placeholder" {
 resource "azapi_resource_action" "placeholder_trigger" {
   count = var.placeholder_job_creation_enabled ? 1 : 0
 
+  action      = "start"
   resource_id = azapi_resource.placeholder[0].id
   type        = "Microsoft.App/jobs@2024-03-01"
-  action      = "start"
   body        = {}
 
   lifecycle {

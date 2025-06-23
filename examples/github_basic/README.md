@@ -4,22 +4,11 @@
 This example deploys GitHub Runners to Azure Container Apps using the minimal set of required variables using private networking.
 
 ```hcl
-variable "github_organization_name" {
-  type        = string
-  description = "GitHub Organisation Name"
-}
 
-variable "github_personal_access_token" {
-  type        = string
-  description = "The personal access token used for authentication to GitHub."
-  sensitive   = true
-}
 
-variable "github_runners_personal_access_token" {
-  description = "Personal access token for GitHub self-hosted runners (the token requires the 'repo' scope and should not expire)."
-  type        = string
-  sensitive   = true
-}
+
+
+
 
 locals {
   tags = {
@@ -36,7 +25,7 @@ terraform {
     }
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.113"
+      version = "~> 4.20"
     }
     github = {
       source  = "integrations/github"
@@ -114,24 +103,26 @@ data "azurerm_client_config" "this" {}
 resource "azapi_resource_action" "resource_provider_registration" {
   for_each = local.resource_providers_to_register
 
-  resource_id = "/subscriptions/${data.azurerm_client_config.this.subscription_id}"
-  type        = "Microsoft.Resources/subscriptions@2021-04-01"
   action      = "providers/${each.value.resource_provider}/register"
   method      = "POST"
+  resource_id = "/subscriptions/${data.azurerm_client_config.this.subscription_id}"
+  type        = "Microsoft.Resources/subscriptions@2021-04-01"
 }
 
 # This is the module call
 module "github_runners" {
-  source                                       = "../.."
-  postfix                                      = random_string.name.result
+  source = "../.."
+
   location                                     = local.selected_region
-  version_control_system_type                  = "github"
-  version_control_system_personal_access_token = var.github_runners_personal_access_token
+  postfix                                      = random_string.name.result
   version_control_system_organization          = var.github_organization_name
+  version_control_system_type                  = "github"
+  tags                                         = local.tags
+  version_control_system_personal_access_token = var.github_runners_personal_access_token
   version_control_system_repository            = github_repository.this.name
   virtual_network_address_space                = "10.0.0.0/16"
-  tags                                         = local.tags
-  depends_on                                   = [github_repository_file.this]
+
+  depends_on = [github_repository_file.this]
 }
 
 # Region helpers
@@ -166,7 +157,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.113)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.20)
 
 - <a name="requirement_github"></a> [github](#requirement\_github) (~> 5.36)
 

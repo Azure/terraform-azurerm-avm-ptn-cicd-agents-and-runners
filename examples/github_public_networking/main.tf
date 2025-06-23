@@ -1,20 +1,3 @@
-variable "github_organization_name" {
-  type        = string
-  description = "GitHub Organisation Name"
-}
-
-variable "github_personal_access_token" {
-  type        = string
-  description = "The personal access token used for authentication to GitHub."
-  sensitive   = true
-}
-
-variable "github_runners_personal_access_token" {
-  description = "Personal access token for GitHub self-hosted runners (the token requires the 'repo' scope and should not expire)."
-  type        = string
-  sensitive   = true
-}
-
 locals {
   tags = {
     scenario = "default"
@@ -30,7 +13,7 @@ terraform {
     }
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.113"
+      version = "~> 4.20"
     }
     github = {
       source  = "integrations/github"
@@ -108,24 +91,29 @@ data "azurerm_client_config" "this" {}
 resource "azapi_resource_action" "resource_provider_registration" {
   for_each = local.resource_providers_to_register
 
-  resource_id = "/subscriptions/${data.azurerm_client_config.this.subscription_id}"
-  type        = "Microsoft.Resources/subscriptions@2021-04-01"
   action      = "providers/${each.value.resource_provider}/register"
   method      = "POST"
+  resource_id = "/subscriptions/${data.azurerm_client_config.this.subscription_id}"
+  type        = "Microsoft.Resources/subscriptions@2021-04-01"
 }
 
 # This is the module call
 module "github_runners" {
-  source                                       = "../.."
-  postfix                                      = random_string.name.result
-  location                                     = local.selected_region
-  version_control_system_type                  = "github"
-  version_control_system_personal_access_token = var.github_runners_personal_access_token
-  version_control_system_organization          = var.github_organization_name
-  version_control_system_repository            = github_repository.this.name
-  use_private_networking                       = false
-  tags                                         = local.tags
-  depends_on                                   = [github_repository_file.this]
+  source = "../.."
+
+  location                                                  = local.selected_region
+  postfix                                                   = random_string.name.result
+  version_control_system_organization                       = var.github_organization_name
+  version_control_system_type                               = "github"
+  tags                                                      = local.tags
+  use_private_networking                                    = false
+  version_control_system_authentication_method              = "github_app"
+  version_control_system_github_application_id              = var.github_application_id
+  version_control_system_github_application_installation_id = var.github_application_installation_id
+  version_control_system_github_application_key             = var.github_application_key
+  version_control_system_repository                         = github_repository.this.name
+
+  depends_on = [github_repository_file.this]
 }
 
 # Region helpers

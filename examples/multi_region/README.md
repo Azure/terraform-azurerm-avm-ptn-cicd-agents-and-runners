@@ -6,23 +6,6 @@ This example deploys Azure DevOps Agents to Azure Container Apps using the minim
 >NOTE: Multi-region support may result in duplicated agent scaling, there is no built-in mechanism to prevent this.
 
 ```hcl
-variable "azure_devops_organization_name" {
-  type        = string
-  description = "Azure DevOps Organisation Name"
-}
-
-variable "azure_devops_personal_access_token" {
-  type        = string
-  description = "The personal access token used for agent authentication to Azure DevOps."
-  sensitive   = true
-}
-
-variable "azure_devops_agents_personal_access_token" {
-  description = "Personal access token for Azure DevOps self-hosted agents (the token requires the 'Agent Pools - Read & Manage' scope and should have the maximum expiry)."
-  type        = string
-  sensitive   = true
-}
-
 locals {
   tags = {
     scenario = "default"
@@ -42,7 +25,7 @@ terraform {
     }
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.113"
+      version = "~> 4.20"
     }
     random = {
       source  = "hashicorp/random"
@@ -158,79 +141,43 @@ data "azurerm_client_config" "this" {}
 resource "azapi_resource_action" "resource_provider_registration" {
   for_each = local.resource_providers_to_register
 
-  resource_id = "/subscriptions/${data.azurerm_client_config.this.subscription_id}"
-  type        = "Microsoft.Resources/subscriptions@2021-04-01"
   action      = "providers/${each.value.resource_provider}/register"
   method      = "POST"
+  resource_id = "/subscriptions/${data.azurerm_client_config.this.subscription_id}"
+  type        = "Microsoft.Resources/subscriptions@2021-04-01"
 }
 
 # This is the module call
 module "azure_devops_agents_primary" {
-  source                                       = "../.."
-  postfix                                      = "${random_string.name.result}1"
+  source = "../.."
+
   location                                     = local.selected_region_primary
-  version_control_system_type                  = "azuredevops"
-  version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
+  postfix                                      = "${random_string.name.result}1"
   version_control_system_organization          = local.azure_devops_organization_url
-  version_control_system_pool_name             = azuredevops_agent_pool.this.name
-  virtual_network_address_space                = "10.0.0.0/16"
+  version_control_system_type                  = "azuredevops"
   container_app_polling_interval_seconds       = local.primary_polling_interval_prime_number
   tags                                         = local.tags
-  depends_on                                   = [azuredevops_pipeline_authorization.this]
+  version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
+  version_control_system_pool_name             = azuredevops_agent_pool.this.name
+  virtual_network_address_space                = "10.0.0.0/16"
+
+  depends_on = [azuredevops_pipeline_authorization.this]
 }
 
 module "azure_devops_agents_secondary" {
-  source                                       = "../.."
-  postfix                                      = "${random_string.name.result}2"
+  source = "../.."
+
   location                                     = local.selected_region_secondary
-  version_control_system_type                  = "azuredevops"
-  version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
+  postfix                                      = "${random_string.name.result}2"
   version_control_system_organization          = local.azure_devops_organization_url
-  version_control_system_pool_name             = azuredevops_agent_pool.this.name
-  virtual_network_address_space                = "10.1.0.0/16"
+  version_control_system_type                  = "azuredevops"
   container_app_polling_interval_seconds       = local.secondary_polling_interval_prime_number
   tags                                         = local.tags
-  depends_on                                   = [azuredevops_pipeline_authorization.this]
-}
+  version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
+  version_control_system_pool_name             = azuredevops_agent_pool.this.name
+  virtual_network_address_space                = "10.1.0.0/16"
 
-output "primary_region" {
-  value = local.selected_region_primary
-}
-
-output "secondary_region" {
-  value = local.selected_region_secondary
-}
-
-output "container_app_environment_primary_resource_id" {
-  value = module.azure_devops_agents_primary.resource_id
-}
-
-output "container_app_environment_primary_name" {
-  value = module.azure_devops_agents_primary.name
-}
-
-output "container_app_job_primary_resource_id" {
-  value = module.azure_devops_agents_primary.job_resource_id
-}
-
-output "container_app_job_primary_name" {
-  value = module.azure_devops_agents_primary.job_name
-}
-
-output "container_app_environment_secondary_resource_id" {
-  value = module.azure_devops_agents_secondary.resource_id
-}
-
-output "container_app_environment_secondary_name" {
-  value = module.azure_devops_agents_secondary.name
-}
-
-output "container_app_job_secondary_resource_id" {
-  value = module.azure_devops_agents_secondary.job_resource_id
-}
-
-output "container_app_job_secondary_name" {
-  value = module.azure_devops_agents_secondary.job_name
+  depends_on = [azuredevops_pipeline_authorization.this]
 }
 
 # Region helpers
@@ -274,7 +221,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azuredevops"></a> [azuredevops](#requirement\_azuredevops) (~> 1.1)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.113)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.20)
 
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 

@@ -53,7 +53,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9, < 2.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.113)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.20)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
@@ -75,6 +75,7 @@ The following resources are used by this module:
 - [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
 - [modtm_telemetry.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/resources/telemetry) (resource)
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
+- [time_sleep.delay_after_container_app_environment_creation](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) (resource)
 - [time_sleep.delay_after_container_image_build](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) (resource)
 - [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
 - [azurerm_client_config.telemetry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
@@ -100,12 +101,6 @@ Type: `string`
 ### <a name="input_version_control_system_organization"></a> [version\_control\_system\_organization](#input\_version\_control\_system\_organization)
 
 Description: The version control system organization to deploy the agents too.
-
-Type: `string`
-
-### <a name="input_version_control_system_personal_access_token"></a> [version\_control\_system\_personal\_access\_token](#input\_version\_control\_system\_personal\_access\_token)
-
-Description: The personal access token for the version control system.
 
 Type: `string`
 
@@ -451,6 +446,14 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_container_instance_use_availability_zones"></a> [container\_instance\_use\_availability\_zones](#input\_container\_instance\_use\_availability\_zones)
+
+Description: Whether to use availability zones for the container instance
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_container_registry_creation_enabled"></a> [container\_registry\_creation\_enabled](#input\_container\_registry\_creation\_enabled)
 
 Description: Whether or not to create a container registry.
@@ -461,7 +464,7 @@ Default: `true`
 
 ### <a name="input_container_registry_dns_zone_id"></a> [container\_registry\_dns\_zone\_id](#input\_container\_registry\_dns\_zone\_id)
 
-Description: The ID of the private DNS zone to create for the container registry. Only required if `container_registry_private_dns_zone_creation_enabled` is `false`.
+Description: The ID of the private DNS zone to create for the container registry. Only required if `container_registry_private_dns_zone_creation_enabled` is `false` and you are not using policy to update the DNS zone.
 
 Type: `string`
 
@@ -620,17 +623,12 @@ Type:
 
 ```hcl
 object({
-    delay_after_container_image_build = number
+    delay_after_container_image_build              = optional(number, 60)
+    delay_after_container_app_environment_creation = optional(number, 120)
   })
 ```
 
-Default:
-
-```json
-{
-  "delay_after_container_image_build": 30
-}
-```
+Default: `{}`
 
 ### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
 
@@ -748,6 +746,22 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_public_ip_zones"></a> [public\_ip\_zones](#input\_public\_ip\_zones)
+
+Description: The availability zones for the public IP. Only required if `public_ip_creation_enabled` is `true`.
+
+Type: `set(string)`
+
+Default:
+
+```json
+[
+  "1",
+  "2",
+  "3"
+]
+```
+
 ### <a name="input_resource_group_creation_enabled"></a> [resource\_group\_creation\_enabled](#input\_resource\_group\_creation\_enabled)
 
 Description: Whether or not to create a resource group.
@@ -836,9 +850,49 @@ Type: `number`
 
 Default: `1`
 
+### <a name="input_version_control_system_authentication_method"></a> [version\_control\_system\_authentication\_method](#input\_version\_control\_system\_authentication\_method)
+
+Description: GitHub authentication method. Possible values: pat or github\_app
+
+Type: `string`
+
+Default: `"pat"`
+
 ### <a name="input_version_control_system_enterprise"></a> [version\_control\_system\_enterprise](#input\_version\_control\_system\_enterprise)
 
 Description: The enterprise name for the version control system.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_version_control_system_github_application_id"></a> [version\_control\_system\_github\_application\_id](#input\_version\_control\_system\_github\_application\_id)
+
+Description: The application ID for the GitHub App authentication method.
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_version_control_system_github_application_installation_id"></a> [version\_control\_system\_github\_application\_installation\_id](#input\_version\_control\_system\_github\_application\_installation\_id)
+
+Description: The installation ID for the GitHub App authentication method.
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_version_control_system_github_application_key"></a> [version\_control\_system\_github\_application\_key](#input\_version\_control\_system\_github\_application\_key)
+
+Description: The application key for the GitHub App authentication method.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_version_control_system_personal_access_token"></a> [version\_control\_system\_personal\_access\_token](#input\_version\_control\_system\_personal\_access\_token)
+
+Description: The personal access token for the version control system.
 
 Type: `string`
 
@@ -1014,19 +1068,19 @@ Version:
 
 Source: Azure/avm-res-operationalinsights-workspace/azurerm
 
-Version: 0.3.3
+Version: 0.4.2
 
 ### <a name="module_user_assigned_managed_identity"></a> [user\_assigned\_managed\_identity](#module\_user\_assigned\_managed\_identity)
 
 Source: Azure/avm-res-managedidentity-userassignedidentity/azurerm
 
-Version: 0.3.1
+Version: 0.3.3
 
 ### <a name="module_virtual_network"></a> [virtual\_network](#module\_virtual\_network)
 
 Source: Azure/avm-res-network-virtualnetwork/azurerm
 
-Version: 0.7.1
+Version: 0.8.1
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection

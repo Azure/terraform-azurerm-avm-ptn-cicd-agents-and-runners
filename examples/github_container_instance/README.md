@@ -4,23 +4,6 @@
 This example deploys GitHub Runners to Azure Container Instance using the minimal set of required variables using private networking.
 
 ```hcl
-variable "github_organization_name" {
-  type        = string
-  description = "GitHub Organisation Name"
-}
-
-variable "github_personal_access_token" {
-  type        = string
-  description = "The personal access token used for authentication to GitHub."
-  sensitive   = true
-}
-
-variable "github_runners_personal_access_token" {
-  description = "Personal access token for GitHub self-hosted runners (the token requires the 'repo' scope and should not expire)."
-  type        = string
-  sensitive   = true
-}
-
 locals {
   tags = {
     scenario = "default"
@@ -32,7 +15,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.113"
+      version = "~> 4.20"
     }
     github = {
       source  = "integrations/github"
@@ -99,17 +82,19 @@ resource "github_repository_file" "this" {
 
 # This is the module call
 module "github_runners" {
-  source                                       = "../.."
-  compute_types                                = ["azure_container_instance"]
-  postfix                                      = random_string.name.result
+  source = "../.."
+
   location                                     = local.selected_region
-  version_control_system_type                  = "github"
-  version_control_system_personal_access_token = var.github_runners_personal_access_token
+  postfix                                      = random_string.name.result
   version_control_system_organization          = var.github_organization_name
+  version_control_system_type                  = "github"
+  compute_types                                = ["azure_container_instance"]
+  tags                                         = local.tags
+  version_control_system_personal_access_token = var.github_runners_personal_access_token
   version_control_system_repository            = github_repository.this.name
   virtual_network_address_space                = "10.0.0.0/16"
-  tags                                         = local.tags
-  depends_on                                   = [github_repository_file.this]
+
+  depends_on = [github_repository_file.this]
 }
 
 # Region helpers
@@ -142,7 +127,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9, < 2.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.113)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.20)
 
 - <a name="requirement_github"></a> [github](#requirement\_github) (~> 5.36)
 

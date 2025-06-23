@@ -1,11 +1,12 @@
 module "virtual_network" {
-  count               = var.use_private_networking && var.virtual_network_creation_enabled ? 1 : 0
-  source              = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version             = "0.7.1"
-  name                = local.virtual_network_name
-  resource_group_name = local.resource_group_name
-  location            = var.location
+  source  = "Azure/avm-res-network-virtualnetwork/azurerm"
+  version = "0.8.1"
+  count   = var.use_private_networking && var.virtual_network_creation_enabled ? 1 : 0
+
   address_space       = [var.virtual_network_address_space]
+  location            = var.location
+  resource_group_name = local.resource_group_name
+  name                = local.virtual_network_name
   subnets = merge(local.final_subnets, {
     container_registry_private_endpoint = {
       name           = local.container_registry_private_endpoint_subnet_name
@@ -41,6 +42,7 @@ resource "azurerm_public_ip" "this" {
   resource_group_name = local.resource_group_name
   sku                 = "Standard"
   tags                = var.tags
+  zones               = var.public_ip_zones
 }
 
 resource "azurerm_nat_gateway" "this" {

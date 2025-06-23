@@ -1,11 +1,11 @@
-variable "job_name" {
-  type        = string
-  description = "The name of the Container App job."
-}
-
 variable "job_container_name" {
   type        = string
   description = "The name of the container for the runner Container Apps job."
+}
+
+variable "job_name" {
+  type        = string
+  description = "The name of the Container App job."
 }
 
 variable "max_execution_count" {

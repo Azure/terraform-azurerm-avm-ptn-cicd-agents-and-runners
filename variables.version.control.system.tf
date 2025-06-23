@@ -3,12 +3,6 @@ variable "version_control_system_organization" {
   description = "The version control system organization to deploy the agents too."
 }
 
-variable "version_control_system_personal_access_token" {
-  type        = string
-  description = "The personal access token for the version control system."
-  sensitive   = true
-}
-
 variable "version_control_system_type" {
   type        = string
   description = "The type of the version control system to deploy the agents too. Allowed values are 'azuredevops' or 'github'"
@@ -26,22 +20,90 @@ variable "version_control_system_agent_name_prefix" {
   description = "The version control system agent name prefix."
 }
 
-variable "version_control_system_placeholder_agent_name" {
-  type        = string
-  default     = null
-  description = "The version control system placeholder agent name."
-}
-
 variable "version_control_system_agent_target_queue_length" {
   type        = number
   default     = 1
   description = "The target value for the amound of pending jobs to scale on."
 }
 
+variable "version_control_system_authentication_method" {
+  type        = string
+  default     = "pat"
+  description = "GitHub authentication method. Possible values: pat or github_app"
+
+  validation {
+    condition = (
+      var.version_control_system_type == "azuredevops" ? var.version_control_system_authentication_method == "pat" :
+      var.version_control_system_authentication_method == "pat" || var.version_control_system_authentication_method == "github_app"
+    )
+    error_message = "azuredevops and github both support only pat while github_app is only supported for github."
+  }
+}
+
 variable "version_control_system_enterprise" {
   type        = string
   default     = null
   description = "The enterprise name for the version control system."
+}
+
+variable "version_control_system_github_application_id" {
+  type        = string
+  default     = ""
+  description = "The application ID for the GitHub App authentication method."
+
+  validation {
+    condition = (
+      var.version_control_system_authentication_method == "github_app" ? length(var.version_control_system_github_application_id) > 0 : true
+    )
+    error_message = "Variable version_control_system_github_application_id must be defined when version_control_system_authentication_method is github_app."
+  }
+}
+
+variable "version_control_system_github_application_installation_id" {
+  type        = string
+  default     = ""
+  description = "The installation ID for the GitHub App authentication method."
+
+  validation {
+    condition = (
+      var.version_control_system_authentication_method == "github_app" ? length(var.version_control_system_github_application_installation_id) > 0 : true
+    )
+    error_message = "Variable version_control_system_github_application_installation_id must be defined when version_control_system_authentication_method is github_app."
+  }
+}
+
+variable "version_control_system_github_application_key" {
+  type        = string
+  default     = null
+  description = "The application key for the GitHub App authentication method."
+  sensitive   = true
+
+  validation {
+    condition = (
+      var.version_control_system_authentication_method == "github_app" ? var.version_control_system_github_application_key != "" && var.version_control_system_github_application_key != null : true
+    )
+    error_message = "Variable version_control_system_github_application_key must be defined when version_control_system_authentication_method is github_app."
+  }
+}
+
+variable "version_control_system_personal_access_token" {
+  type        = string
+  default     = null
+  description = "The personal access token for the version control system."
+  sensitive   = true
+
+  validation {
+    condition = (
+      var.version_control_system_authentication_method == "pat" ? var.version_control_system_personal_access_token != "" && var.version_control_system_personal_access_token != null : true
+    )
+    error_message = "Variable version_control_system_personal_access_token must be defined when version_control_system_authentication_method is pat."
+  }
+}
+
+variable "version_control_system_placeholder_agent_name" {
+  type        = string
+  default     = null
+  description = "The version control system placeholder agent name."
 }
 
 variable "version_control_system_pool_name" {

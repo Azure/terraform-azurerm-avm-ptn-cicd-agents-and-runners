@@ -1,4 +1,3 @@
-
 variable "container_registry_creation_enabled" {
   type        = bool
   default     = true
@@ -9,31 +8,6 @@ variable "container_registry_name" {
   type        = string
   default     = null
   description = "The name of the container registry. Only required if `container_registry_creation_enabled` is `true`."
-}
-
-variable "custom_container_registry_login_server" {
-  type        = string
-  description = "The login server of the container registry to use if `container_registry_creation_enabled` is `false`."
-  default     = null
-}
-
-variable "custom_container_registry_username" {
-  type        = string
-  description = "The username of the container registry to use if `container_registry_creation_enabled` is `false`."
-  default     = null
-}
-
-variable "custom_container_registry_password" {
-  type        = string
-  description = "The password of the container registry to use if `container_registry_creation_enabled` is `false`."
-  default     = null
-  sensitive   = true
-}
-
-variable "use_default_container_image" {
-  type        = bool
-  default     = true
-  description = "Whether or not to use the default container image provided by the module."
 }
 
 variable "custom_container_registry_images" {
@@ -57,37 +31,62 @@ The images to build and push to the container registry. This is only relevant if
 DESCRIPTION
 }
 
-variable "default_image_repository_url" {
+variable "custom_container_registry_login_server" {
   type        = string
-  description = "The default image repository URL to use if no custom image is provided."
-  default     = "https://github.com/Azure/avm-container-images-cicd-agents-and-runners"
+  default     = null
+  description = "The login server of the container registry to use if `container_registry_creation_enabled` is `false`."
+}
+
+variable "custom_container_registry_password" {
+  type        = string
+  default     = null
+  description = "The password of the container registry to use if `container_registry_creation_enabled` is `false`."
+  sensitive   = true
+}
+
+variable "custom_container_registry_username" {
+  type        = string
+  default     = null
+  description = "The username of the container registry to use if `container_registry_creation_enabled` is `false`."
+}
+
+variable "default_image_name" {
+  type        = string
+  default     = null
+  description = "The default image name to use if no custom image is provided."
+}
+
+variable "default_image_registry_dockerfile_path" {
+  type        = string
+  default     = "dockerfile"
+  description = "The default image registry Dockerfile path to use if no custom image is provided."
 }
 
 variable "default_image_repository_commit" {
   type        = string
-  description = "The default image repository commit to use if no custom image is provided."
   default     = "bc4087f"
+  description = "The default image repository commit to use if no custom image is provided."
 }
 
 variable "default_image_repository_folder_paths" {
-  type        = map(string)
-  description = "The default image repository folder path to use if no custom image is provided."
+  type = map(string)
   default = {
     azuredevops-container-app      = "azure-devops-agent-aca"
     github-container-app           = "github-runner-aca"
     azuredevops-container-instance = "azure-devops-agent-aci"
     github-container-instance      = "github-runner-aci"
   }
+  description = "The default image repository folder path to use if no custom image is provided."
 }
 
-variable "default_image_registry_dockerfile_path" {
+variable "default_image_repository_url" {
   type        = string
-  description = "The default image registry Dockerfile path to use if no custom image is provided."
-  default     = "dockerfile"
+  default     = "https://github.com/Azure/avm-container-images-cicd-agents-and-runners"
+  description = "The default image repository URL to use if no custom image is provided."
 }
 
-variable "default_image_name" {
-  type        = string
-  description = "The default image name to use if no custom image is provided."
-  default     = null
+variable "use_default_container_image" {
+  type        = bool
+  default     = true
+  description = "Whether or not to use the default container image provided by the module."
 }

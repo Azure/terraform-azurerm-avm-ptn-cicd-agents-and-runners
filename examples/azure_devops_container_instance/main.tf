@@ -1,20 +1,3 @@
-variable "azure_devops_organization_name" {
-  type        = string
-  description = "Azure DevOps Organisation Name"
-}
-
-variable "azure_devops_personal_access_token" {
-  type        = string
-  description = "The personal access token used for agent authentication to Azure DevOps."
-  sensitive   = true
-}
-
-variable "azure_devops_agents_personal_access_token" {
-  description = "Personal access token for Azure DevOps self-hosted agents (the token requires the 'Agent Pools - Read & Manage' scope and should have the maximum expiry)."
-  type        = string
-  sensitive   = true
-}
-
 locals {
   tags = {
     scenario = "default"
@@ -30,7 +13,7 @@ terraform {
     }
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.113"
+      version = "~> 4.20"
     }
     random = {
       source  = "hashicorp/random"
@@ -130,25 +113,19 @@ resource "azuredevops_pipeline_authorization" "this" {
 
 # This is the module call
 module "azure_devops_agents" {
-  source                                       = "../.."
-  compute_types                                = ["azure_container_instance"]
-  postfix                                      = random_string.name.result
+  source = "../.."
+
   location                                     = local.selected_region
-  version_control_system_type                  = "azuredevops"
-  version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
+  postfix                                      = random_string.name.result
   version_control_system_organization          = local.azure_devops_organization_url
+  version_control_system_type                  = "azuredevops"
+  compute_types                                = ["azure_container_instance"]
+  tags                                         = local.tags
+  version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
   version_control_system_pool_name             = azuredevops_agent_pool.this.name
   virtual_network_address_space                = "10.0.0.0/16"
-  tags                                         = local.tags
-  depends_on                                   = [azuredevops_pipeline_authorization.this]
-}
 
-output "container_instance_resource_ids" {
-  value = module.azure_devops_agents.container_instance_resource_ids
-}
-
-output "container_instance_names" {
-  value = module.azure_devops_agents.container_instance_names
+  depends_on = [azuredevops_pipeline_authorization.this]
 }
 
 # Region helpers

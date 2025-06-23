@@ -60,13 +60,13 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9, < 2.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.113)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.20)
 
 ## Providers
 
 The following providers are used by this module:
 
-- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (~> 3.113)
+- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (~> 4.20)
 
 ## Resources
 
@@ -131,13 +131,7 @@ Description: List of availability zones
 
 Type: `list(string)`
 
-Default:
-
-```json
-[
-  1
-]
-```
+Default: `null`
 
 ### <a name="input_container_cpu"></a> [container\_cpu](#input\_container\_cpu)
 
