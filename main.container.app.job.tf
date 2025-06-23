@@ -32,5 +32,10 @@ module "container_app_job" {
   registry_username                 = var.custom_container_registry_username
   tags                              = var.tags
 
-  depends_on = [module.container_registry, azurerm_private_dns_zone_virtual_network_link.container_registry, time_sleep.delay_after_container_image_build]
+  depends_on = [
+    module.container_registry,
+    azurerm_private_dns_zone_virtual_network_link.container_registry,
+    time_sleep.delay_after_container_image_build,
+    time_sleep.delay_after_container_app_environment_creation
+  ]
 }

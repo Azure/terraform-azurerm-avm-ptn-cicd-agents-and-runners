@@ -4,9 +4,6 @@
 This example deploys Azure DevOps Agents to Azure Container Apps using the minimal set of required variables with public networking.
 
 ```hcl
-
-
-
 locals {
   tags = {
     scenario = "default"
@@ -150,18 +147,14 @@ module "azure_devops_agents" {
   location                                     = local.selected_region
   postfix                                      = random_string.name.result
   version_control_system_organization          = local.azure_devops_organization_url
-  version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
   version_control_system_type                  = "azuredevops"
   tags                                         = local.tags
   use_private_networking                       = false
+  version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
   version_control_system_pool_name             = azuredevops_agent_pool.this.name
 
   depends_on = [azuredevops_pipeline_authorization.this]
 }
-
-
-
-
 
 # Region helpers
 module "regions" {
