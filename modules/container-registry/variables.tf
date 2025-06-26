@@ -29,6 +29,12 @@ variable "use_private_networking" {
   description = "Whether to use private networking for the container registry"
 }
 
+variable "use_zone_redundancy" {
+  type        = bool
+  default     = true
+  description = "Whether to use zone redundancy for the container registry"
+}
+
 variable "images" {
   type = map(object({
     task_name            = string

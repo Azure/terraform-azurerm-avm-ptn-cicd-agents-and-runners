@@ -15,7 +15,7 @@ module "container_registry" {
   } : null
   public_network_access_enabled = !var.use_private_networking
   tags                          = var.tags
-  zone_redundancy_enabled       = var.use_private_networking
+  zone_redundancy_enabled       = var.use_zone_redundancy ? true : false
 }
 
 resource "azapi_update_resource" "network_rule_bypass_allowed_for_tasks" {
