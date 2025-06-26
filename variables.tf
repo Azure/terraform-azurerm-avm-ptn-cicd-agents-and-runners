@@ -86,3 +86,9 @@ variable "use_private_networking" {
   default     = true
   description = "Whether or not to use private networking for the container registry."
 }
+
+variable "use_zone_redundancy" {
+  type        = bool
+  default     = true
+  description = "Whether or not to use zone redundancy for the container app environment."
+}
