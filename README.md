@@ -802,6 +802,14 @@ Type: `bool`
 
 Default: `true`
 
+### <a name="input_use_zone_redundancy"></a> [use\_zone\_redundancy](#input\_use\_zone\_redundancy)
+
+Description: Whether or not to use zone redundancy for the container app environment.
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_user_assigned_managed_identity_creation_enabled"></a> [user\_assigned\_managed\_identity\_creation\_enabled](#input\_user\_assigned\_managed\_identity\_creation\_enabled)
 
 Description: Whether or not to create a user assigned managed identity.
