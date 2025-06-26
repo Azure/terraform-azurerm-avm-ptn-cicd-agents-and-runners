@@ -12,6 +12,7 @@ module "container_registry" {
   private_dns_zone_id                     = local.container_registry_dns_zone_id
   subnet_id                               = local.container_registry_private_endpoint_subnet_id
   tags                                    = var.tags
+  use_zone_redundancy                     = var.use_zone_redundancy ? true : false
 }
 
 resource "time_sleep" "delay_after_container_image_build" {
