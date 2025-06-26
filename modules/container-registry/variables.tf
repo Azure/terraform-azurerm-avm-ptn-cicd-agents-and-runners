@@ -28,6 +28,7 @@ variable "use_private_networking" {
   type        = bool
   description = "Whether to use private networking for the container registry"
 }
+
 variable "use_zone_redundancy" {
   type        = bool
   default     = true
@@ -70,10 +71,4 @@ variable "tags" {
   type        = map(string)
   default     = null
   description = "(Optional) Tags of the resource."
-}
-
-variable "use_zone_redundancy" {
-  type        = bool
-  default     = true
-  description = "Whether to use zone redundancy for the container registry"
 }
