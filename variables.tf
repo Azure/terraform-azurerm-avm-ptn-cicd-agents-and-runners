@@ -89,6 +89,11 @@ variable "use_private_networking" {
 
 variable "use_zone_redundancy" {
   type        = bool
-  default     = true
-  description = "Whether or not to use zone redundancy for the container app environment, container registry and public IP."
+  description = "Enable zone redundancy for the deployment"
+  default     = false
+
+  validation {
+    condition = !(var.use_zone_redundancy == true && var.use_private_networking == false)
+    error_message = "Zone redundancy requires private networking to be enabled. When use_zone_redundancy is true, use_private_networking must also be true because infrastructure_subnet_id is required for zone redundant deployments."
+  }
 }
