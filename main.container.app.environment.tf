@@ -9,7 +9,7 @@ resource "azurerm_container_app_environment" "this" {
   internal_load_balancer_enabled     = var.use_private_networking ? true : null
   log_analytics_workspace_id         = local.log_analytics_workspace_id
   tags                               = var.tags
-  zone_redundancy_enabled            = var.use_zone_redundancy ? true : false
+  zone_redundancy_enabled            = var.use_zone_redundancy ? true : null
 
   workload_profile {
     name                  = "Consumption"

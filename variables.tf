@@ -90,5 +90,5 @@ variable "use_private_networking" {
 variable "use_zone_redundancy" {
   type        = bool
   default     = true
-  description = "Whether or not to use zone redundancy for the container app environment."
+  description = "Whether or not to use zone redundancy for the container app environment, container registry and public IP."
 }
