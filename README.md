@@ -804,7 +804,7 @@ Default: `true`
 
 ### <a name="input_use_zone_redundancy"></a> [use\_zone\_redundancy](#input\_use\_zone\_redundancy)
 
-Description: Whether or not to use zone redundancy for the container app environment.
+Description: Whether or not to use zone redundancy for the container app environment, container registry and public IP.
 
 Type: `bool`
 
