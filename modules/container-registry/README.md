@@ -217,7 +217,7 @@ Default: `null`
 
 ### <a name="input_use_zone_redundancy"></a> [use\_zone\_redundancy](#input\_use\_zone\_redundancy)
 
-Description: Whether to use zone redundancy for the container registry. Defaults to true.
+Description: Enable zone redundancy for the deployment
 
 Type: `bool`
 
