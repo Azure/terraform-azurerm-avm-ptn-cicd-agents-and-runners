@@ -21,6 +21,6 @@ module "container_instance" {
   subnet_id                         = local.container_instance_subnet_id
   use_private_networking            = var.use_private_networking
 
-  depends_on = [module.container_registry, azurerm_private_dns_zone_virtual_network_link.container_registry, time_sleep.delay_after_container_image_build]
+  depends_on = [module.container_registry, azurerm_role_assignment.container_registry_pull_for_container_instance, azurerm_private_dns_zone_virtual_network_link.container_registry, time_sleep.delay_after_container_image_build]
 }
 

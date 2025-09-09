@@ -31,6 +31,12 @@ The images to build and push to the container registry. This is only relevant if
 DESCRIPTION
 }
 
+variable "custom_container_registry_id" {
+  type        = string
+  default     = null
+  description = "The id of the container registry to use if `container_registry_creation_enabled` is `false`."
+}
+
 variable "custom_container_registry_login_server" {
   type        = string
   default     = null
