@@ -8,6 +8,7 @@ resource "azurerm_container_app_environment" "this" {
   infrastructure_subnet_id           = var.use_private_networking ? local.container_app_subnet_id : null
   internal_load_balancer_enabled     = var.use_private_networking ? true : null
   log_analytics_workspace_id         = local.log_analytics_workspace_id
+  logs_destination                   = "log-analytics"
   tags                               = var.tags
   zone_redundancy_enabled            = var.use_private_networking ? true : null
 
