@@ -14,6 +14,14 @@ module "container_registry" {
   tags                                    = var.tags
 }
 
+resource "azurerm_role_assignment" "container_registry_pull_for_container_instance" {
+  count = var.user_assigned_managed_identity_creation_enabled && var.custom_container_registry_id != null ? 1 : 0
+
+  principal_id         = local.user_assigned_managed_identity_principal_id
+  scope                = var.custom_container_registry_id
+  role_definition_name = "AcrPull"
+}
+
 resource "time_sleep" "delay_after_container_image_build" {
   create_duration = "${var.delays.delay_after_container_image_build}s"
 

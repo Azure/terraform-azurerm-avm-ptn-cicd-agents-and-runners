@@ -10,6 +10,12 @@ variable "container_registry_name" {
   description = "The name of the container registry. Only required if `container_registry_creation_enabled` is `true`."
 }
 
+variable "custom_container_registry_id" {
+  type        = string
+  default     = null
+  description = "The id of the container registry to use if `container_registry_creation_enabled` is `false`."
+}
+
 variable "custom_container_registry_images" {
   type = map(object({
     task_name            = string
