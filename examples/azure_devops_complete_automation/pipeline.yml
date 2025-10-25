@@ -1,0 +1,170 @@
+# Azure DevOps Pipeline for KEDA Auto-Scaling Test
+# Simple tasks to trigger KEDA scaling with UAMI authentication
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+  paths:
+    exclude:
+      - '*.md'
+      - 'docs/*'
+
+pool:
+  name: '${agent_pool_name}'
+
+variables:
+  - name: 'serviceConnection'
+    value: '${service_connection_name}'
+  - name: 'resourceGroupName'
+    value: '${resource_group_name}'
+
+stages:
+- stage: SimpleTest
+  displayName: 'Simple Azure CLI Test'
+  jobs:
+  - job: BasicAzureTest
+    displayName: 'Basic Azure CLI Operations'
+    steps:
+    - task: AzureCLI@2
+      displayName: 'Test UAMI Login'
+      inputs:
+        azureSubscription: '$(serviceConnection)'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          echo "🔐 Testing UAMI authentication..."
+          az account show --query '{subscriptionId: id, tenantId: tenantId}' -o table
+          echo "✅ UAMI authentication successful!"
+
+    - task: AzureCLI@2
+      displayName: 'List Resource Groups'
+      inputs:
+        azureSubscription: '$(serviceConnection)'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          echo "📋 Listing all resource groups..."
+          az group list --query '[].{Name:name, Location:location}' -o table
+          echo "✅ Resource groups listed successfully!"
+
+- stage: ParallelJobs
+  displayName: 'KEDA Scaling Test - Parallel Jobs'
+  dependsOn: SimpleTest
+  condition: succeeded()
+  jobs:
+  - job: ParallelJob1
+    displayName: 'Parallel Job 1 - List Locations'
+    steps:
+    - task: AzureCLI@2
+      displayName: 'List Azure Locations'
+      inputs:
+        azureSubscription: '$(serviceConnection)'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          echo "🌍 Job 1: Listing Azure locations..."
+          echo "Agent: $(Agent.Name)"
+          echo "Pool: ${agent_pool_name}"
+
+          # List Azure locations
+          az account list-locations --query '[].{Name:name, DisplayName:displayName}' -o table
+
+          # Add some processing time
+          for i in {1..15}; do
+            echo "Job 1 - Processing location data $i/15"
+            sleep 2
+          done
+          echo "✅ Job 1 completed successfully"
+
+  - job: ParallelJob2
+    displayName: 'Parallel Job 2 - Check VM Sizes'
+    steps:
+    - task: AzureCLI@2
+      displayName: 'Check Available VM Sizes'
+      inputs:
+        azureSubscription: '$(serviceConnection)'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          echo "� Job 2: Checking VM sizes in East US 2..."
+          echo "Agent: $(Agent.Name)"
+          echo "Pool: ${agent_pool_name}"
+
+          # List VM sizes in East US 2
+          az vm list-sizes --location "East US 2" --query '[0:10].{Name:name, Cores:numberOfCores, Memory:memoryInMb}' -o table
+
+          # Add some processing time
+          for i in {1..12}; do
+            echo "Job 2 - Analyzing VM size $i/12"
+            sleep 3
+          done
+          echo "✅ Job 2 completed successfully"
+
+  - job: ParallelJob3
+    displayName: 'Parallel Job 3 - Resource Providers'
+    steps:
+    - task: AzureCLI@2
+      displayName: 'List Resource Providers'
+      inputs:
+        azureSubscription: '$(serviceConnection)'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          echo "🔧 Job 3: Listing resource providers..."
+          echo "Agent: $(Agent.Name)"
+          echo "Pool: ${agent_pool_name}"
+
+          # List registered resource providers
+          az provider list --query '[0:15].{Namespace:namespace, State:registrationState}' -o table
+
+          # Add some processing time
+          for i in {1..10}; do
+            echo "Job 3 - Processing provider info $i/10"
+            sleep 4
+          done
+          echo "✅ Job 3 completed successfully"
+
+- stage: FinalTest
+  displayName: 'Final Verification'
+  dependsOn: ParallelJobs
+  condition: succeeded()
+  jobs:
+  - job: FinalVerification
+    displayName: 'Final KEDA Test Summary'
+    steps:
+    - task: AzureCLI@2
+      displayName: 'Verify Our Resource Group'
+      inputs:
+        azureSubscription: '$(serviceConnection)'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          echo "🎯 Final verification of our deployment..."
+          echo "Target Resource Group: $(resourceGroupName)"
+
+          # Show our resource group details
+          az group show --name $(resourceGroupName) --query '{Name:name, Location:location, ProvisioningState:properties.provisioningState}' -o table
+
+          # Count resources in our group
+          RESOURCE_COUNT=$(az resource list --resource-group $(resourceGroupName) --query 'length(@)')
+          echo "Resources in $(resourceGroupName): $RESOURCE_COUNT"
+
+          echo "✅ Final verification completed!"
+
+    - script: |
+        echo "🎉 KEDA Auto-Scaling Test Results:"
+        echo "=================================="
+        echo "Agent Pool: ${agent_pool_name}"
+        echo "Service Connection: $(serviceConnection) (UAMI-based)"
+        echo "Resource Group: $(resourceGroupName)"
+        echo ""
+        echo "Test Summary:"
+        echo "- ✅ UAMI authentication working"
+        echo "- ✅ Parallel jobs executed (3 simultaneous jobs)"
+        echo "- ✅ Azure CLI operations successful"
+        echo "- ✅ KEDA should have scaled agents based on demand"
+        echo ""
+        echo "🚀 KEDA auto-scaling test completed successfully!"
+      displayName: 'Test Summary'

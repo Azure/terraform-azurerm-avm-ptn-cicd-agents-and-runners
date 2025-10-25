@@ -1,0 +1,14 @@
+trigger:
+- main
+
+pool: ${agent_pool_name}
+
+steps:
+- script: echo Hello, world from Container App with UAMI!
+  displayName: 'Run a one-line script'
+
+- script: |
+    echo "This agent is running in Azure Container Apps"
+    echo "Authentication method: User Assigned Managed Identity (UAMI)"
+    echo "Agent Pool: ${agent_pool_name}"
+  displayName: 'Show agent information'
