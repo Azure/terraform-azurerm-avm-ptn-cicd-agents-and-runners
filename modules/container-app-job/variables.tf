@@ -85,3 +85,22 @@ variable "registry_username" {
   default     = null
   description = "Name of the container registry."
 }
+
+variable "sensitive_environment_variables_placeholder" {
+  type = set(object({
+    name                      = string
+    value                     = string
+    container_app_secret_name = string
+    keda_auth_name            = optional(string)
+  }))
+  default     = []
+  description = "List of sensitive environment variables to pass to the placeholder container. Defaults to empty to avoid Azure DevOps connection for placeholder jobs."
+  sensitive   = true
+}
+
+variable "use_managed_identity_auth" {
+  type        = bool
+  default     = false
+  description = "Whether to use managed identity for KEDA authentication instead of PAT."
+  nullable    = false
+}

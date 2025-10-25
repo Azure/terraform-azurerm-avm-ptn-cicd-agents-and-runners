@@ -31,6 +31,7 @@ module "container_app_job" {
   registry_password                 = var.custom_container_registry_password
   registry_username                 = var.custom_container_registry_username
   tags                              = var.tags
+  use_managed_identity_auth         = var.version_control_system_type == local.version_control_system_azure_devops && var.version_control_system_authentication_method == "uami"
 
   depends_on = [
     module.container_registry,

@@ -67,10 +67,12 @@ locals {
     secretRef        = env.container_app_secret_name
     triggerParameter = env.keda_auth_name
   } if env.keda_auth_name != null]
-  keda_rule = {
+  keda_rule = merge({
     name     = var.keda_rule_type
     type     = var.keda_rule_type
     metadata = var.keda_meta_data
     auth     = local.keda_auth
-  }
+    }, var.use_managed_identity_auth ? {
+    identity = var.user_assigned_managed_identity_id
+  } : {})
 }
