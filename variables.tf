@@ -64,6 +64,18 @@ variable "lock" {
   }
 }
 
+variable "log_analytics_workspace_internet_ingestion_enabled" {
+  type        = bool
+  default     = null
+  description = "Whether or not to enable internet ingestion for the Log Analytics workspace. If null, defaults to opposite of use_private_networking (true when private networking is false)."
+}
+
+variable "log_analytics_workspace_internet_query_enabled" {
+  type        = bool
+  default     = null
+  description = "Whether or not to enable internet query for the Log Analytics workspace. If null, defaults to opposite of use_private_networking (true when private networking is false)."
+}
+
 variable "resource_group_creation_enabled" {
   type        = bool
   default     = true
