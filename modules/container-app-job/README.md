@@ -237,6 +237,23 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_sensitive_environment_variables_placeholder"></a> [sensitive\_environment\_variables\_placeholder](#input\_sensitive\_environment\_variables\_placeholder)
+
+Description: List of sensitive environment variables to pass to the placeholder container. Defaults to empty to avoid Azure DevOps connection for placeholder jobs.
+
+Type:
+
+```hcl
+set(object({
+    name                      = string
+    value                     = string
+    container_app_secret_name = string
+    keda_auth_name            = optional(string)
+  }))
+```
+
+Default: `[]`
+
 ### <a name="input_tags"></a> [tags](#input\_tags)
 
 Description: (Optional) Tags of the resource.
@@ -244,6 +261,14 @@ Description: (Optional) Tags of the resource.
 Type: `map(string)`
 
 Default: `null`
+
+### <a name="input_use_managed_identity_auth"></a> [use\_managed\_identity\_auth](#input\_use\_managed\_identity\_auth)
+
+Description: Whether to use managed identity for KEDA authentication instead of PAT.
+
+Type: `bool`
+
+Default: `false`
 
 ## Outputs
 
