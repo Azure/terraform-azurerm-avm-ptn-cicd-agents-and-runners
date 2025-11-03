@@ -29,7 +29,7 @@ variable "version_control_system_agent_target_queue_length" {
 variable "version_control_system_authentication_method" {
   type        = string
   default     = "pat"
-  description = "Authentication method. For Azure DevOps: 'pat' or 'uami'. For GitHub: 'pat' or 'github_app'"
+  description = "Authentication method. For Azure DevOps: 'pat' or 'uami' (requires Azure DevOps prerequisites - see README). For GitHub: 'pat' or 'github_app'"
 
   validation {
     condition = (
