@@ -86,6 +86,16 @@ variable "registry_username" {
   description = "Name of the container registry."
 }
 
+variable "retry" {
+  type = object({
+    error_message_regex  = optional(list(string), ["ReferencedResourceNotProvisioned"])
+    interval_seconds     = optional(number, 10)
+    max_interval_seconds = optional(number, 180)
+  })
+  default     = {}
+  description = "Retry configuration for the resource operations"
+}
+
 variable "sensitive_environment_variables_placeholder" {
   type = set(object({
     name                      = string

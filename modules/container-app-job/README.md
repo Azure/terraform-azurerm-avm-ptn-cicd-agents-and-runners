@@ -237,6 +237,22 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_retry"></a> [retry](#input\_retry)
+
+Description: Retry configuration for the resource operations
+
+Type:
+
+```hcl
+object({
+    error_message_regex  = optional(list(string), ["ReferencedResourceNotProvisioned"])
+    interval_seconds     = optional(number, 10)
+    max_interval_seconds = optional(number, 180)
+  })
+```
+
+Default: `{}`
+
 ### <a name="input_sensitive_environment_variables_placeholder"></a> [sensitive\_environment\_variables\_placeholder](#input\_sensitive\_environment\_variables\_placeholder)
 
 Description: List of sensitive environment variables to pass to the placeholder container. Defaults to empty to avoid Azure DevOps connection for placeholder jobs.

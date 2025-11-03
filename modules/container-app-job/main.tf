@@ -28,6 +28,7 @@ resource "azapi_resource" "job" {
       }
     }
   }
+  retry                     = var.retry
   schema_validation_enabled = true
   tags                      = var.tags
 
@@ -63,7 +64,8 @@ resource "azapi_resource" "placeholder" {
       }
     }
   }
-  tags = null
+  retry = var.retry
+  tags  = null
 
   identity {
     type         = "UserAssigned"
