@@ -1,24 +1,24 @@
-# Azure DevOps Container Apps with User Assigned Managed Identity (UAMI) Authentication
+# Azure DevOps Container Apps with UAMI - Complete Automation Example
 
-This example shows how to deploy Azure DevOps Agents to Azure Container Apps using User Assigned Managed Identity (UAMI) for authentication instead of Personal Access Token (PAT).
+This example demonstrates complete end-to-end User Assigned Managed Identity (UAMI) authentication setup for Azure DevOps CI/CD agents - no PAT tokens required and no manual Azure DevOps configuration needed.
 
-## Key Features
+## ⚠️ Prerequisites Required
 
-- **UAMI Authentication**: Uses User Assigned Managed Identity for agent authentication with Azure DevOps instead of PAT
-- **Container Apps**: Deploys agents as Container App Jobs with KEDA scaling
-- **Auto Scaling**: Scales from 0 to N based on Azure DevOps queue length
-- **Private Networking**: Uses private networking with NAT Gateway for outbound connectivity
-- **Complete Infrastructure**: Creates all required Azure resources including VNet, Container Registry, Log Analytics, etc.
+**No manual setup required!** This example provides complete automation including:
 
-## Authentication Method Comparison
+1. **Automatic UAMI creation**: Creates User Assigned Managed Identity with proper Azure permissions
+2. **Azure DevOps integration**: Automatically configures projects, agent pools, and service connections
+3. **Infrastructure deployment**: Deploys Container Apps using the configured UAMI authentication
 
-| Feature | PAT Authentication | UAMI Authentication |
-|---------|-------------------|-------------------|
-| Secret Management | Requires PAT token | No secrets required |
-| Token Expiry | PAT tokens expire | Identity-based, no expiry |
-| Security | Token-based | Azure AD identity-based |
-| Maintenance | Manual token rotation | Automatic |
-| KEDA Auth | Uses PAT in secrets | Uses managed identity |
+> **Key benefit**: Fully automated setup - no manual Azure DevOps configuration steps needed!
+
+## Features
+
+- **Complete automation**: UAMI creation, Azure DevOps setup, and infrastructure deployment
+- **UAMI authentication**: No PAT tokens required for agent authentication
+- **KEDA auto-scaling**: Scale from 0 to N agents based on pipeline queue length
+- **Secure networking**: Private virtual networks for all components
+- **Two-phase deployment**: Automated UAMI setup followed by infrastructure deployment
 
 ## Usage
 

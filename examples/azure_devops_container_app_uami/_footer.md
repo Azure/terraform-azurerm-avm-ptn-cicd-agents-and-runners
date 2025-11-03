@@ -1,48 +1,29 @@
+## Clean Up
+
+To remove all resources created by this example:
+
+```bash
+terraform destroy
 ```
 
-## Prerequisites
+**Note**: This will remove:
+- All Azure resources (Container Apps, UAMI, networking, etc.)
+- Azure DevOps project and all associated resources
+- Service connections and agent pools
 
-Before running this example, you need:
+## Next Steps
 
-1. **Azure DevOps Organization**: An Azure DevOps organization where you have permissions to create projects and agent pools
-2. **Azure Subscription**: An Azure subscription where you can create resources
-3. **Azure DevOps PAT**: A Personal Access Token for creating Azure DevOps resources (project, agent pool, repository). This is different from agent authentication which uses UAMI
-   - Required scopes: `Agent Pools (Read & Manage)`, `Build (Read & Write)`, `Code (Read & Write)`, `Project and Team (Read & Write)`
+1. **Customize for Production**: Review security settings, network policies, and RBAC permissions
+2. **Scale Configuration**: Adjust container scaling rules based on your workload
+3. **Multi-Environment**: Use this pattern for dev/staging/prod environments
+4. **Custom Agents**: Build custom container images with your required tools
+5. **Monitoring**: Set up alerts and dashboards for agent performance
 
-## Variables
+## Support
 
-Set the following variables in `terraform.tfvars`:
+This example follows Azure Verified Modules (AVM) standards. For issues:
+- **Module Issues**: [AVM Repository Issues](https://github.com/Azure/terraform-azurerm-avm-ptn-cicd-agents-and-runners/issues)
+- **Azure DevOps Provider**: [Provider Documentation](https://registry.terraform.io/providers/microsoft/azuredevops/latest)
+- **Azure Documentation**: [Container Apps](https://docs.microsoft.com/azure/container-apps/)
 
-```hcl
-azure_devops_organization_name    = "your-org-name"
-azure_devops_personal_access_token = "your-pat-token-for-setup"
-```
-
-## Key Differences from PAT-based Examples
-
-- Sets `version_control_system_authentication_method = "uami"`
-- Does NOT require `version_control_system_personal_access_token` for agent authentication
-- The agents use the automatically created User Assigned Managed Identity to authenticate with Azure DevOps
-- KEDA scaling uses identity-based authentication instead of PAT secrets
-
-## Resources Created
-
-This example creates:
-
-- Azure DevOps Project, Agent Pool, Repository, and Build Pipeline
-- Resource Group
-- Virtual Network with subnets for Container Apps and Container Registry
-- NAT Gateway and Public IP for outbound connectivity
-- User Assigned Managed Identity with required permissions
-- Azure Container Registry with private endpoint
-- Log Analytics Workspace
-- Container App Environment
-- Container App Jobs (main agent job and placeholder job)
-- All necessary RBAC assignments for UAMI authentication
-
-## Notes
-
-- The User Assigned Managed Identity is automatically granted the necessary permissions to authenticate with Azure DevOps
-- No PAT tokens are stored in the Container App secrets for agent authentication
-- The setup PAT token is only used by the Terraform azuredevops provider to create the initial Azure DevOps resources
-- Agents will automatically register and deregister with the Azure DevOps agent pool using UAMI authentication
+Remember to follow the [AVM Contributing Guidelines](https://azure.github.io/Azure-Verified-Modules/contributing/) when submitting improvements.
