@@ -1,29 +1,4 @@
-## Clean Up
+<!-- markdownlint-disable-next-line MD041 -->
+## Data Collection
 
-To remove all resources created by this example:
-
-```bash
-terraform destroy
-```
-
-**Note**: This will remove:
-- All Azure resources (Container Apps, UAMI, networking, etc.)
-- Azure DevOps project and all associated resources
-- Service connections and agent pools
-
-## Next Steps
-
-1. **Customize for Production**: Review security settings, network policies, and RBAC permissions
-2. **Scale Configuration**: Adjust container scaling rules based on your workload
-3. **Multi-Environment**: Use this pattern for dev/staging/prod environments
-4. **Custom Agents**: Build custom container images with your required tools
-5. **Monitoring**: Set up alerts and dashboards for agent performance
-
-## Support
-
-This example follows Azure Verified Modules (AVM) standards. For issues:
-- **Module Issues**: [AVM Repository Issues](https://github.com/Azure/terraform-azurerm-avm-ptn-cicd-agents-and-runners/issues)
-- **Azure DevOps Provider**: [Provider Documentation](https://registry.terraform.io/providers/microsoft/azuredevops/latest)
-- **Azure Documentation**: [Container Apps](https://docs.microsoft.com/azure/container-apps/)
-
-Remember to follow the [AVM Contributing Guidelines](https://azure.github.io/Azure-Verified-Modules/contributing/) when submitting improvements.
+The software may collect information about you and your use of the software and send it to Microsoft. Microsoft may use this information to provide services and improve our products and services. You may turn off the telemetry as described in the repository. There are also some features in the software that may enable you and Microsoft to collect data from users of your applications. If you use these features, you must comply with applicable law, including providing appropriate notices to users of your applications together with a copy of Microsoft’s privacy statement. Our privacy statement is located at <https://go.microsoft.com/fwlink/?LinkID=824704>. You can learn more about data collection and use in the help documentation and our privacy statement. Your use of the software operates as your consent to these practices.

@@ -92,16 +92,12 @@ resource "azurerm_role_assignment" "uami_contributor" {
   principal_id         = module.uami.principal_id
   scope                = azurerm_resource_group.this.id
   role_definition_name = "Contributor"
-
-  depends_on = [module.uami]
 }
 
 resource "azurerm_role_assignment" "uami_acr_push" {
   principal_id         = module.uami.principal_id
   scope                = "/subscriptions/${data.azurerm_client_config.this.subscription_id}"
   role_definition_name = "AcrPush"
-
-  depends_on = [module.uami]
 }
 
 # Azure DevOps Project
@@ -230,7 +226,6 @@ resource "azuredevops_service_principal_entitlement" "uami" {
   origin_id            = module.uami.principal_id # Use principal_id (object ID) for managed identities
 
   depends_on = [
-    module.uami,
     time_sleep.uami_propagation
   ]
 }
@@ -262,7 +257,7 @@ module "azure_devops_agents" {
   # Version Control System Configuration - uses the resources created above
   version_control_system_type = "azuredevops"
   # Compute Configuration
-  compute_types = var.compute_types
+  compute_types = ["azure_container_app"] # Hardcoded: Recommended serverless auto-scaling
   # Container App Configuration
   container_app_max_execution_count      = 10
   container_app_min_execution_count      = 0
@@ -271,7 +266,7 @@ module "azure_devops_agents" {
   resource_group_creation_enabled          = false
   resource_group_name                      = azurerm_resource_group.this.name
   tags                                     = local.tags
-  use_private_networking                   = var.use_private_networking
+  use_private_networking                   = false # Hardcoded: false for easy setup, set to true for production
   user_assigned_managed_identity_client_id = module.uami.client_id
   # Use the UAMI created in Phase 1
   user_assigned_managed_identity_creation_enabled = false
@@ -281,7 +276,7 @@ module "azure_devops_agents" {
   version_control_system_personal_access_token    = null # Clean: no PAT needed!
   version_control_system_pool_name                = azuredevops_agent_pool.this.name
   # Networking Configuration
-  virtual_network_address_space = var.virtual_network_address_space
+  virtual_network_address_space = "10.0.0.0/16" # Hardcoded: Standard address space
 
   # Clean dependencies - everything from Phase 1 including automated UAMI setup
   depends_on = [
@@ -312,5 +307,5 @@ locals {
     "northcentralusstage", "westus2", "southeastasia", "swedencentral", "canadacentral", "westeurope", "northeurope", "eastus", "eastus2", "eastasia", "australiaeast", "germanywestcentral", "japaneast", "uksouth", "westus", "centralus", "northcentralus", "southcentralus", "koreacentral", "brazilsouth", "westus3", "francecentral", "southafricanorth", "norwayeast", "switzerlandnorth", "uaenorth", "canadaeast", "westcentralus", "ukwest", "centralindia", "italynorth", "polandcentral", "southindia"
   ]
   regions         = [for region in module.regions.regions : region.name if !contains(local.excluded_regions, region.name) && contains(local.included_regions, region.name)]
-  selected_region = local.regions[random_integer.region_index.result]
+  selected_region = var.location_override != null ? var.location_override : local.regions[random_integer.region_index.result]
 }
