@@ -8,10 +8,6 @@ terraform {
   required_version = ">= 1.9"
 
   required_providers {
-    azapi = {
-      source  = "azure/azapi"
-      version = "~> 2.4"
-    }
     azuredevops = {
       source  = "microsoft/azuredevops"
       version = "~> 1.1"
@@ -54,7 +50,7 @@ resource "random_string" "name" {
 
 module "naming" {
   source  = "Azure/naming/azurerm"
-  version = ">= 0.3.0"
+  version = "0.4.2"
 }
 
 data "azurerm_client_config" "this" {}
