@@ -64,7 +64,7 @@ resource "random_string" "name" {
 
 module "naming" {
   source  = "Azure/naming/azurerm"
-  version = ">= 0.3.0"
+  version = "0.4.2"
 }
 
 resource "azuredevops_project" "this" {
@@ -252,15 +252,7 @@ Type: `string`
 
 ## Optional Inputs
 
-The following input variables are optional (have default values):
-
-### <a name="input_location_override"></a> [location\_override](#input\_location\_override)
-
-Description: (Optional) Override the automatically selected Azure region. If not specified, a region is chosen automatically.
-
-Type: `string`
-
-Default: `null`
+No optional inputs.
 
 ## Outputs
 
@@ -296,7 +288,7 @@ Version:
 
 Source: Azure/naming/azurerm
 
-Version: >= 0.3.0
+Version: 0.4.2
 
 ### <a name="module_regions"></a> [regions](#module\_regions)
 
