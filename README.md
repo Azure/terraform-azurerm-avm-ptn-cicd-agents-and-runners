@@ -883,22 +883,6 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_retry"></a> [retry](#input\_retry)
-
-Description: Retry configuration for the resource operations
-
-Type:
-
-```hcl
-object({
-    error_message_regex  = optional(list(string), ["ReferencedResourceNotProvisioned"])
-    interval_seconds     = optional(number, 10)
-    max_interval_seconds = optional(number, 180)
-  })
-```
-
-Default: `{}`
-
 ### <a name="input_tags"></a> [tags](#input\_tags)
 
 Description: (Optional) Tags of the resource.
