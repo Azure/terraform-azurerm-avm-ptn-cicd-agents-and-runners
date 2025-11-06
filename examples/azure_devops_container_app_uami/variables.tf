@@ -1,13 +1,3 @@
-# ========================================
-# Required Variables
-# ========================================
-
-# ========================================
-# Optional Variables
-# ========================================
-
-# Container app scaling is configured directly in the module call using supported parameters
-
 variable "azure_devops_organization_name" {
   type        = string
   description = "Azure DevOps Organisation Name"
