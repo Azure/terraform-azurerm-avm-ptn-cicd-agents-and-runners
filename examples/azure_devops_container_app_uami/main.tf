@@ -112,7 +112,7 @@ resource "azuredevops_project" "this" {
 
 # Azure DevOps Agent Pool
 resource "azuredevops_agent_pool" "this" {
-  name           = "ContainerApps-${random_string.name.result}"
+  name           = "ContainerApps-UAMI-${random_string.name.result}"
   auto_provision = false
   auto_update    = true
 }
@@ -247,34 +247,27 @@ module "azure_devops_agents" {
   source = "../.."
 
   # Basic Configuration
-  location                            = local.selected_region
-  postfix                             = random_string.name.result
-  version_control_system_organization = local.azure_devops_organization_url
-  # Version Control System Configuration - uses the resources created above
-  version_control_system_type = "azuredevops"
-  # Compute Configuration
-  compute_types = ["azure_container_app"] # Hardcoded: Recommended serverless auto-scaling
-  # Container App Configuration
-  container_app_max_execution_count      = 10
-  container_app_min_execution_count      = 0
-  container_app_polling_interval_seconds = 30
-  # Use the Resource Group we created
-  resource_group_creation_enabled          = false
-  resource_group_name                      = azurerm_resource_group.this.name
-  tags                                     = local.tags
-  use_private_networking                   = false # Hardcoded: false for easy setup, set to true for production
-  user_assigned_managed_identity_client_id = module.uami.client_id
-  # Use the UAMI created in Phase 1
+  location                                        = local.selected_region
+  postfix                                         = random_string.name.result
+  version_control_system_organization             = local.azure_devops_organization_url
+  version_control_system_type                     = "azuredevops"
+  compute_types                                   = ["azure_container_app"]
+  container_app_max_execution_count               = 10
+  container_app_min_execution_count               = 0
+  container_app_polling_interval_seconds          = 30
+  resource_group_creation_enabled                 = false
+  resource_group_name                             = azurerm_resource_group.this.name
+  tags                                            = local.tags
+  use_private_networking                          = false
+  user_assigned_managed_identity_client_id        = module.uami.client_id
   user_assigned_managed_identity_creation_enabled = false
   user_assigned_managed_identity_id               = module.uami.resource_id
   user_assigned_managed_identity_principal_id     = module.uami.principal_id
   version_control_system_authentication_method    = "uami"
   version_control_system_personal_access_token    = null # Clean: no PAT needed!
   version_control_system_pool_name                = azuredevops_agent_pool.this.name
-  # Networking Configuration
-  virtual_network_address_space = "10.0.0.0/16" # Hardcoded: Standard address space
+  virtual_network_address_space                   = "10.0.0.0/16"
 
-  # Clean dependencies - everything from Phase 1 including automated UAMI setup
   depends_on = [
     azurerm_role_assignment.uami_contributor,
     azurerm_role_assignment.uami_acr_push,
