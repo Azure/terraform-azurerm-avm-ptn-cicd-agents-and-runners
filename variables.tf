@@ -88,8 +88,6 @@ variable "resource_group_name" {
   description = "The resource group where the resources will be deployed. Must be specified if `resource_group_creation_enabled == false`"
 }
 
-
-
 variable "tags" {
   type        = map(string)
   default     = null

@@ -96,8 +96,6 @@ variable "retry" {
   description = "Retry configuration for the resource operations"
 }
 
-
-
 variable "use_managed_identity_auth" {
   type        = bool
   default     = false
