@@ -64,7 +64,7 @@ variable "default_image_registry_dockerfile_path" {
 
 variable "default_image_repository_commit" {
   type        = string
-  default     = "bc4087f"
+  default     = "221742d"
   description = "The default image repository commit to use if no custom image is provided."
 }
 

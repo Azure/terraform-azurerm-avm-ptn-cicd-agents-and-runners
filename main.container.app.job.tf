@@ -23,6 +23,7 @@ module "container_app_job" {
   sensitive_environment_variables   = local.sensitive_environment_variables
   user_assigned_managed_identity_id = local.user_assigned_managed_identity_id
   environment_variables_placeholder = local.environment_variables_placeholder
+  managed_identity_auth_enabled     = var.version_control_system_type == local.version_control_system_azure_devops && var.version_control_system_authentication_method == "uami"
   placeholder_container_name        = var.container_app_placeholder_container_name
   placeholder_job_creation_enabled  = var.version_control_system_type == local.version_control_system_azure_devops
   placeholder_job_name              = var.container_app_placeholder_job_name

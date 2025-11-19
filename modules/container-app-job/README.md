@@ -181,6 +181,14 @@ set(object({
 
 Default: `[]`
 
+### <a name="input_managed_identity_auth_enabled"></a> [managed\_identity\_auth\_enabled](#input\_managed\_identity\_auth\_enabled)
+
+Description: Whether to use managed identity for KEDA authentication instead of PAT.
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_placeholder_container_name"></a> [placeholder\_container\_name](#input\_placeholder\_container\_name)
 
 Description: The name of the container for the placeholder Container Apps job.
@@ -236,6 +244,22 @@ Description: Name of the container registry.
 Type: `string`
 
 Default: `null`
+
+### <a name="input_retry"></a> [retry](#input\_retry)
+
+Description: Retry configuration for the resource operations
+
+Type:
+
+```hcl
+object({
+    error_message_regex  = optional(list(string), ["ReferencedResourceNotProvisioned"])
+    interval_seconds     = optional(number, 10)
+    max_interval_seconds = optional(number, 180)
+  })
+```
+
+Default: `{}`
 
 ### <a name="input_tags"></a> [tags](#input\_tags)
 
