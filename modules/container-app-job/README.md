@@ -181,6 +181,14 @@ set(object({
 
 Default: `[]`
 
+### <a name="input_managed_identity_auth_enabled"></a> [managed\_identity\_auth\_enabled](#input\_managed\_identity\_auth\_enabled)
+
+Description: Whether to use managed identity for KEDA authentication instead of PAT.
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_placeholder_container_name"></a> [placeholder\_container\_name](#input\_placeholder\_container\_name)
 
 Description: The name of the container for the placeholder Container Apps job.
@@ -260,14 +268,6 @@ Description: (Optional) Tags of the resource.
 Type: `map(string)`
 
 Default: `null`
-
-### <a name="input_use_managed_identity_auth"></a> [use\_managed\_identity\_auth](#input\_use\_managed\_identity\_auth)
-
-Description: Whether to use managed identity for KEDA authentication instead of PAT.
-
-Type: `bool`
-
-Default: `false`
 
 ## Outputs
 

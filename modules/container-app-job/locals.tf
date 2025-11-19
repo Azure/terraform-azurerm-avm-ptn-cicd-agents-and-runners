@@ -72,7 +72,7 @@ locals {
     type     = var.keda_rule_type
     metadata = var.keda_meta_data
     auth     = local.keda_auth
-    }, var.use_managed_identity_auth ? {
+    }, var.managed_identity_auth_enabled ? {
     identity = var.user_assigned_managed_identity_id
   } : {})
 }

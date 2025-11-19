@@ -73,6 +73,13 @@ variable "environment_variables_placeholder" {
   nullable    = false
 }
 
+variable "managed_identity_auth_enabled" {
+  type        = bool
+  default     = false
+  description = "Whether to use managed identity for KEDA authentication instead of PAT."
+  nullable    = false
+}
+
 variable "registry_password" {
   type        = string
   default     = null
@@ -94,11 +101,4 @@ variable "retry" {
   })
   default     = {}
   description = "Retry configuration for the resource operations"
-}
-
-variable "use_managed_identity_auth" {
-  type        = bool
-  default     = false
-  description = "Whether to use managed identity for KEDA authentication instead of PAT."
-  nullable    = false
 }
