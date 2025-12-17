@@ -116,7 +116,20 @@ locals {
 
 locals {
   sensitive_environment_variables = concat(tolist(jsondecode(local.sensitive_environment_variables_final)), tolist(var.container_app_sensitive_environment_variables))
-  sensitive_environment_variables_azure_devops = [
+  sensitive_environment_variables_azure_devops = var.version_control_system_authentication_method == "uami" ? [
+    {
+      name                      = "AZP_URL"
+      value                     = var.version_control_system_organization
+      container_app_secret_name = "organization-url"
+      keda_auth_name            = "organizationURL"
+    },
+    {
+      name                      = "USRMI_ID"
+      value                     = local.user_assigned_managed_identity_client_id
+      container_app_secret_name = "user-assigned-identity-client-id"
+      keda_auth_name            = null
+    }
+    ] : [
     {
       name                      = "AZP_URL"
       value                     = var.version_control_system_organization

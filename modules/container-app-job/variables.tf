@@ -73,6 +73,13 @@ variable "environment_variables_placeholder" {
   nullable    = false
 }
 
+variable "managed_identity_auth_enabled" {
+  type        = bool
+  default     = false
+  description = "Whether to use managed identity for KEDA authentication instead of PAT."
+  nullable    = false
+}
+
 variable "registry_password" {
   type        = string
   default     = null
@@ -84,4 +91,14 @@ variable "registry_username" {
   type        = string
   default     = null
   description = "Name of the container registry."
+}
+
+variable "retry" {
+  type = object({
+    error_message_regex  = optional(list(string), ["ReferencedResourceNotProvisioned"])
+    interval_seconds     = optional(number, 10)
+    max_interval_seconds = optional(number, 180)
+  })
+  default     = {}
+  description = "Retry configuration for the resource operations"
 }

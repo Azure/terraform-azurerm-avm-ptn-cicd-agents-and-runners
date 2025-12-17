@@ -1,6 +1,12 @@
+# ========================================
+# Azure DevOps Container Apps with PAT - Backwards Compatibility Example
+# ========================================
+# This example demonstrates PAT-based authentication for Azure DevOps CI/CD agents
+# to ensure backwards compatibility with existing deployments
+
 locals {
   tags = {
-    scenario = "default"
+    scenario = "container_app_pat"
   }
 }
 
@@ -8,6 +14,10 @@ terraform {
   required_version = ">= 1.9"
 
   required_providers {
+    azapi = {
+      source  = "azure/azapi"
+      version = "~> 2.0"
+    }
     azuredevops = {
       source  = "microsoft/azuredevops"
       version = "~> 1.1"
@@ -49,11 +59,11 @@ module "naming" {
 }
 
 resource "azuredevops_project" "this" {
-  name = random_string.name.result
+  name = "pat-agents-${random_string.name.result}"
 }
 
 resource "azuredevops_agent_pool" "this" {
-  name           = random_string.name.result
+  name           = "ContainerApps-PAT-${random_string.name.result}"
   auto_provision = false
   auto_update    = true
 }
@@ -66,7 +76,7 @@ resource "azuredevops_agent_queue" "this" {
 locals {
   default_branch  = "refs/heads/main"
   pipeline_file   = "pipeline.yml"
-  repository_name = "example-repo"
+  repository_name = "agents-pat-repo"
 }
 
 resource "azuredevops_git_repository" "this" {
@@ -91,7 +101,7 @@ resource "azuredevops_git_repository_file" "this" {
 
 resource "azuredevops_build_definition" "this" {
   project_id = azuredevops_project.this.id
-  name       = "Example Build Definition"
+  name       = "Container Apps PAT Build"
 
   ci_trigger {
     use_yaml = true
@@ -112,7 +122,26 @@ resource "azuredevops_pipeline_authorization" "this" {
   pipeline_id = azuredevops_build_definition.this.id
 }
 
-# This is the module call
+locals {
+  resource_providers_to_register = {
+    dev_center = {
+      resource_provider = "Microsoft.App"
+    }
+  }
+}
+
+data "azurerm_client_config" "this" {}
+
+resource "azapi_resource_action" "resource_provider_registration" {
+  for_each = local.resource_providers_to_register
+
+  action      = "providers/${each.value.resource_provider}/register"
+  method      = "POST"
+  resource_id = "/subscriptions/${data.azurerm_client_config.this.subscription_id}"
+  type        = "Microsoft.Resources/subscriptions@2021-04-01"
+}
+
+# This is the module call with Container App configuration
 module "azure_devops_agents" {
   source = "../.."
 
@@ -120,8 +149,12 @@ module "azure_devops_agents" {
   postfix                                      = random_string.name.result
   version_control_system_organization          = local.azure_devops_organization_url
   version_control_system_type                  = "azuredevops"
-  compute_types                                = ["azure_container_instance"]
+  compute_types                                = ["azure_container_app"]
+  container_app_max_execution_count            = 10
+  container_app_min_execution_count            = 0
+  container_app_polling_interval_seconds       = 30
   tags                                         = local.tags
+  use_private_networking                       = false
   version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
   version_control_system_pool_name             = azuredevops_agent_pool.this.name
   virtual_network_address_space                = "10.0.0.0/16"
@@ -150,3 +183,5 @@ locals {
   regions         = [for region in module.regions.regions : region.name if !contains(local.excluded_regions, region.name) && contains(local.included_regions, region.name)]
   selected_region = local.regions[random_integer.region_index.result]
 }
+
+
