@@ -142,6 +142,8 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.4)
 
+- <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) (~> 2.50)
+
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.20)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
@@ -154,6 +156,14 @@ The following requirements are needed by this module:
 
 The following resources are used by this module:
 
+- [azapi_resource.azure_devops_managed_pool_dev_center](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.azure_devops_managed_pool_dev_center_project](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.azure_devops_managed_pool_nat_gateway](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.azure_devops_managed_pool_public_ip](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.github_hosted_runners_nat_gateway](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.github_hosted_runners_network_settings](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.github_hosted_runners_public_ip](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource_action.azure_devops_managed_pool_resource_provider_registration](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource_action) (resource)
 - [azurerm_container_app_environment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_app_environment) (resource)
 - [azurerm_management_lock.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/management_lock) (resource)
 - [azurerm_nat_gateway.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/nat_gateway) (resource)
@@ -162,11 +172,13 @@ The following resources are used by this module:
 - [azurerm_private_dns_zone_virtual_network_link.container_registry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone_virtual_network_link) (resource)
 - [azurerm_public_ip.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/public_ip) (resource)
 - [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
+- [azurerm_role_definition.azure_devops_managed_pool_subnet_join](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_definition) (resource)
 - [modtm_telemetry.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/resources/telemetry) (resource)
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
 - [time_sleep.delay_after_container_app_environment_creation](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) (resource)
 - [time_sleep.delay_after_container_image_build](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) (resource)
 - [azapi_client_config.telemetry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
+- [azuread_service_principal.devops_infrastructure](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/service_principal) (data source)
 - [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
 - [modtm_module_source.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/data-sources/module_source) (data source)
 
@@ -202,6 +214,78 @@ Type: `string`
 ## Optional Inputs
 
 The following input variables are optional (have default values):
+
+### <a name="input_azure_devops_managed_pool_enable_nat_gateway"></a> [azure\_devops\_managed\_pool\_enable\_nat\_gateway](#input\_azure\_devops\_managed\_pool\_enable\_nat\_gateway)
+
+Description: Create and attach a NAT Gateway to the managed pool subnet when the subnet is created by this module.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_azure_devops_managed_pool_enabled"></a> [azure\_devops\_managed\_pool\_enabled](#input\_azure\_devops\_managed\_pool\_enabled)
+
+Description: Set to true to deploy an Azure DevOps Managed DevOps Pool (managed runners) with optional VNet injection.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_azure_devops_managed_pool_fabric_profile_sku_name"></a> [azure\_devops\_managed\_pool\_fabric\_profile\_sku\_name](#input\_azure\_devops\_managed\_pool\_fabric\_profile\_sku\_name)
+
+Description: VM SKU for the Managed DevOps Pool fabric profile.
+
+Type: `string`
+
+Default: `"Standard_D2ads_v5"`
+
+### <a name="input_azure_devops_managed_pool_maximum_concurrency"></a> [azure\_devops\_managed\_pool\_maximum\_concurrency](#input\_azure\_devops\_managed\_pool\_maximum\_concurrency)
+
+Description: Maximum concurrent agents in the Managed DevOps Pool.
+
+Type: `number`
+
+Default: `2`
+
+### <a name="input_azure_devops_managed_pool_name"></a> [azure\_devops\_managed\_pool\_name](#input\_azure\_devops\_managed\_pool\_name)
+
+Description: Name of the Azure DevOps Managed DevOps Pool. Defaults to mdp-<postfix>.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_azure_devops_managed_pool_project_names"></a> [azure\_devops\_managed\_pool\_project\_names](#input\_azure\_devops\_managed\_pool\_project\_names)
+
+Description: Azure DevOps project names the managed pool should serve. Required when azure\_devops\_managed\_pool\_enabled is true.
+
+Type: `set(string)`
+
+Default: `[]`
+
+### <a name="input_azure_devops_managed_pool_subnet_address_prefix"></a> [azure\_devops\_managed\_pool\_subnet\_address\_prefix](#input\_azure\_devops\_managed\_pool\_subnet\_address\_prefix)
+
+Description: Subnet address prefix for the managed pool subnet when created (e.g. 10.0.0.0/27). Required when azure\_devops\_managed\_pool\_enabled is true and azure\_devops\_managed\_pool\_subnet\_id is not provided.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_azure_devops_managed_pool_subnet_id"></a> [azure\_devops\_managed\_pool\_subnet\_id](#input\_azure\_devops\_managed\_pool\_subnet\_id)
+
+Description: Bring-your-own subnet ID for the managed pool. When provided, no VNet/subnet resources are created for the pool.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_azure_devops_managed_pool_vnet_address_space"></a> [azure\_devops\_managed\_pool\_vnet\_address\_space](#input\_azure\_devops\_managed\_pool\_vnet\_address\_space)
+
+Description: Address space for the managed pool VNet when created (e.g. 10.0.0.0/24). Required when azure\_devops\_managed\_pool\_enabled is true and azure\_devops\_managed\_pool\_subnet\_id is not provided.
+
+Type: `string`
+
+Default: `null`
 
 ### <a name="input_compute_types"></a> [compute\_types](#input\_compute\_types)
 
@@ -729,6 +813,62 @@ Type: `bool`
 
 Default: `true`
 
+### <a name="input_github_hosted_runners_business_id"></a> [github\_hosted\_runners\_business\_id](#input\_github\_hosted\_runners\_business\_id)
+
+Description: GitHub Enterprise business ID used by GitHub hosted runners Azure private networking. Required when github\_hosted\_runners\_network\_enabled is true.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_github_hosted_runners_enable_nat_gateway"></a> [github\_hosted\_runners\_enable\_nat\_gateway](#input\_github\_hosted\_runners\_enable\_nat\_gateway)
+
+Description: Create and attach a NAT Gateway to the GitHub hosted runners subnet when the subnet is created by this module.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_github_hosted_runners_network_enabled"></a> [github\_hosted\_runners\_network\_enabled](#input\_github\_hosted\_runners\_network\_enabled)
+
+Description: Set to true to configure GitHub-hosted runners Azure private networking (GitHub.Network/networkSettings) with optional VNet/subnet creation.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_github_hosted_runners_network_settings_name"></a> [github\_hosted\_runners\_network\_settings\_name](#input\_github\_hosted\_runners\_network\_settings\_name)
+
+Description: Name for the GitHub Network Settings resource.
+
+Type: `string`
+
+Default: `"gh-managed-runners"`
+
+### <a name="input_github_hosted_runners_subnet_address_prefix"></a> [github\_hosted\_runners\_subnet\_address\_prefix](#input\_github\_hosted\_runners\_subnet\_address\_prefix)
+
+Description: Subnet address prefix for the GitHub hosted runners subnet when created (e.g. 10.0.0.0/27). Required when github\_hosted\_runners\_network\_enabled is true and github\_hosted\_runners\_subnet\_id is not provided.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_github_hosted_runners_subnet_id"></a> [github\_hosted\_runners\_subnet\_id](#input\_github\_hosted\_runners\_subnet\_id)
+
+Description: Bring-your-own subnet ID for GitHub hosted runners Azure private networking. When provided, no VNet/subnet resources are created.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_github_hosted_runners_vnet_address_space"></a> [github\_hosted\_runners\_vnet\_address\_space](#input\_github\_hosted\_runners\_vnet\_address\_space)
+
+Description: Address space for the GitHub hosted runners VNet when created (e.g. 10.0.0.0/24). Required when github\_hosted\_runners\_network\_enabled is true and github\_hosted\_runners\_subnet\_id is not provided.
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_lock"></a> [lock](#input\_lock)
 
 Description:   Controls the Resource Lock configuration for this resource. The following properties can be specified:
@@ -1094,6 +1234,10 @@ Default: `null`
 
 The following outputs are exported:
 
+### <a name="output_azure_devops_managed_pool"></a> [azure\_devops\_managed\_pool](#output\_azure\_devops\_managed\_pool)
+
+Description: Details of the optional Azure DevOps Managed DevOps Pool (managed runners).
+
 ### <a name="output_container_app_subnet_resource_id"></a> [container\_app\_subnet\_resource\_id](#output\_container\_app\_subnet\_resource\_id)
 
 Description: The subnet id of the container app job.
@@ -1117,6 +1261,10 @@ Description: The container registry name.
 ### <a name="output_container_registry_resource_id"></a> [container\_registry\_resource\_id](#output\_container\_registry\_resource\_id)
 
 Description: The container registry resource id.
+
+### <a name="output_github_hosted_runners_network_settings"></a> [github\_hosted\_runners\_network\_settings](#output\_github\_hosted\_runners\_network\_settings)
+
+Description: Details for optional GitHub hosted runners Azure private networking (GitHub.Network/networkSettings).
 
 ### <a name="output_job_name"></a> [job\_name](#output\_job\_name)
 
@@ -1170,6 +1318,18 @@ Description: The virtual network resource id.
 
 The following Modules are called:
 
+### <a name="module_azure_devops_managed_pool"></a> [azure\_devops\_managed\_pool](#module\_azure\_devops\_managed\_pool)
+
+Source: Azure/avm-res-devopsinfrastructure-pool/azurerm
+
+Version: 0.3.1
+
+### <a name="module_azure_devops_managed_pool_vnet"></a> [azure\_devops\_managed\_pool\_vnet](#module\_azure\_devops\_managed\_pool\_vnet)
+
+Source: Azure/avm-res-network-virtualnetwork/azurerm
+
+Version: 0.8.1
+
 ### <a name="module_container_app_job"></a> [container\_app\_job](#module\_container\_app\_job)
 
 Source: ./modules/container-app-job
@@ -1187,6 +1347,12 @@ Version:
 Source: ./modules/container-registry
 
 Version:
+
+### <a name="module_github_hosted_runners_vnet"></a> [github\_hosted\_runners\_vnet](#module\_github\_hosted\_runners\_vnet)
+
+Source: Azure/avm-res-network-virtualnetwork/azurerm
+
+Version: 0.8.1
 
 ### <a name="module_log_analytics_workspace"></a> [log\_analytics\_workspace](#module\_log\_analytics\_workspace)
 
