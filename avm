@@ -38,13 +38,6 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-# Set pull option based on AVM_NO_CONTAINER_PULL
-if [ -z "$AVM_NO_CONTAINER_PULL" ]; then
-  PULL_OPTION="--pull always"
-else
-  PULL_OPTION=""
-fi
-
 # Check if AZURE_CONFIG_DIR is set, if not, set it to ~/.azure
 if [ -z "${AZURE_CONFIG_DIR}" ]; then
   AZURE_CONFIG_DIR="${HOME}/.azure"
