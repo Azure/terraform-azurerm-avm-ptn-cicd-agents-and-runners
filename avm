@@ -53,6 +53,7 @@ if [ -S /var/run/docker.sock ]; then
   DOCKER_SOCK_MOUNT="-v /var/run/docker.sock:/var/run/docker.sock"
 fi
 
+=======
 # If we are in GitHub Copilot Coding Agent, we need to mount the SSL certificates from the host
 SSL_CERT_MOUNTS=""
 if [ -n "${COPILOT_AGENT_ACTION}" ]; then
