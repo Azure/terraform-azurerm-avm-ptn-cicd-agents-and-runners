@@ -721,8 +721,8 @@ Default: `{}`
 
 ### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
 
-Description: This variable controls whether or not telemetry is enabled for the module.
-For more information see <https://aka.ms/avm/telemetryinfo>.
+Description: This variable controls whether or not telemetry is enabled for the module.  
+For more information see <https://aka.ms/avm/telemetryinfo>.  
 If it is set to false, then no telemetry will be collected.
 
 Type: `bool`
@@ -914,6 +914,7 @@ Description: Enable zone redundancy for the deployment
 Type: `bool`
 
 Default: `true`
+
 ### <a name="input_user_assigned_managed_identity_client_id"></a> [user\_assigned\_managed\_identity\_client\_id](#input\_user\_assigned\_managed\_identity\_client\_id)
 
 Description: The client id of the user assigned managed identity. Only required if `user_assigned_managed_identity_creation_enabled == false` and using UAMI authentication. The identity must be configured in Azure DevOps separately.
