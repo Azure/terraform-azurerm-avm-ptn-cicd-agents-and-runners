@@ -1,3 +1,14 @@
+output "azure_devops_managed_pool" {
+  description = "Details of the optional Azure DevOps Managed DevOps Pool (managed runners)."
+  value = var.azure_devops_managed_pool_enabled ? {
+    name        = module.azure_devops_managed_pool[0].name
+    resource_id = module.azure_devops_managed_pool[0].resource_id
+    subnet_id   = local.azure_devops_managed_pool_subnet_id
+    dev_center  = azapi_resource.azure_devops_managed_pool_dev_center[0].id
+    dev_project = azapi_resource.azure_devops_managed_pool_dev_center_project[0].id
+  } : null
+}
+
 output "container_app_subnet_resource_id" {
   description = "The subnet id of the container app job."
   value       = local.container_app_subnet_id
@@ -26,6 +37,16 @@ output "container_registry_name" {
 output "container_registry_resource_id" {
   description = "The container registry resource id."
   value       = var.container_registry_creation_enabled ? module.container_registry[0].resource_id : null
+}
+
+output "github_hosted_runners_network_settings" {
+  description = "Details for optional GitHub hosted runners Azure private networking (GitHub.Network/networkSettings)."
+  value = var.github_hosted_runners_network_enabled ? {
+    name        = azapi_resource.github_hosted_runners_network_settings[0].name
+    resource_id = azapi_resource.github_hosted_runners_network_settings[0].id
+    subnet_id   = local.github_hosted_runners_subnet_id
+    github_id   = azapi_resource.github_hosted_runners_network_settings[0].output.tags.GitHubId
+  } : null
 }
 
 output "job_name" {
