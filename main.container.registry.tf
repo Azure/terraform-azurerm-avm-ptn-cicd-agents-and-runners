@@ -15,7 +15,7 @@ module "container_registry" {
   use_zone_redundancy                     = var.use_zone_redundancy ? true : null
 }
 
-resource "azurerm_role_assignment" "container_registry_pull_for_container_instance" {
+resource "azurerm_role_assignment" "custom_container_registry_pull" {
   count = var.user_assigned_managed_identity_creation_enabled && var.custom_container_registry_id != null ? 1 : 0
 
   principal_id         = local.user_assigned_managed_identity_principal_id
