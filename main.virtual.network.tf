@@ -42,7 +42,7 @@ resource "azurerm_public_ip" "this" {
   resource_group_name = local.resource_group_name
   sku                 = "Standard"
   tags                = var.tags
-  zones               = var.public_ip_zones
+  zones               = var.use_zone_redundancy ? var.public_ip_zones : null
 }
 
 resource "azurerm_nat_gateway" "this" {

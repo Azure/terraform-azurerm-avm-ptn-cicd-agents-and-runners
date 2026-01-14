@@ -11,6 +11,7 @@ locals {
   resource_group_id                                = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${local.resource_group_name}"
   resource_group_name                              = var.resource_group_creation_enabled ? azurerm_resource_group.this[0].name : var.resource_group_name
   resource_group_name_container_app_infrastructure = var.container_app_infrastructure_resource_group_name == null ? "rg-${var.postfix}-container-apps-infrastructure" : var.container_app_infrastructure_resource_group_name
+  user_assigned_managed_identity_client_id         = var.user_assigned_managed_identity_creation_enabled ? module.user_assigned_managed_identity[0].client_id : var.user_assigned_managed_identity_client_id
   user_assigned_managed_identity_principal_id      = var.user_assigned_managed_identity_creation_enabled ? module.user_assigned_managed_identity[0].principal_id : var.user_assigned_managed_identity_principal_id
   virtual_network_id                               = var.use_private_networking ? (var.virtual_network_creation_enabled ? module.virtual_network[0].resource_id : var.virtual_network_id) : ""
 }

@@ -64,6 +64,18 @@ variable "lock" {
   }
 }
 
+variable "log_analytics_workspace_internet_ingestion_enabled" {
+  type        = bool
+  default     = null
+  description = "Whether or not to enable internet ingestion for the Log Analytics workspace. If null, defaults to opposite of use_private_networking (true when private networking is false)."
+}
+
+variable "log_analytics_workspace_internet_query_enabled" {
+  type        = bool
+  default     = null
+  description = "Whether or not to enable internet query for the Log Analytics workspace. If null, defaults to opposite of use_private_networking (true when private networking is false)."
+}
+
 variable "resource_group_creation_enabled" {
   type        = bool
   default     = true
@@ -86,4 +98,39 @@ variable "use_private_networking" {
   type        = bool
   default     = true
   description = "Whether or not to use private networking for the container registry."
+}
+
+variable "use_zone_redundancy" {
+  type        = bool
+  default     = true
+  description = "Enable zone redundancy for the deployment"
+
+  validation {
+    condition     = !(var.use_zone_redundancy == true && var.use_private_networking == false)
+    error_message = "Zone redundancy requires private networking to be enabled. When use_zone_redundancy is true, use_private_networking must also be true because infrastructure_subnet_id is required for zone redundant deployments."
+  }
+  validation {
+    condition = !(var.use_zone_redundancy == true && contains([
+      "australiacentral",
+      "australiacentral2",
+      "canadaeast",
+      "koreasouth",
+      "northcentralus",
+      "southindia",
+      "westindia",
+      "westus",
+      "westcentralus",
+      "ukwest",
+      "brazilsoutheast",
+      "uaecentral",
+      "germanynorth",
+      "norwaywest",
+      "jioindiawest",
+      "jioindiacentral",
+      "switzerlandwest",
+      "francesouth",
+      "southafricawest"
+    ], var.location))
+    error_message = "Zone redundancy is not supported in the specified location. The following regions do not support zone redundancy: australiacentral, australiacentral2, canadaeast, koreasouth, northcentralus, southindia, westindia, westus, westcentralus, ukwest, brazilsoutheast, uaecentral, germanynorth, norwaywest, jioindiawest, jioindiacentral, switzerlandwest, francesouth, southafricawest."
+  }
 }

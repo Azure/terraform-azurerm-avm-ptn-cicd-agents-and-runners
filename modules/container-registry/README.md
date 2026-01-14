@@ -118,6 +118,14 @@ Type: `map(string)`
 
 Default: `null`
 
+### <a name="input_use_zone_redundancy"></a> [use\_zone\_redundancy](#input\_use\_zone\_redundancy)
+
+Description: Enable zone redundancy for the deployment
+
+Type: `bool`
+
+Default: `true`
+
 ## Outputs
 
 The following outputs are exported:

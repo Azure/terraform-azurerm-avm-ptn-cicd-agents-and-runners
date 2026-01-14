@@ -29,14 +29,14 @@ variable "version_control_system_agent_target_queue_length" {
 variable "version_control_system_authentication_method" {
   type        = string
   default     = "pat"
-  description = "GitHub authentication method. Possible values: pat or github_app"
+  description = "Authentication method. For Azure DevOps: 'pat' or 'uami' (requires Azure DevOps prerequisites - see README). For GitHub: 'pat' or 'github_app'"
 
   validation {
     condition = (
-      var.version_control_system_type == "azuredevops" ? var.version_control_system_authentication_method == "pat" :
-      var.version_control_system_authentication_method == "pat" || var.version_control_system_authentication_method == "github_app"
+      var.version_control_system_type == "azuredevops" ? contains(["pat", "uami"], var.version_control_system_authentication_method) :
+      contains(["pat", "github_app"], var.version_control_system_authentication_method)
     )
-    error_message = "azuredevops and github both support only pat while github_app is only supported for github."
+    error_message = "For Azure DevOps, authentication_method must be 'pat' or 'uami'. For GitHub, authentication_method must be 'pat' or 'github_app'."
   }
 }
 
@@ -89,7 +89,7 @@ variable "version_control_system_github_application_key" {
 variable "version_control_system_personal_access_token" {
   type        = string
   default     = null
-  description = "The personal access token for the version control system."
+  description = "The personal access token for the version control system. Required when authentication_method is 'pat'."
   sensitive   = true
 
   validation {
