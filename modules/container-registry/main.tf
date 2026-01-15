@@ -1,6 +1,6 @@
 module "container_registry" {
   source  = "Azure/avm-res-containerregistry-registry/azurerm"
-  version = "0.4.0"
+  version = "0.5.1"
 
   location                   = var.location
   name                       = var.name
@@ -15,7 +15,7 @@ module "container_registry" {
   } : null
   public_network_access_enabled = !var.use_private_networking
   tags                          = var.tags
-  zone_redundancy_enabled       = var.use_zone_redundancy ? true : null
+  zone_redundancy_enabled       = var.use_zone_redundancy
 }
 
 resource "azapi_update_resource" "network_rule_bypass_allowed_for_tasks" {
