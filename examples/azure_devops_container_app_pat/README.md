@@ -164,6 +164,7 @@ module "azure_devops_agents" {
   container_app_polling_interval_seconds       = 30
   tags                                         = local.tags
   use_private_networking                       = false
+  use_zone_redundancy                          = false
   version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
   version_control_system_pool_name             = azuredevops_agent_pool.this.name
   virtual_network_address_space                = "10.0.0.0/16"

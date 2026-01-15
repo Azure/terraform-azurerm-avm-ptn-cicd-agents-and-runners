@@ -115,6 +115,7 @@ module "github_runners" {
   version_control_system_type                               = "github"
   tags                                                      = local.tags
   use_private_networking                                    = false
+  use_zone_redundancy                                       = false
   version_control_system_authentication_method              = "github_app"
   version_control_system_github_application_id              = var.github_application_id
   version_control_system_github_application_installation_id = var.github_application_installation_id

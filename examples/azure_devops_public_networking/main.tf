@@ -145,6 +145,7 @@ module "azure_devops_agents" {
   version_control_system_type                  = "azuredevops"
   tags                                         = local.tags
   use_private_networking                       = false
+  use_zone_redundancy                          = false
   version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
   version_control_system_pool_name             = azuredevops_agent_pool.this.name
 

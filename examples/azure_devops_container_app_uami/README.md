@@ -266,6 +266,7 @@ module "azure_devops_agents" {
   resource_group_name                             = azurerm_resource_group.this.name
   tags                                            = local.tags
   use_private_networking                          = false
+  use_zone_redundancy                             = false
   user_assigned_managed_identity_client_id        = module.uami.client_id
   user_assigned_managed_identity_creation_enabled = false
   user_assigned_managed_identity_id               = module.uami.resource_id
