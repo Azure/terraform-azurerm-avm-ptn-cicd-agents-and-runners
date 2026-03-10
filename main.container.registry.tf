@@ -10,6 +10,7 @@ module "container_registry" {
   use_private_networking                  = var.use_private_networking
   images                                  = local.container_images
   private_dns_zone_id                     = local.container_registry_dns_zone_id
+  sku                                     = var.container_registry_sku
   subnet_id                               = local.container_registry_private_endpoint_subnet_id
   tags                                    = var.tags
   use_zone_redundancy                     = var.use_zone_redundancy
