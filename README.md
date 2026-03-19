@@ -600,6 +600,14 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_container_registry_sku"></a> [container\_registry\_sku](#input\_container\_registry\_sku)
+
+Description: The SKU name of the Container Registry. Default is `Premium`. `Possible values are `Basic`, `Standard` and `Premium`.`
+
+Type: `string`
+
+Default: `"Premium"`
+
 ### <a name="input_container_registry_subnet_cidr_size"></a> [container\_registry\_subnet\_cidr\_size](#input\_container\_registry\_subnet\_cidr\_size)
 
 Description: The CIDR size for the container registry subnet.

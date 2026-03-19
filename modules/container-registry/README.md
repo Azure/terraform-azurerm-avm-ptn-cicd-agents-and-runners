@@ -102,6 +102,14 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_sku"></a> [sku](#input\_sku)
+
+Description: The SKU name of the Container Registry. Default is `Premium`. `Possible values are `Basic`, `Standard` and `Premium`.`
+
+Type: `string`
+
+Default: `"Premium"`
+
 ### <a name="input_subnet_id"></a> [subnet\_id](#input\_subnet\_id)
 
 Description: The id of the subnet to use for the private endpoint

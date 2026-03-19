@@ -55,6 +55,12 @@ variable "private_dns_zone_id" {
   description = "The id of the private DNS zone to create for the container registry. Only required if `container_registry_private_dns_zone_creation_enabled` is `false` and you are not using policy to update the DNS zone."
 }
 
+variable "sku" {
+  type        = string
+  default     = "Premium"
+  description = "The SKU name of the Container Registry. Default is `Premium`. `Possible values are `Basic`, `Standard` and `Premium`."
+}
+
 variable "subnet_id" {
   type        = string
   default     = null

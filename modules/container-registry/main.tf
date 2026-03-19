@@ -14,6 +14,7 @@ module "container_registry" {
     }
   } : null
   public_network_access_enabled = !var.use_private_networking
+  sku                           = var.sku
   tags                          = var.tags
   zone_redundancy_enabled       = var.use_zone_redundancy
 }
