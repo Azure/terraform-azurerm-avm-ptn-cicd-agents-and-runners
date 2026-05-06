@@ -93,14 +93,14 @@ locals {
   }
 }
 
-data "azurerm_client_config" "this" {}
+data "azapi_client_config" "this" {}
 
 resource "azapi_resource_action" "resource_provider_registration" {
   for_each = local.resource_providers_to_register
 
   action      = "providers/${each.value.resource_provider}/register"
   method      = "POST"
-  resource_id = "/subscriptions/${data.azurerm_client_config.this.subscription_id}"
+  resource_id = "/subscriptions/${data.azapi_client_config.this.subscription_id}"
   type        = "Microsoft.Resources/subscriptions@2021-04-01"
 }
 
@@ -138,9 +138,12 @@ locals {
   virtual_network_address_space = "10.0.0.0/16"
 }
 
-resource "azurerm_resource_group" "this" {
-  location = local.selected_region
-  name     = "rg-${random_string.name.result}"
+resource "azapi_resource" "rg" {
+  location               = local.selected_region
+  name                   = "rg-${random_string.name.result}"
+  parent_id              = "/subscriptions/${data.azapi_client_config.this.subscription_id}"
+  type                   = "Microsoft.Resources/resourceGroups@2024-11-01"
+  response_export_values = ["id", "name"]
 }
 
 module "virtual_network" {
@@ -149,22 +152,34 @@ module "virtual_network" {
 
   address_space       = [local.virtual_network_address_space]
   location            = local.selected_region
-  resource_group_name = azurerm_resource_group.this.name
+  resource_group_name = azapi_resource.rg.name
   name                = "vnet-${random_string.name.result}"
   subnets             = local.subnets
 }
 
-resource "azurerm_private_dns_zone" "container_registry" {
-  name                = "privatelink.azurecr.io"
-  resource_group_name = azurerm_resource_group.this.name
+resource "azapi_resource" "private_dns_zone_container_registry" {
+  location               = "global"
+  name                   = "privatelink.azurecr.io"
+  parent_id              = azapi_resource.rg.id
+  type                   = "Microsoft.Network/privateDnsZones@2024-06-01"
+  response_export_values = ["id", "name"]
 }
 
-resource "azurerm_private_dns_zone_virtual_network_link" "container_registry" {
-  name                  = "privatelink.azurecr.io"
-  private_dns_zone_name = azurerm_private_dns_zone.container_registry.name
-  resource_group_name   = azurerm_resource_group.this.name
-  virtual_network_id    = module.virtual_network.resource_id
-  tags                  = local.tags
+resource "azapi_resource" "private_dns_zone_virtual_network_link_container_registry" {
+  location  = "global"
+  name      = "privatelink.azurecr.io"
+  parent_id = azapi_resource.private_dns_zone_container_registry.id
+  type      = "Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01"
+  body = {
+    properties = {
+      registrationEnabled = false
+      virtualNetwork = {
+        id = module.virtual_network.resource_id
+      }
+    }
+  }
+  response_export_values = ["id"]
+  tags                   = local.tags
 }
 
 # This is the module call
@@ -178,18 +193,18 @@ module "azure_devops_agents" {
   compute_types                                        = ["azure_container_app", "azure_container_instance"]
   container_app_subnet_id                              = module.virtual_network.subnets["container_app"].resource_id
   container_instance_subnet_id                         = module.virtual_network.subnets["container_instance"].resource_id
-  container_registry_dns_zone_id                       = azurerm_private_dns_zone.container_registry.id
+  container_registry_dns_zone_id                       = azapi_resource.private_dns_zone_container_registry.id
   container_registry_private_dns_zone_creation_enabled = false
   container_registry_private_endpoint_subnet_id        = module.virtual_network.subnets["container_registry_private_endpoint"].resource_id
   resource_group_creation_enabled                      = false
-  resource_group_name                                  = azurerm_resource_group.this.name
+  resource_group_name                                  = azapi_resource.rg.name
   tags                                                 = local.tags
   version_control_system_personal_access_token         = var.github_runners_personal_access_token
   version_control_system_repository                    = github_repository.this.name
   virtual_network_creation_enabled                     = false
   virtual_network_id                                   = module.virtual_network.resource_id
 
-  depends_on = [azurerm_private_dns_zone_virtual_network_link.container_registry]
+  depends_on = [azapi_resource.private_dns_zone_virtual_network_link_container_registry]
 }
 
 # Region helpers
@@ -234,15 +249,15 @@ The following requirements are needed by this module:
 
 The following resources are used by this module:
 
+- [azapi_resource.private_dns_zone_container_registry](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.private_dns_zone_virtual_network_link_container_registry](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.rg](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
 - [azapi_resource_action.resource_provider_registration](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource_action) (resource)
-- [azurerm_private_dns_zone.container_registry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone) (resource)
-- [azurerm_private_dns_zone_virtual_network_link.container_registry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone_virtual_network_link) (resource)
-- [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
 - [github_repository.this](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository) (resource)
 - [github_repository_file.this](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository_file) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
 - [random_string.name](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
-- [azurerm_client_config.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
+- [azapi_client_config.this](https://registry.terraform.io/providers/azure/azapi/latest/docs/data-sources/client_config) (data source)
 - [github_organization.alz](https://registry.terraform.io/providers/integrations/github/latest/docs/data-sources/organization) (data source)
 
 <!-- markdownlint-disable MD013 -->

@@ -8,6 +8,10 @@ terraform {
   required_version = ">= 1.9"
 
   required_providers {
+    azapi = {
+      source  = "Azure/azapi"
+      version = "~> 2.4"
+    }
     azuredevops = {
       source  = "microsoft/azuredevops"
       version = "~> 1.1"
@@ -53,7 +57,7 @@ module "naming" {
   version = "0.4.2"
 }
 
-data "azurerm_client_config" "this" {}
+data "azapi_client_config" "this" {}
 
 # ========================================
 # PHASE 1: PREREQUISITES
@@ -67,7 +71,7 @@ module "uami" {
 
   location            = local.selected_region
   name                = "uami-devops-agents-${random_string.name.result}"
-  resource_group_name = azurerm_resource_group.this.name
+  resource_group_name = azapi_resource.rg.name
   enable_telemetry    = true
   tags                = local.tags
 }
@@ -77,23 +81,13 @@ module "uami" {
 # ========================================
 
 # Create Resource Group for our infrastructure
-resource "azurerm_resource_group" "this" {
-  location = local.selected_region
-  name     = "${module.naming.resource_group.name_unique}-${random_string.name.result}"
-  tags     = local.tags
-}
-
-# Grant necessary Azure permissions to the UAMI
-resource "azurerm_role_assignment" "uami_contributor" {
-  principal_id         = module.uami.principal_id
-  scope                = azurerm_resource_group.this.id
-  role_definition_name = "Contributor"
-}
-
-resource "azurerm_role_assignment" "uami_acr_push" {
-  principal_id         = module.uami.principal_id
-  scope                = "/subscriptions/${data.azurerm_client_config.this.subscription_id}"
-  role_definition_name = "AcrPush"
+resource "azapi_resource" "rg" {
+  location               = local.selected_region
+  name                   = "${module.naming.resource_group.name_unique}-${random_string.name.result}"
+  parent_id              = "/subscriptions/${data.azapi_client_config.this.subscription_id}"
+  type                   = "Microsoft.Resources/resourceGroups@2024-11-01"
+  response_export_values = ["id", "name"]
+  tags                   = local.tags
 }
 
 # Azure DevOps Project
@@ -123,22 +117,6 @@ resource "azuredevops_agent_queue" "this" {
   agent_pool_id = azuredevops_agent_pool.this.id
 }
 
-# Service Connection for Azure access
-resource "azuredevops_serviceendpoint_azurerm" "this" {
-  project_id                             = azuredevops_project.this.id
-  service_endpoint_name                  = "Azure-UAMI-${random_string.name.result}"
-  description                            = "Service connection using UAMI authentication"
-  service_endpoint_authentication_scheme = "ManagedServiceIdentity"
-
-  credentials {
-    serviceprincipalid = module.uami.client_id
-  }
-
-  azurerm_spn_tenantid      = data.azurerm_client_config.this.tenant_id
-  azurerm_subscription_id   = data.azurerm_client_config.this.subscription_id
-  azurerm_subscription_name = "Primary Subscription"
-}
-
 # Basic repository and pipeline
 resource "azuredevops_git_repository" "this" {
   project_id     = azuredevops_project.this.id
@@ -155,12 +133,10 @@ resource "azuredevops_git_repository_file" "pipeline" {
   repository_id = azuredevops_git_repository.this.id
   file          = "azure-pipelines.yml"
   content = templatefile("${path.module}/pipeline.yml", {
-    agent_pool_name         = azuredevops_agent_pool.this.name
-    service_connection_name = azuredevops_serviceendpoint_azurerm.this.service_endpoint_name
-    resource_group_name     = azurerm_resource_group.this.name
+    agent_pool_name = azuredevops_agent_pool.this.name
   })
   branch              = "refs/heads/main"
-  commit_message      = "Add KEDA auto-scaling test pipeline with UAMI authentication"
+  commit_message      = "Add agent test pipeline"
   overwrite_on_create = true
 
   depends_on = [azuredevops_git_repository.this]
@@ -200,13 +176,10 @@ resource "azuredevops_pipeline_authorization" "this" {
 # ========================================
 # Azure DevOps Service Principal Setup
 # ========================================
-# Automated setup: Create service principal entitlement and add to required group
-
-# Get the Project Collection Service Accounts group (organization-level)
-data "azuredevops_group" "project_collection_service_accounts" {
-  name = "Project Collection Service Accounts"
-  # No project_id specified - searches at organization level
-}
+# Add the UAMI as a service principal in Azure DevOps and grant the Administrator
+# role on the project's agent pool queue. Administrator on the queue is the
+# least-privilege role required for the UAMI to register self-hosted agents
+# into the pool. See the README "Required permissions" section for details.
 
 # Add a delay to ensure UAMI is fully propagated in Azure AD
 resource "time_sleep" "uami_propagation" {
@@ -226,15 +199,15 @@ resource "azuredevops_service_principal_entitlement" "uami" {
   ]
 }
 
-# Add UAMI service principal to Project Collection Service Accounts group
-resource "azuredevops_group_membership" "uami_service_accounts" {
-  group   = data.azuredevops_group.project_collection_service_accounts.descriptor
-  members = [azuredevops_service_principal_entitlement.uami.descriptor]
-  mode    = "add"
+# Grant the UAMI service principal the Administrator role on the agent pool queue
+resource "azuredevops_securityrole_assignment" "uami_pool_admin" {
+  scope       = "distributedtask.agentqueuerole"
+  resource_id = "${azuredevops_project.this.id}_${azuredevops_agent_queue.this.id}"
+  identity_id = module.uami.principal_id
+  role_name   = "Administrator"
 
   depends_on = [
-    azuredevops_service_principal_entitlement.uami,
-    data.azuredevops_group.project_collection_service_accounts
+    azuredevops_service_principal_entitlement.uami
   ]
 }
 
@@ -256,7 +229,7 @@ module "azure_devops_agents" {
   container_app_min_execution_count               = 0
   container_app_polling_interval_seconds          = 30
   resource_group_creation_enabled                 = false
-  resource_group_name                             = azurerm_resource_group.this.name
+  resource_group_name                             = azapi_resource.rg.name
   tags                                            = local.tags
   use_private_networking                          = false
   use_zone_redundancy                             = false
@@ -270,11 +243,8 @@ module "azure_devops_agents" {
   virtual_network_address_space                   = "10.0.0.0/16"
 
   depends_on = [
-    azurerm_role_assignment.uami_contributor,
-    azurerm_role_assignment.uami_acr_push,
     azuredevops_agent_queue.this,
-    azuredevops_serviceendpoint_azurerm.this,
-    azuredevops_group_membership.uami_service_accounts
+    azuredevops_securityrole_assignment.uami_pool_admin
   ]
 }
 

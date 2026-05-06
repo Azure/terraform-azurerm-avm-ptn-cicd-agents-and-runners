@@ -7,7 +7,7 @@ module "container_instance" {
   container_name                    = local.container_instance_container_name
   container_registry_login_server   = local.registry_login_server
   location                          = var.location
-  resource_group_name               = local.resource_group_name
+  parent_id                         = local.resource_group_id
   user_assigned_managed_identity_id = local.user_assigned_managed_identity_id
   availability_zones                = var.container_instance_use_availability_zones ? each.value.availability_zones : null
   container_cpu                     = var.container_instance_container_cpu
@@ -21,6 +21,6 @@ module "container_instance" {
   subnet_id                         = local.container_instance_subnet_id
   use_private_networking            = var.use_private_networking
 
-  depends_on = [module.container_registry, azurerm_role_assignment.custom_container_registry_pull, azurerm_private_dns_zone_virtual_network_link.container_registry, time_sleep.delay_after_container_image_build]
+  depends_on = [module.container_registry, azapi_resource.custom_container_registry_pull, azapi_resource.private_dns_zone_virtual_network_link_container_registry, time_sleep.delay_after_container_image_build]
 }
 

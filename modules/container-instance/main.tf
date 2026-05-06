@@ -1,47 +1,69 @@
-resource "azurerm_container_group" "alz" {
-  location            = var.location
-  name                = var.container_instance_name
-  os_type             = "Linux"
-  resource_group_name = var.resource_group_name
-  ip_address_type     = var.use_private_networking ? "Private" : "None"
-  subnet_ids          = var.use_private_networking ? [var.subnet_id] : []
-  tags                = var.tags
-  zones               = var.availability_zones
-
-  container {
-    cpu                          = var.container_cpu
-    image                        = "${var.container_registry_login_server}/${var.container_image}"
-    memory                       = var.container_memory
-    name                         = var.container_name
-    cpu_limit                    = var.container_cpu_limit
-    environment_variables        = var.environment_variables
-    memory_limit                 = var.container_memory_limit
-    secure_environment_variables = var.sensitive_environment_variables
-
-    ports {
-      port     = 80
-      protocol = "TCP"
+resource "azapi_resource" "container_group" {
+  location  = var.location
+  name      = var.container_instance_name
+  parent_id = var.parent_id
+  type      = "Microsoft.ContainerInstance/containerGroups@2024-05-01-preview"
+  body = {
+    zones = var.availability_zones
+    properties = {
+      osType = "Linux"
+      ipAddress = var.use_private_networking ? {
+        type = "Private"
+        ports = [
+          {
+            port     = 80
+            protocol = "TCP"
+          }
+        ]
+      } : null
+      subnetIds = var.use_private_networking ? [{ id = var.subnet_id }] : null
+      containers = [
+        {
+          name = var.container_name
+          properties = {
+            image = "${var.container_registry_login_server}/${var.container_image}"
+            resources = {
+              requests = {
+                cpu        = var.container_cpu
+                memoryInGB = var.container_memory
+              }
+              limits = {
+                cpu        = var.container_cpu_limit
+                memoryInGB = var.container_memory_limit
+              }
+            }
+            environmentVariables = concat(
+              [for k, v in var.environment_variables : { name = k, value = v }],
+              [for k, v in var.sensitive_environment_variables : { name = k, secureValue = v }]
+            )
+            ports = [
+              {
+                port     = 80
+                protocol = "TCP"
+              }
+            ]
+          }
+        }
+      ]
+      imageRegistryCredentials = var.container_registry_username != null ? [
+        {
+          server   = var.container_registry_login_server
+          username = var.container_registry_username
+          password = var.container_registry_password
+        }
+        ] : [
+        {
+          server   = var.container_registry_login_server
+          identity = var.user_assigned_managed_identity_id
+        }
+      ]
     }
   }
+  response_export_values = ["id", "name"]
+  tags                   = var.tags
+
   identity {
     type         = "UserAssigned"
     identity_ids = [var.user_assigned_managed_identity_id]
-  }
-  dynamic "image_registry_credential" {
-    for_each = var.container_registry_username != null ? ["custom"] : []
-
-    content {
-      server   = var.container_registry_login_server
-      password = var.container_registry_password
-      username = var.container_registry_username
-    }
-  }
-  dynamic "image_registry_credential" {
-    for_each = var.container_registry_username == null ? ["default"] : []
-
-    content {
-      server                    = var.container_registry_login_server
-      user_assigned_identity_id = var.user_assigned_managed_identity_id
-    }
   }
 }

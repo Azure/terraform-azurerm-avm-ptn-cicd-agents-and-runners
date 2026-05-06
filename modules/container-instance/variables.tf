@@ -24,9 +24,9 @@ variable "location" {
   nullable    = false
 }
 
-variable "resource_group_name" {
+variable "parent_id" {
   type        = string
-  description = "Name of the resource group"
+  description = "The Azure resource id of the parent resource group in which to create the container instance (e.g. `/subscriptions/<subscription-id>/resourceGroups/<resource-group-name>`)."
 }
 
 variable "user_assigned_managed_identity_id" {

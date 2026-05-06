@@ -35,8 +35,8 @@ module "container_app_job" {
 
   depends_on = [
     module.container_registry,
-    azurerm_role_assignment.custom_container_registry_pull,
-    azurerm_private_dns_zone_virtual_network_link.container_registry,
+    azapi_resource.custom_container_registry_pull,
+    azapi_resource.private_dns_zone_virtual_network_link_container_registry,
     time_sleep.delay_after_container_image_build,
     time_sleep.delay_after_container_app_environment_creation
   ]

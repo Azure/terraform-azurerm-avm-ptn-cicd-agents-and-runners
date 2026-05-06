@@ -11,13 +11,13 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.20)
+- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.4)
 
 ## Resources
 
 The following resources are used by this module:
 
-- [azurerm_container_group.alz](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_group) (resource)
+- [azapi_resource.container_group](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
@@ -54,9 +54,9 @@ Description: Azure region where the resource should be deployed.
 
 Type: `string`
 
-### <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name)
+### <a name="input_parent_id"></a> [parent\_id](#input\_parent\_id)
 
-Description: Name of the resource group
+Description: The Azure resource id of the parent resource group in which to create the container instance (e.g. `/subscriptions/<subscription-id>/resourceGroups/<resource-group-name>`).
 
 Type: `string`
 

@@ -19,9 +19,9 @@ variable "name" {
   description = "The name of the container registry"
 }
 
-variable "resource_group_name" {
+variable "parent_id" {
   type        = string
-  description = "The name of the resource group in which to create the container registry"
+  description = "The Azure resource id of the parent resource group in which to create the container registry (e.g. `/subscriptions/<subscription-id>/resourceGroups/<resource-group-name>`)."
 }
 
 variable "use_private_networking" {

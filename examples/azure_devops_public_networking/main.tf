@@ -24,6 +24,10 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 3.5"
     }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.9"
+    }
   }
 }
 
@@ -124,32 +128,95 @@ locals {
   }
 }
 
-data "azurerm_client_config" "this" {}
+data "azapi_client_config" "this" {}
 
 resource "azapi_resource_action" "resource_provider_registration" {
   for_each = local.resource_providers_to_register
 
   action      = "providers/${each.value.resource_provider}/register"
   method      = "POST"
-  resource_id = "/subscriptions/${data.azurerm_client_config.this.subscription_id}"
+  resource_id = "/subscriptions/${data.azapi_client_config.this.subscription_id}"
   type        = "Microsoft.Resources/subscriptions@2021-04-01"
+}
+
+# Resource group used to host the UAMI and the agents
+resource "azapi_resource" "rg" {
+  location               = local.selected_region
+  name                   = "rg-${random_string.name.result}"
+  parent_id              = "/subscriptions/${data.azapi_client_config.this.subscription_id}"
+  type                   = "Microsoft.Resources/resourceGroups@2024-11-01"
+  response_export_values = ["id", "name"]
+  tags                   = local.tags
+}
+
+# User Assigned Managed Identity for agent authentication
+module "uami" {
+  source  = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
+  version = "0.3.3"
+
+  location            = local.selected_region
+  name                = "uami-devops-agents-${random_string.name.result}"
+  resource_group_name = azapi_resource.rg.name
+  enable_telemetry    = true
+  tags                = local.tags
+}
+
+# Add UAMI as a service principal in Azure DevOps and grant the Administrator
+# role on the project's agent pool queue. Administrator on the queue is the
+# least-privilege role required for the UAMI to register self-hosted agents
+# into the pool. See the README "Required permissions" section for details.
+resource "time_sleep" "uami_propagation" {
+  create_duration = "30s"
+
+  depends_on = [module.uami]
+}
+
+resource "azuredevops_service_principal_entitlement" "uami" {
+  account_license_type = "express"
+  origin               = "aad"
+  origin_id            = module.uami.principal_id
+
+  depends_on = [
+    time_sleep.uami_propagation
+  ]
+}
+
+resource "azuredevops_securityrole_assignment" "uami_pool_admin" {
+  scope       = "distributedtask.agentqueuerole"
+  resource_id = "${azuredevops_project.this.id}_${azuredevops_agent_queue.this.id}"
+  identity_id = module.uami.principal_id
+  role_name   = "Administrator"
+
+  depends_on = [
+    azuredevops_service_principal_entitlement.uami
+  ]
 }
 
 # This is the module call
 module "azure_devops_agents" {
   source = "../.."
 
-  location                                     = local.selected_region
-  postfix                                      = random_string.name.result
-  version_control_system_organization          = local.azure_devops_organization_url
-  version_control_system_type                  = "azuredevops"
-  tags                                         = local.tags
-  use_private_networking                       = false
-  use_zone_redundancy                          = false
-  version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
-  version_control_system_pool_name             = azuredevops_agent_pool.this.name
+  location                                        = local.selected_region
+  postfix                                         = random_string.name.result
+  version_control_system_organization             = local.azure_devops_organization_url
+  version_control_system_type                     = "azuredevops"
+  resource_group_creation_enabled                 = false
+  resource_group_name                             = azapi_resource.rg.name
+  tags                                            = local.tags
+  use_private_networking                          = false
+  use_zone_redundancy                             = false
+  user_assigned_managed_identity_client_id        = module.uami.client_id
+  user_assigned_managed_identity_creation_enabled = false
+  user_assigned_managed_identity_id               = module.uami.resource_id
+  user_assigned_managed_identity_principal_id     = module.uami.principal_id
+  version_control_system_authentication_method    = "uami"
+  version_control_system_personal_access_token    = null
+  version_control_system_pool_name                = azuredevops_agent_pool.this.name
 
-  depends_on = [azuredevops_pipeline_authorization.this]
+  depends_on = [
+    azuredevops_pipeline_authorization.this,
+    azuredevops_securityrole_assignment.uami_pool_admin
+  ]
 }
 
 # Region helpers

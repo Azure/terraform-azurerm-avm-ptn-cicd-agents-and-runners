@@ -100,14 +100,14 @@ locals {
   }
 }
 
-data "azurerm_client_config" "this" {}
+data "azapi_client_config" "this" {}
 
 resource "azapi_resource_action" "resource_provider_registration" {
   for_each = local.resource_providers_to_register
 
   action      = "providers/${each.value.resource_provider}/register"
   method      = "POST"
-  resource_id = "/subscriptions/${data.azurerm_client_config.this.subscription_id}"
+  resource_id = "/subscriptions/${data.azapi_client_config.this.subscription_id}"
   type        = "Microsoft.Resources/subscriptions@2021-04-01"
 }
 
@@ -174,7 +174,7 @@ The following resources are used by this module:
 - [github_repository_file.this](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository_file) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
 - [random_string.name](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
-- [azurerm_client_config.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
+- [azapi_client_config.this](https://registry.terraform.io/providers/azure/azapi/latest/docs/data-sources/client_config) (data source)
 - [github_organization.alz](https://registry.terraform.io/providers/integrations/github/latest/docs/data-sources/organization) (data source)
 
 <!-- markdownlint-disable MD013 -->
