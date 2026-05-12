@@ -3,12 +3,6 @@ variable "azure_devops_organization_name" {
   description = "Azure DevOps Organisation Name"
 }
 
-variable "azure_devops_personal_access_token" {
-  type        = string
-  description = "The personal access token used for agent authentication to Azure DevOps."
-  sensitive   = true
-}
-
 # Optional override variables - most values are hardcoded in main.tf for simplicity
 variable "location_override" {
   type        = string

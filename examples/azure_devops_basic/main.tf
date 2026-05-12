@@ -14,7 +14,7 @@ terraform {
     }
     azuredevops = {
       source  = "microsoft/azuredevops"
-      version = "~> 1.1"
+      version = "~> 1.15"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -39,10 +39,7 @@ locals {
   azure_devops_organization_url = "https://dev.azure.com/${var.azure_devops_organization_name}"
 }
 
-provider "azuredevops" {
-  personal_access_token = var.azure_devops_personal_access_token
-  org_service_url       = local.azure_devops_organization_url
-}
+provider "azuredevops" {}
 
 resource "random_string" "name" {
   length  = 6

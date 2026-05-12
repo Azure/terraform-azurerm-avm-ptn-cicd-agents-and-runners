@@ -14,7 +14,7 @@ terraform {
     }
     github = {
       source  = "integrations/github"
-      version = "~> 5.36"
+      version = "~> 6.12"
     }
     random = {
       source  = "hashicorp/random"
@@ -27,10 +27,7 @@ provider "azurerm" {
   features {}
 }
 
-provider "github" {
-  token = var.github_personal_access_token
-  owner = var.github_organization_name
-}
+provider "github" {}
 
 resource "random_string" "name" {
   length  = 6

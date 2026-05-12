@@ -6,6 +6,17 @@ This example deploys Azure DevOps Agents to Azure Container Apps in two regions 
 
 >NOTE: Multi-region support may result in duplicated agent scaling, there is no built-in mechanism to prevent this.
 
+## Authentication
+
+This example uses the [`azuredevops`](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs) provider's default Azure CLI authentication. Set the organization URL via the `AZDO_ORG_SERVICE_URL` environment variable and sign in with the Azure CLI before running Terraform:
+
+```bash
+export AZDO_ORG_SERVICE_URL="https://dev.azure.com/<your-organization>"
+az login
+```
+
+For other authentication methods (Personal Access Token, OIDC, Managed Identity, Service Principal, etc.), see the [provider authentication documentation](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs#authentication).
+
 ```hcl
 locals {
   tags = {
@@ -23,7 +34,7 @@ terraform {
     }
     azuredevops = {
       source  = "microsoft/azuredevops"
-      version = "~> 1.1"
+      version = "~> 1.15"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -48,10 +59,7 @@ locals {
   azure_devops_organization_url = "https://dev.azure.com/${var.azure_devops_organization_name}"
 }
 
-provider "azuredevops" {
-  personal_access_token = var.azure_devops_personal_access_token
-  org_service_url       = local.azure_devops_organization_url
-}
+provider "azuredevops" {}
 
 resource "random_string" "name" {
   length  = 6
@@ -307,7 +315,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.0)
 
-- <a name="requirement_azuredevops"></a> [azuredevops](#requirement\_azuredevops) (~> 1.1)
+- <a name="requirement_azuredevops"></a> [azuredevops](#requirement\_azuredevops) (~> 1.15)
 
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.20)
 
@@ -345,12 +353,6 @@ The following input variables are required:
 ### <a name="input_azure_devops_organization_name"></a> [azure\_devops\_organization\_name](#input\_azure\_devops\_organization\_name)
 
 Description: Azure DevOps Organisation Name
-
-Type: `string`
-
-### <a name="input_azure_devops_personal_access_token"></a> [azure\_devops\_personal\_access\_token](#input\_azure\_devops\_personal\_access\_token)
-
-Description: The personal access token used by the azuredevops Terraform provider to manage Azure DevOps resources.
 
 Type: `string`
 

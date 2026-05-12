@@ -6,6 +6,19 @@ This example demonstrates setting up Azure DevOps agents using Container Apps wi
 
 > **Note**: This example is provided for backwards compatibility testing. For production deployments, use the UAMI (User Assigned Managed Identity) authentication method instead.
 
+## Authentication
+
+This example uses the [`azuredevops`](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs) provider's default Azure CLI authentication for managing Azure DevOps resources. Set the organization URL via the `AZDO_ORG_SERVICE_URL` environment variable and sign in with the Azure CLI before running Terraform:
+
+```bash
+export AZDO_ORG_SERVICE_URL="https://dev.azure.com/<your-organization>"
+az login
+```
+
+The separate `azure_devops_agents_personal_access_token` variable below is the PAT used by the *self-hosted agents themselves* to register with the Azure DevOps agent pool — it is distinct from the provider authentication.
+
+For other provider authentication methods (Personal Access Token, OIDC, Managed Identity, Service Principal, etc.), see the [provider authentication documentation](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs#authentication).
+
 ```hcl
 # ========================================
 # Azure DevOps Container Apps with PAT - Backwards Compatibility Example
@@ -29,7 +42,7 @@ terraform {
     }
     azuredevops = {
       source  = "microsoft/azuredevops"
-      version = "~> 1.1"
+      version = "~> 1.15"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -50,10 +63,7 @@ locals {
   azure_devops_organization_url = "https://dev.azure.com/${var.azure_devops_organization_name}"
 }
 
-provider "azuredevops" {
-  personal_access_token = var.azure_devops_personal_access_token
-  org_service_url       = local.azure_devops_organization_url
-}
+provider "azuredevops" {}
 
 resource "random_string" "name" {
   length  = 6
@@ -206,7 +216,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.0)
 
-- <a name="requirement_azuredevops"></a> [azuredevops](#requirement\_azuredevops) (~> 1.1)
+- <a name="requirement_azuredevops"></a> [azuredevops](#requirement\_azuredevops) (~> 1.15)
 
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.20)
 
@@ -242,12 +252,6 @@ Type: `string`
 ### <a name="input_azure_devops_organization_name"></a> [azure\_devops\_organization\_name](#input\_azure\_devops\_organization\_name)
 
 Description: Azure DevOps Organisation Name
-
-Type: `string`
-
-### <a name="input_azure_devops_personal_access_token"></a> [azure\_devops\_personal\_access\_token](#input\_azure\_devops\_personal\_access\_token)
-
-Description: Personal Access Token for Azure DevOps authentication. Required scopes: Agent Pools (Read & Manage), Build (Read & Execute), Code (Read & Write), Project and Team (Read & Write)
 
 Type: `string`
 

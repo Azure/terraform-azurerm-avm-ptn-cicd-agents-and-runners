@@ -4,6 +4,19 @@
 
 This example deploys GitHub Runners to Azure Container Instance using the minimal set of required variables using private networking.
 
+## Authentication
+
+This example uses the [`github`](https://registry.terraform.io/providers/integrations/github/latest/docs) provider with credentials supplied via environment variables. Set the GitHub owner (organization or user) and a Personal Access Token before running Terraform (e.g. in your CD workflow):
+
+```bash
+export GITHUB_OWNER="<your-organization-or-user>"
+export GITHUB_TOKEN="<your-pat>"
+```
+
+The `github_runners_personal_access_token` variable is a separate token used by the self-hosted runners to register with GitHub and is unrelated to provider authentication.
+
+For other authentication methods (GitHub App installation, GitHub CLI, etc.), see the [provider authentication documentation](https://registry.terraform.io/providers/integrations/github/latest/docs#authentication).
+
 ```hcl
 locals {
   tags = {
@@ -21,7 +34,7 @@ terraform {
     }
     github = {
       source  = "integrations/github"
-      version = "~> 5.36"
+      version = "~> 6.12"
     }
     random = {
       source  = "hashicorp/random"
@@ -34,10 +47,7 @@ provider "azurerm" {
   features {}
 }
 
-provider "github" {
-  token = var.github_personal_access_token
-  owner = var.github_organization_name
-}
+provider "github" {}
 
 resource "random_string" "name" {
   length  = 6
@@ -131,7 +141,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.20)
 
-- <a name="requirement_github"></a> [github](#requirement\_github) (~> 5.36)
+- <a name="requirement_github"></a> [github](#requirement\_github) (~> 6.12)
 
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
@@ -153,12 +163,6 @@ The following input variables are required:
 ### <a name="input_github_organization_name"></a> [github\_organization\_name](#input\_github\_organization\_name)
 
 Description: GitHub Organisation Name
-
-Type: `string`
-
-### <a name="input_github_personal_access_token"></a> [github\_personal\_access\_token](#input\_github\_personal\_access\_token)
-
-Description: The personal access token used for authentication to GitHub.
 
 Type: `string`
 
