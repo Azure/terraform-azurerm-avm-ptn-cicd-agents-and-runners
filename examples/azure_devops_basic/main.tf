@@ -35,11 +35,13 @@ provider "azurerm" {
   features {}
 }
 
-locals {
-  azure_devops_organization_url = "https://dev.azure.com/${var.azure_devops_organization_name}"
-}
-
 provider "azuredevops" {}
+
+data "azuredevops_client_config" "this" {}
+
+locals {
+  azure_devops_organization_url = data.azuredevops_client_config.this.organization_url
+}
 
 resource "random_string" "name" {
   length  = 6

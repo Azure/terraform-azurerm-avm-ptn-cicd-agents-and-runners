@@ -1,8 +1,3 @@
-variable "azure_devops_organization_name" {
-  type        = string
-  description = "Azure DevOps Organisation Name"
-}
-
 # Optional override variables - most values are hardcoded in main.tf for simplicity
 variable "location_override" {
   type        = string

@@ -53,12 +53,14 @@ provider "azurerm" {
   features {}
 }
 
-locals {
-  azure_devops_organization_url = "https://dev.azure.com/${var.azure_devops_organization_name}"
-}
-
 # Azure DevOps provider - uses Azure CLI for local development
 provider "azuredevops" {}
+
+data "azuredevops_client_config" "this" {}
+
+locals {
+  azure_devops_organization_url = data.azuredevops_client_config.this.organization_url
+}
 
 resource "random_string" "name" {
   length  = 6
@@ -321,17 +323,12 @@ The following resources are used by this module:
 - [random_string.name](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
 - [time_sleep.uami_propagation](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) (resource)
 - [azapi_client_config.this](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
+- [azuredevops_client_config.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/data-sources/client_config) (data source)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
 
-The following input variables are required:
-
-### <a name="input_azure_devops_organization_name"></a> [azure\_devops\_organization\_name](#input\_azure\_devops\_organization\_name)
-
-Description: Azure DevOps Organisation Name
-
-Type: `string`
+No required inputs.
 
 ## Optional Inputs
 

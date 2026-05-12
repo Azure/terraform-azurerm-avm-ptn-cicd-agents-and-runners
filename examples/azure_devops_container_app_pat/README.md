@@ -59,11 +59,13 @@ provider "azurerm" {
   features {}
 }
 
-locals {
-  azure_devops_organization_url = "https://dev.azure.com/${var.azure_devops_organization_name}"
-}
-
 provider "azuredevops" {}
+
+data "azuredevops_client_config" "this" {}
+
+locals {
+  azure_devops_organization_url = data.azuredevops_client_config.this.organization_url
+}
 
 resource "random_string" "name" {
   length  = 6
@@ -237,6 +239,7 @@ The following resources are used by this module:
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
 - [random_string.name](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
 - [azapi_client_config.this](https://registry.terraform.io/providers/azure/azapi/latest/docs/data-sources/client_config) (data source)
+- [azuredevops_client_config.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/data-sources/client_config) (data source)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
@@ -246,12 +249,6 @@ The following input variables are required:
 ### <a name="input_azure_devops_agents_personal_access_token"></a> [azure\_devops\_agents\_personal\_access\_token](#input\_azure\_devops\_agents\_personal\_access\_token)
 
 Description: Personal access token for Azure DevOps self-hosted agents (the token requires the 'Agent Pools - Read & Manage' scope and should have the maximum expiry).
-
-Type: `string`
-
-### <a name="input_azure_devops_organization_name"></a> [azure\_devops\_organization\_name](#input\_azure\_devops\_organization\_name)
-
-Description: Azure DevOps Organisation Name
 
 Type: `string`
 
