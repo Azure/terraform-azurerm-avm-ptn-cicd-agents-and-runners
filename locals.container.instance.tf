@@ -9,7 +9,7 @@ locals {
 
 locals {
   container_instance_environment_variables = concat(tolist(jsondecode(local.container_instance_environment_variables_final)), tolist(var.container_instance_environment_variables))
-  container_instance_environment_variables_azure_devops = var.version_control_system_authentication_method == "uami" ? [
+  container_instance_environment_variables_azure_devops = local.version_control_system_authentication_method == "uami" ? [
     {
       name  = "AZP_URL"
       value = var.version_control_system_organization
@@ -59,7 +59,7 @@ locals {
 
 locals {
   container_instance_sensitive_environment_variables = concat(tolist(jsondecode(local.container_instance_sensitive_environment_variables_final)), tolist(var.container_instance_sensitive_environment_variables))
-  container_instance_sensitive_environment_variables_azure_devops = var.version_control_system_authentication_method == "uami" ? [] : [
+  container_instance_sensitive_environment_variables_azure_devops = local.version_control_system_authentication_method == "uami" ? [] : [
     {
       name  = "AZP_TOKEN"
       value = var.version_control_system_personal_access_token

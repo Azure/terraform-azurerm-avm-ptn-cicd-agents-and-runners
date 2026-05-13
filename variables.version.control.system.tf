@@ -28,15 +28,16 @@ variable "version_control_system_agent_target_queue_length" {
 
 variable "version_control_system_authentication_method" {
   type        = string
-  default     = "pat"
-  description = "Authentication method. For Azure DevOps: 'pat' or 'uami' (requires Azure DevOps prerequisites - see README). For GitHub: 'pat' or 'github_app'"
+  default     = null
+  description = "Authentication method. For Azure DevOps: 'pat' or 'uami' (requires Azure DevOps prerequisites - see README). For GitHub: 'pat' or 'github_app'. If null (the default), Azure DevOps falls back to 'uami' and GitHub falls back to 'github_app'."
 
   validation {
     condition = (
+      var.version_control_system_authentication_method == null ? true :
       var.version_control_system_type == "azuredevops" ? contains(["pat", "uami"], var.version_control_system_authentication_method) :
       contains(["pat", "github_app"], var.version_control_system_authentication_method)
     )
-    error_message = "For Azure DevOps, authentication_method must be 'pat' or 'uami'. For GitHub, authentication_method must be 'pat' or 'github_app'."
+    error_message = "For Azure DevOps, authentication_method must be 'pat' or 'uami'. For GitHub, authentication_method must be 'pat' or 'github_app'. Leave null to use the default for the chosen version_control_system_type."
   }
 }
 
@@ -53,7 +54,7 @@ variable "version_control_system_github_application_id" {
 
   validation {
     condition = (
-      var.version_control_system_authentication_method == "github_app" ? length(var.version_control_system_github_application_id) > 0 : true
+      coalesce(var.version_control_system_authentication_method, var.version_control_system_type == "azuredevops" ? "uami" : "github_app") == "github_app" ? length(var.version_control_system_github_application_id) > 0 : true
     )
     error_message = "Variable version_control_system_github_application_id must be defined when version_control_system_authentication_method is github_app."
   }
@@ -66,7 +67,7 @@ variable "version_control_system_github_application_installation_id" {
 
   validation {
     condition = (
-      var.version_control_system_authentication_method == "github_app" ? length(var.version_control_system_github_application_installation_id) > 0 : true
+      coalesce(var.version_control_system_authentication_method, var.version_control_system_type == "azuredevops" ? "uami" : "github_app") == "github_app" ? length(var.version_control_system_github_application_installation_id) > 0 : true
     )
     error_message = "Variable version_control_system_github_application_installation_id must be defined when version_control_system_authentication_method is github_app."
   }
@@ -80,7 +81,7 @@ variable "version_control_system_github_application_key" {
 
   validation {
     condition = (
-      var.version_control_system_authentication_method == "github_app" ? var.version_control_system_github_application_key != "" && var.version_control_system_github_application_key != null : true
+      coalesce(var.version_control_system_authentication_method, var.version_control_system_type == "azuredevops" ? "uami" : "github_app") == "github_app" ? var.version_control_system_github_application_key != "" && var.version_control_system_github_application_key != null : true
     )
     error_message = "Variable version_control_system_github_application_key must be defined when version_control_system_authentication_method is github_app."
   }
@@ -94,7 +95,7 @@ variable "version_control_system_personal_access_token" {
 
   validation {
     condition = (
-      var.version_control_system_authentication_method == "pat" ? var.version_control_system_personal_access_token != "" && var.version_control_system_personal_access_token != null : true
+      coalesce(var.version_control_system_authentication_method, var.version_control_system_type == "azuredevops" ? "uami" : "github_app") == "pat" ? var.version_control_system_personal_access_token != "" && var.version_control_system_personal_access_token != null : true
     )
     error_message = "Variable version_control_system_personal_access_token must be defined when version_control_system_authentication_method is pat."
   }

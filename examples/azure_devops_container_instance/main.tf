@@ -163,15 +163,19 @@ resource "azuredevops_service_principal_entitlement" "uami" {
   ]
 }
 
+# Grant the UAMI the Administrator role on the org-level agent pool. The
+# lower-privilege Service Account role only permits an already-registered
+# agent to create sessions and listen for jobs; it does not grant the Manage
+# permission needed to register a new agent. This module's containers are
+# ephemeral and call POST /_apis/distributedtask/pools/{poolId}/agents on
+# every start, so Administrator is the lowest built-in role that works.
 resource "azuredevops_securityrole_assignment" "uami_pool_admin" {
-  scope       = "distributedtask.agentqueuerole"
-  resource_id = "${azuredevops_project.this.id}_${azuredevops_agent_queue.this.id}"
-  identity_id = module.uami.principal_id
+  scope       = "distributedtask.agentpoolrole"
+  resource_id = azuredevops_agent_pool.this.id
+  # Must be the AzDO Service Principal UUID (entitlement id), not the AAD object id;
+  # the provider polls the role assignment until the returned Identity.ID matches identity_id.
+  identity_id = azuredevops_service_principal_entitlement.uami.id
   role_name   = "Administrator"
-
-  depends_on = [
-    azuredevops_service_principal_entitlement.uami
-  ]
 }
 
 # This is the module call
@@ -184,13 +188,10 @@ module "azure_devops_agents" {
   version_control_system_type                     = "azuredevops"
   compute_types                                   = ["azure_container_instance"]
   resource_group_creation_enabled                 = false
-  resource_group_name                             = azapi_resource.rg.name
+  parent_id                                       = azapi_resource.rg.id
   tags                                            = local.tags
-  user_assigned_managed_identity_client_id        = module.uami.client_id
   user_assigned_managed_identity_creation_enabled = false
   user_assigned_managed_identity_id               = module.uami.resource_id
-  user_assigned_managed_identity_principal_id     = module.uami.principal_id
-  version_control_system_authentication_method    = "uami"
   version_control_system_personal_access_token    = null
   version_control_system_pool_name                = azuredevops_agent_pool.this.name
   virtual_network_address_space                   = "10.0.0.0/16"

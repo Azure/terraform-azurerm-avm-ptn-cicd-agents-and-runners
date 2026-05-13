@@ -75,7 +75,7 @@ output "user_assigned_managed_identity_id" {
 
 output "user_assigned_managed_identity_principal_id" {
   description = "The principal id of the user assigned managed identity."
-  value       = var.user_assigned_managed_identity_creation_enabled ? module.user_assigned_managed_identity[0].principal_id : var.user_assigned_managed_identity_principal_id
+  value       = local.user_assigned_managed_identity_principal_id
 }
 
 output "virtual_network_name" {

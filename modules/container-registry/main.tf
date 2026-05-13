@@ -4,7 +4,7 @@ module "container_registry" {
 
   location                   = var.location
   name                       = var.name
-  resource_group_name        = basename(var.parent_id)
+  resource_group_name        = provider::azapi::parse_resource_id("Microsoft.Resources/resourceGroups@2024-11-01", var.parent_id).name
   enable_telemetry           = var.enable_telemetry
   network_rule_bypass_option = var.use_private_networking ? "AzureServices" : "None"
   private_endpoints = var.use_private_networking ? {
@@ -67,14 +67,10 @@ resource "azapi_resource" "task" {
   }
 }
 
-resource "azapi_resource_action" "task_run" {
+resource "azurerm_container_registry_task_schedule_run_now" "task_run" {
   for_each = var.images
 
-  action      = "scheduleRun"
-  method      = "POST"
-  resource_id = azapi_resource.task[each.key].id
-  type        = "Microsoft.ContainerRegistry/registries/tasks@2019-06-01-preview"
-  body        = {}
+  container_registry_task_id = azapi_resource.task[each.key].id
 
   depends_on = [
     azapi_resource.role_assignment_acr_push_for_task,

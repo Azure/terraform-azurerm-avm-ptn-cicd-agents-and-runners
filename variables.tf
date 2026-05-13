@@ -76,6 +76,21 @@ variable "log_analytics_workspace_internet_query_enabled" {
   description = "Whether or not to enable internet query for the Log Analytics workspace. If null, defaults to opposite of use_private_networking (true when private networking is false)."
 }
 
+variable "parent_id" {
+  type        = string
+  default     = null
+  description = "The resource ID of the resource group where the resources will be deployed. Required when `resource_group_creation_enabled == false`."
+
+  validation {
+    condition     = var.resource_group_creation_enabled || var.parent_id != null
+    error_message = "Variable parent_id must be provided when resource_group_creation_enabled is false."
+  }
+  validation {
+    condition     = var.parent_id == null || can(provider::azapi::parse_resource_id("Microsoft.Resources/resourceGroups@2024-11-01", var.parent_id))
+    error_message = "Variable parent_id must be a resource group resource ID of the form /subscriptions/{sub}/resourceGroups/{name}."
+  }
+}
+
 variable "resource_group_creation_enabled" {
   type        = bool
   default     = true
@@ -85,7 +100,7 @@ variable "resource_group_creation_enabled" {
 variable "resource_group_name" {
   type        = string
   default     = null
-  description = "The resource group where the resources will be deployed. Must be specified if `resource_group_creation_enabled == false`"
+  description = "The name to give to the resource group when `resource_group_creation_enabled == true`. Defaults to `rg-<postfix>`. Ignored when bringing your own resource group; set `parent_id` instead."
 }
 
 variable "tags" {

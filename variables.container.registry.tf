@@ -64,7 +64,7 @@ variable "default_image_name" {
 
 variable "default_image_registry_dockerfile_path" {
   type        = string
-  default     = "dockerfile"
+  default     = "Dockerfile"
   description = "The default image registry Dockerfile path to use if no custom image is provided."
 }
 

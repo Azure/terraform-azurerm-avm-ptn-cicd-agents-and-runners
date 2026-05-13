@@ -187,8 +187,9 @@ module "azure_devops_agents" {
   container_registry_private_dns_zone_creation_enabled = false
   container_registry_private_endpoint_subnet_id        = module.virtual_network.subnets["container_registry_private_endpoint"].resource_id
   resource_group_creation_enabled                      = false
-  resource_group_name                                  = azapi_resource.rg.name
+  parent_id                                            = azapi_resource.rg.id
   tags                                                 = local.tags
+  version_control_system_authentication_method         = "pat"
   version_control_system_personal_access_token         = var.github_runners_personal_access_token
   version_control_system_repository                    = github_repository.this.name
   virtual_network_creation_enabled                     = false

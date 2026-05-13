@@ -8,11 +8,12 @@ locals {
   nat_gateway_id                                   = var.use_private_networking ? (var.nat_gateway_creation_enabled ? azapi_resource.nat_gateway[0].id : var.nat_gateway_id) : ""
   public_ip_id                                     = var.use_private_networking ? (var.public_ip_creation_enabled ? azapi_resource.public_ip[0].id : var.public_ip_id) : ""
   registry_login_server                            = var.container_registry_creation_enabled ? module.container_registry[0].login_server : var.custom_container_registry_login_server
-  resource_group_id                                = "/subscriptions/${data.azapi_client_config.current.subscription_id}/resourceGroups/${local.resource_group_name}"
-  resource_group_name                              = var.resource_group_creation_enabled ? azapi_resource.resource_group[0].name : var.resource_group_name
+  resource_group_id                                = var.resource_group_creation_enabled ? azapi_resource.resource_group[0].id : var.parent_id
+  resource_group_name                              = var.resource_group_creation_enabled ? azapi_resource.resource_group[0].name : provider::azapi::parse_resource_id("Microsoft.Resources/resourceGroups@2024-11-01", var.parent_id).name
   resource_group_name_container_app_infrastructure = var.container_app_infrastructure_resource_group_name == null ? "rg-${var.postfix}-container-apps-infrastructure" : var.container_app_infrastructure_resource_group_name
-  user_assigned_managed_identity_client_id         = var.user_assigned_managed_identity_creation_enabled ? module.user_assigned_managed_identity[0].client_id : var.user_assigned_managed_identity_client_id
-  user_assigned_managed_identity_principal_id      = var.user_assigned_managed_identity_creation_enabled ? module.user_assigned_managed_identity[0].principal_id : var.user_assigned_managed_identity_principal_id
+  user_assigned_managed_identity_client_id         = var.user_assigned_managed_identity_creation_enabled ? module.user_assigned_managed_identity[0].client_id : data.azapi_resource.user_assigned_managed_identity[0].output.properties.clientId
+  user_assigned_managed_identity_principal_id      = var.user_assigned_managed_identity_creation_enabled ? module.user_assigned_managed_identity[0].principal_id : data.azapi_resource.user_assigned_managed_identity[0].output.properties.principalId
+  version_control_system_authentication_method     = coalesce(var.version_control_system_authentication_method, var.version_control_system_type == local.version_control_system_azure_devops ? "uami" : "github_app")
   virtual_network_id                               = var.use_private_networking ? (var.virtual_network_creation_enabled ? module.virtual_network[0].resource_id : var.virtual_network_id) : ""
 }
 

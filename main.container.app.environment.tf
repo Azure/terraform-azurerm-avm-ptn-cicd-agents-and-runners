@@ -1,5 +1,5 @@
 data "azapi_resource" "log_analytics_workspace" {
-  count = local.deploy_container_app && var.container_app_environment_creation_enabled && local.log_analytics_workspace_id != null ? 1 : 0
+  count = local.deploy_container_app && var.container_app_environment_creation_enabled && (var.log_analytics_workspace_creation_enabled || var.log_analytics_workspace_id != null) ? 1 : 0
 
   resource_id            = local.log_analytics_workspace_id
   type                   = "Microsoft.OperationalInsights/workspaces@2023-09-01"
@@ -7,7 +7,7 @@ data "azapi_resource" "log_analytics_workspace" {
 }
 
 data "azapi_resource_action" "log_analytics_workspace_keys" {
-  count = local.deploy_container_app && var.container_app_environment_creation_enabled && local.log_analytics_workspace_id != null ? 1 : 0
+  count = local.deploy_container_app && var.container_app_environment_creation_enabled && (var.log_analytics_workspace_creation_enabled || var.log_analytics_workspace_id != null) ? 1 : 0
 
   action                 = "sharedKeys"
   method                 = "POST"
@@ -39,18 +39,18 @@ resource "azapi_resource" "container_app_environment" {
         {
           name                = "Consumption"
           workloadProfileType = "Consumption"
-          maximumCount        = 0
-          minimumCount        = 0
         }
       ]
       zoneRedundant               = var.use_zone_redundancy ? true : null
       infrastructureResourceGroup = var.use_private_networking ? local.resource_group_name_container_app_infrastructure : null
     }
   }
-  create_headers         = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
-  delete_headers         = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
-  read_headers           = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
-  response_export_values = ["id", "name"]
+  create_headers            = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+  delete_headers            = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+  ignore_null_property      = true
+  read_headers              = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+  response_export_values    = ["id", "name"]
+  schema_validation_enabled = true
   sensitive_body = {
     properties = {
       appLogsConfiguration = {

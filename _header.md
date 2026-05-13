@@ -63,15 +63,13 @@ module "azure_devops_agents_uami" {
   location = "uksouth"
 
   version_control_system_type                  = "azuredevops"
-  version_control_system_authentication_method = "uami"  # No PAT required
   version_control_system_organization          = "https://dev.azure.com/my-organization"
   version_control_system_pool_name             = "my-agent-pool"
 
-  # Use existing UAMI (must be configured in Azure DevOps first)
+  # Use existing UAMI (must be configured in Azure DevOps first). Only the
+  # resource_id is required; the module reads client_id and principal_id from it.
   user_assigned_managed_identity_creation_enabled = false
   user_assigned_managed_identity_id               = "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/my-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/my-uami"
-  user_assigned_managed_identity_client_id        = "12345678-1234-1234-1234-123456789012"
-  user_assigned_managed_identity_principal_id     = "87654321-4321-4321-4321-210987654321"
 
   virtual_network_address_space = "10.0.0.0/16"
 }
@@ -88,7 +86,6 @@ module "azure_devops_agents_uami" {
   location = "uksouth"
 
   version_control_system_type                  = "azuredevops"
-  version_control_system_authentication_method = "uami"  # No PAT required
   version_control_system_organization          = "https://dev.azure.com/my-organization"
   version_control_system_pool_name             = "my-agent-pool"
 
@@ -182,20 +179,25 @@ resource "azuredevops_service_principal_entitlement" "uami" {
   origin_id            = module.uami.principal_id
 }
 
-# 2. Grant the UAMI the Administrator role on the agent pool's project queue.
-#    Administrator on the queue is the least-privilege role that allows the
-#    UAMI to register agents into the underlying organization-level pool.
+# 2. Grant the UAMI the Administrator role on the organization-level agent
+#    pool. The lower-privilege Service Account role only permits an already-
+#    registered agent to create sessions and listen for jobs; it does not
+#    grant the Manage permission needed to register a new agent. Because
+#    this module's containers are ephemeral and call POST /_apis/distributed
+#    task/pools/{poolId}/agents on every start, Administrator is the lowest
+#    built-in role that works. (A custom role with just Manage added to
+#    Service Account would be tighter, but is not Terraformable today.)
 resource "azuredevops_securityrole_assignment" "uami_pool_admin" {
-  scope       = "distributedtask.agentqueuerole"
-  resource_id = "${azuredevops_project.this.id}_${azuredevops_agent_queue.this.id}"
-  identity_id = module.uami.principal_id
+  scope       = "distributedtask.agentpoolrole"
+  resource_id = azuredevops_agent_pool.this.id
+  identity_id = azuredevops_service_principal_entitlement.uami.id
   role_name   = "Administrator"
 }
 ```
 
-Per the [Microsoft docs](https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/service-principal-agent-registration?view=azure-devops), `Administrator` on the agent pool is the role required for a service principal to register agents. The examples grant it at the project queue level (`distributedtask.agentqueuerole`) rather than the organization pool level so each project's UAMI is only an administrator of its own queue.
+Per the [Microsoft docs](https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/service-principal-agent-registration?view=azure-devops), `Administrator` on the **organization-level** agent pool is the role a service principal needs to register self-hosted agents. The examples grant it via `azuredevops_securityrole_assignment` with `scope = "distributedtask.agentpoolrole"` and `resource_id = <pool_id>`. No project-queue role assignment is needed: agents register against the org-level pool, and pipeline access to the queue is granted separately via `azuredevops_pipeline_authorization`.
 
-> **Provider limitation**: At the time of writing, the `azuredevops` Terraform provider does not support assigning roles on the **organization-level** agent pool security view (`Organization settings → Agent pools → <pool> → Security`). See [microsoft/terraform-provider-azuredevops#910](https://github.com/microsoft/terraform-provider-azuredevops/issues/910). The project-queue role assignment shown above is the supported, least-privilege Terraform path. If your environment requires the org-level role to be set explicitly, add it manually via the Azure DevOps UI or REST API after the Terraform apply.
+The `identity_id` must be the Azure DevOps Service Principal UUID returned by `azuredevops_service_principal_entitlement` (not the AAD object id) — the provider polls the role assignment until the returned `Identity.ID` matches.
 
 The principal that runs `terraform apply` against Azure DevOps must itself be a [Project Collection Administrator](https://learn.microsoft.com/en-us/azure/devops/organizations/security/look-up-project-collection-administrators) (or otherwise be allowed to manage agent pool security and add service principals to the organization) so it can create the `azuredevops_service_principal_entitlement` and `azuredevops_securityrole_assignment` resources above.
 
