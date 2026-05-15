@@ -44,7 +44,7 @@ See the [Required permissions](#required-permissions) section below for the full
 
 - **Option 1**: Use existing pre-configured UAMI (recommended) - requires `user_assigned_managed_identity_creation_enabled = false` and UAMI details
 - **Option 2**: Let module create UAMI, then configure it manually in Azure DevOps afterward
-- **Option 3**: Use `azure_devops_container_app_uami` example for fully automated setup
+- **Option 3**: Use `azure_devops_aca_private_uami_auth` example for fully automated setup
 
 > **Note**: This module handles Azure infrastructure provisioning only. Azure DevOps organization configuration is managed separately (either manually or through examples using the azuredevops provider).
 
