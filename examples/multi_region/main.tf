@@ -218,8 +218,8 @@ module "azure_devops_agents_primary" {
   version_control_system_organization             = local.azure_devops_organization_url
   version_control_system_type                     = "azuredevops"
   container_app_polling_interval_seconds          = local.primary_polling_interval_prime_number
-  resource_group_creation_enabled                 = false
   parent_id                                       = azapi_resource.rg_primary.id
+  resource_group_creation_enabled                 = false
   tags                                            = local.tags
   user_assigned_managed_identity_creation_enabled = false
   user_assigned_managed_identity_id               = module.uami.resource_id
@@ -241,8 +241,8 @@ module "azure_devops_agents_secondary" {
   version_control_system_organization             = local.azure_devops_organization_url
   version_control_system_type                     = "azuredevops"
   container_app_polling_interval_seconds          = local.secondary_polling_interval_prime_number
-  resource_group_creation_enabled                 = false
   parent_id                                       = azapi_resource.rg_secondary.id
+  resource_group_creation_enabled                 = false
   tags                                            = local.tags
   user_assigned_managed_identity_creation_enabled = false
   user_assigned_managed_identity_id               = module.uami.resource_id

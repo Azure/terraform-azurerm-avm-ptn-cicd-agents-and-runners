@@ -230,8 +230,8 @@ module "azure_devops_agents" {
   container_app_max_execution_count               = 10
   container_app_min_execution_count               = 0 # Scale to 0 for optimal cost savings when idle
   container_app_polling_interval_seconds          = 30
-  resource_group_creation_enabled                 = false
   parent_id                                       = azapi_resource.rg.id
+  resource_group_creation_enabled                 = false
   tags                                            = local.tags
   use_private_networking                          = false
   use_zone_redundancy                             = false

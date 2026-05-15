@@ -221,15 +221,11 @@ module "azure_devops_agents" {
   postfix                                         = random_string.name.result
   version_control_system_organization             = local.azure_devops_organization_url
   version_control_system_type                     = "azuredevops"
+  parent_id                                       = azapi_resource.rg.id
   resource_group_creation_enabled                 = false
-  resource_group_name                             = azapi_resource.rg.name
   tags                                            = local.tags
-  user_assigned_managed_identity_client_id        = module.uami.client_id
   user_assigned_managed_identity_creation_enabled = false
   user_assigned_managed_identity_id               = module.uami.resource_id
-  user_assigned_managed_identity_principal_id     = module.uami.principal_id
-  version_control_system_authentication_method    = "uami"
-  version_control_system_personal_access_token    = null
   version_control_system_pool_name                = azuredevops_agent_pool.this.name
   virtual_network_address_space                   = "10.0.0.0/16"
 

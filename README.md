@@ -65,15 +65,13 @@ module "azure_devops_agents_uami" {
   location = "uksouth"
 
   version_control_system_type                  = "azuredevops"
-  version_control_system_authentication_method = "uami"  # No PAT required
   version_control_system_organization          = "https://dev.azure.com/my-organization"
   version_control_system_pool_name             = "my-agent-pool"
 
-  # Use existing UAMI (must be configured in Azure DevOps first)
+  # Use existing UAMI (must be configured in Azure DevOps first). Only the
+  # resource_id is required; the module reads client_id and principal_id from it.
   user_assigned_managed_identity_creation_enabled = false
   user_assigned_managed_identity_id               = "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/my-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/my-uami"
-  user_assigned_managed_identity_client_id        = "12345678-1234-1234-1234-123456789012"
-  user_assigned_managed_identity_principal_id     = "87654321-4321-4321-4321-210987654321"
 
   virtual_network_address_space = "10.0.0.0/16"
 }
@@ -90,7 +88,6 @@ module "azure_devops_agents_uami" {
   location = "uksouth"
 
   version_control_system_type                  = "azuredevops"
-  version_control_system_authentication_method = "uami"  # No PAT required
   version_control_system_organization          = "https://dev.azure.com/my-organization"
   version_control_system_pool_name             = "my-agent-pool"
 
@@ -255,6 +252,7 @@ The following resources are used by this module:
 - [azapi_client_config.current](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
 - [azapi_client_config.telemetry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
 - [azapi_resource.log_analytics_workspace](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/resource) (data source)
+- [azapi_resource.user_assigned_managed_identity](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/resource) (data source)
 - [azapi_resource_action.log_analytics_workspace_keys](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/resource_action) (data source)
 - [modtm_module_source.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/data-sources/module_source) (data source)
 
@@ -773,7 +771,7 @@ Description: The default image repository commit to use if no custom image is pr
 
 Type: `string`
 
-Default: `"6d9e65a"`
+Default: `"9b4c292"`
 
 ### <a name="input_default_image_repository_folder_paths"></a> [default\_image\_repository\_folder\_paths](#input\_default\_image\_repository\_folder\_paths)
 
@@ -923,6 +921,14 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_parent_id"></a> [parent\_id](#input\_parent\_id)
+
+Description: The resource ID of the resource group where the resources will be deployed. Required when `resource_group_creation_enabled == false`.
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_public_ip_creation_enabled"></a> [public\_ip\_creation\_enabled](#input\_public\_ip\_creation\_enabled)
 
 Description: Whether or not to create a public IP.
@@ -973,7 +979,7 @@ Default: `true`
 
 ### <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name)
 
-Description: The resource group where the resources will be deployed. Must be specified if `resource_group_creation_enabled == false`
+Description: The name to give to the resource group when `resource_group_creation_enabled == true`. Defaults to `rg-<postfix>`. Ignored when bringing your own resource group; set `parent_id` instead.
 
 Type: `string`
 
@@ -1011,14 +1017,6 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_user_assigned_managed_identity_client_id"></a> [user\_assigned\_managed\_identity\_client\_id](#input\_user\_assigned\_managed\_identity\_client\_id)
-
-Description: The client id of the user assigned managed identity. Only required if `user_assigned_managed_identity_creation_enabled == false` and using UAMI authentication. The identity must be configured in Azure DevOps separately.
-
-Type: `string`
-
-Default: `null`
-
 ### <a name="input_user_assigned_managed_identity_creation_enabled"></a> [user\_assigned\_managed\_identity\_creation\_enabled](#input\_user\_assigned\_managed\_identity\_creation\_enabled)
 
 Description: Whether or not to create a user assigned managed identity. When using UAMI authentication, the identity must also be configured in Azure DevOps separately.
@@ -1029,7 +1027,7 @@ Default: `true`
 
 ### <a name="input_user_assigned_managed_identity_id"></a> [user\_assigned\_managed\_identity\_id](#input\_user\_assigned\_managed\_identity\_id)
 
-Description: The resource Id of the user assigned managed identity. Only required if `user_assigned_managed_identity_creation_enabled == false`. When using UAMI authentication, ensure the identity is configured in Azure DevOps.
+Description: The resource Id of the user assigned managed identity. Required when `user_assigned_managed_identity_creation_enabled == false`; the module reads `clientId` and `principalId` from this resource. When using UAMI authentication, ensure the identity is configured in Azure DevOps.
 
 Type: `string`
 
@@ -1038,14 +1036,6 @@ Default: `null`
 ### <a name="input_user_assigned_managed_identity_name"></a> [user\_assigned\_managed\_identity\_name](#input\_user\_assigned\_managed\_identity\_name)
 
 Description: The name of the user assigned managed identity. Must be specified if `user_assigned_managed_identity_creation_enabled == true`.
-
-Type: `string`
-
-Default: `null`
-
-### <a name="input_user_assigned_managed_identity_principal_id"></a> [user\_assigned\_managed\_identity\_principal\_id](#input\_user\_assigned\_managed\_identity\_principal\_id)
-
-Description: The principal id of the user assigned managed identity. Only required if `user_assigned_managed_identity_creation_enabled == false`. When using UAMI authentication, ensure the identity is configured in Azure DevOps.
 
 Type: `string`
 
@@ -1069,11 +1059,11 @@ Default: `1`
 
 ### <a name="input_version_control_system_authentication_method"></a> [version\_control\_system\_authentication\_method](#input\_version\_control\_system\_authentication\_method)
 
-Description: Authentication method. For Azure DevOps: 'pat' or 'uami' (requires Azure DevOps prerequisites - see README). For GitHub: 'pat' or 'github\_app'
+Description: Authentication method. For Azure DevOps: 'pat' or 'uami' (requires Azure DevOps prerequisites - see README). For GitHub: 'pat' or 'github\_app'. If null (the default), Azure DevOps falls back to 'uami' and GitHub falls back to 'github\_app'.
 
 Type: `string`
 
-Default: `"pat"`
+Default: `null`
 
 ### <a name="input_version_control_system_enterprise"></a> [version\_control\_system\_enterprise](#input\_version\_control\_system\_enterprise)
 

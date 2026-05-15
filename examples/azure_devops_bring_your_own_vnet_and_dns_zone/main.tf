@@ -280,8 +280,8 @@ module "azure_devops_agents" {
   container_registry_dns_zone_id                       = azapi_resource.private_dns_zone_container_registry.id
   container_registry_private_dns_zone_creation_enabled = false
   container_registry_private_endpoint_subnet_id        = module.virtual_network.subnets["container_registry_private_endpoint"].resource_id
-  resource_group_creation_enabled                      = false
   parent_id                                            = azapi_resource.rg.id
+  resource_group_creation_enabled                      = false
   tags                                                 = local.tags
   user_assigned_managed_identity_creation_enabled      = false
   user_assigned_managed_identity_id                    = module.uami.resource_id

@@ -1,6 +1,6 @@
-# GitHub minimal example with a container instance and private networking
+# GitHub minimal example with a container instance, private networking and GitHub App authentication
 
-This example deploys GitHub Runners to Azure Container Instance using the minimal set of required variables using private networking.
+This example deploys GitHub Runners to Azure Container Instance using the minimal set of required variables using private networking and GitHub App authentication. No Personal Access Token is required for the runners to register with GitHub.
 
 ## Authentication
 
@@ -11,6 +11,6 @@ export GITHUB_OWNER="<your-organization-or-user>"
 export GITHUB_TOKEN="<your-pat>"
 ```
 
-The `github_runners_personal_access_token` variable is a separate token used by the self-hosted runners to register with GitHub and is unrelated to provider authentication.
+The `github_application_*` variables are passed into the runners module to configure GitHub App authentication for the self-hosted runners themselves and are unrelated to provider authentication.
 
 For other authentication methods (GitHub App installation, GitHub CLI, etc.), see the [provider authentication documentation](https://registry.terraform.io/providers/integrations/github/latest/docs#authentication).

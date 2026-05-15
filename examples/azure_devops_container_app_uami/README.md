@@ -248,16 +248,13 @@ module "azure_devops_agents" {
   container_app_max_execution_count               = 10
   container_app_min_execution_count               = 0 # Scale to 0 for optimal cost savings when idle
   container_app_polling_interval_seconds          = 30
+  parent_id                                       = azapi_resource.rg.id
   resource_group_creation_enabled                 = false
-  resource_group_name                             = azapi_resource.rg.name
   tags                                            = local.tags
   use_private_networking                          = false
   use_zone_redundancy                             = false
-  user_assigned_managed_identity_client_id        = module.uami.client_id
   user_assigned_managed_identity_creation_enabled = false
   user_assigned_managed_identity_id               = module.uami.resource_id
-  user_assigned_managed_identity_principal_id     = module.uami.principal_id
-  version_control_system_authentication_method    = "uami"
   version_control_system_personal_access_token    = null # Clean: no PAT needed!
   version_control_system_pool_name                = azuredevops_agent_pool.this.name
   virtual_network_address_space                   = "10.0.0.0/16"

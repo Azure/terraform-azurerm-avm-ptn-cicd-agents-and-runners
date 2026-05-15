@@ -298,14 +298,11 @@ module "azure_devops_agents" {
   container_registry_dns_zone_id                       = azapi_resource.private_dns_zone_container_registry.id
   container_registry_private_dns_zone_creation_enabled = false
   container_registry_private_endpoint_subnet_id        = module.virtual_network.subnets["container_registry_private_endpoint"].resource_id
+  parent_id                                            = azapi_resource.rg.id
   resource_group_creation_enabled                      = false
-  resource_group_name                                  = azapi_resource.rg.name
   tags                                                 = local.tags
-  user_assigned_managed_identity_client_id             = module.uami.client_id
   user_assigned_managed_identity_creation_enabled      = false
   user_assigned_managed_identity_id                    = module.uami.resource_id
-  user_assigned_managed_identity_principal_id          = module.uami.principal_id
-  version_control_system_authentication_method         = "uami"
   version_control_system_personal_access_token         = null
   version_control_system_pool_name                     = azuredevops_agent_pool.this.name
   virtual_network_creation_enabled                     = false

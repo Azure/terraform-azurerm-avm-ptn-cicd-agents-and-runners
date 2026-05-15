@@ -187,8 +187,8 @@ module "azure_devops_agents" {
   version_control_system_organization             = local.azure_devops_organization_url
   version_control_system_type                     = "azuredevops"
   compute_types                                   = ["azure_container_instance"]
-  resource_group_creation_enabled                 = false
   parent_id                                       = azapi_resource.rg.id
+  resource_group_creation_enabled                 = false
   tags                                            = local.tags
   user_assigned_managed_identity_creation_enabled = false
   user_assigned_managed_identity_id               = module.uami.resource_id
