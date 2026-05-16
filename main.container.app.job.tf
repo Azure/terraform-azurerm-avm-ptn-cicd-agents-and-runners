@@ -31,10 +31,11 @@ module "container_app_job" {
   placeholder_replica_timeout       = var.container_app_placeholder_replica_timeout
   registry_password                 = var.custom_container_registry_password
   registry_username                 = var.custom_container_registry_username
+  retry                             = var.retry
   tags                              = var.tags
+  timeouts                          = var.timeouts
 
   depends_on = [
-    module.container_registry,
     azapi_resource.custom_container_registry_pull,
     azapi_resource.private_dns_zone_virtual_network_link_container_registry,
     time_sleep.delay_after_container_image_build,

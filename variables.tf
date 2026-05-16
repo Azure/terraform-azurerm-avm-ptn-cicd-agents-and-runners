@@ -103,10 +103,45 @@ variable "resource_group_name" {
   description = "The name to give to the resource group when `resource_group_creation_enabled == true`. Defaults to `rg-<postfix>`. Ignored when bringing your own resource group; set `parent_id` instead."
 }
 
+variable "retry" {
+  type = object({
+    error_message_regex  = optional(list(string), ["CannotDeleteResource", "ReferencedResourceNotProvisioned"])
+    interval_seconds     = optional(number, 10)
+    max_interval_seconds = optional(number, 180)
+  })
+  default     = {}
+  description = <<DESCRIPTION
+Retry configuration applied to every AzAPI resource managed by this module (and forwarded to its submodules). The default `error_message_regex` set covers ARM eventual-consistency conditions that commonly surface during create or destroy, such as the parent delete returning `CannotDeleteResource` while a nested child is still being torn down.
+
+- `error_message_regex` - List of regular expressions matched against ARM error messages. A request whose error matches any regex is retried.
+- `interval_seconds` - Base interval (seconds) between retries.
+- `max_interval_seconds` - Upper bound (seconds) on the interval between retries.
+DESCRIPTION
+  nullable    = false
+}
+
 variable "tags" {
   type        = map(string)
   default     = null
   description = "(Optional) Tags of the resource."
+}
+
+variable "timeouts" {
+  type = object({
+    create = optional(string)
+    delete = optional(string)
+    read   = optional(string)
+    update = optional(string)
+  })
+  default     = null
+  description = <<DESCRIPTION
+Per-operation timeouts forwarded to every AzAPI resource managed by this module (and to its submodules). When `null`, the provider defaults are used. Each value is a Go duration string such as `"30m"` or `"2h45m"`.
+
+- `create` - Timeout for create operations.
+- `delete` - Timeout for delete operations.
+- `read` - Timeout for read operations.
+- `update` - Timeout for update operations.
+DESCRIPTION
 }
 
 variable "use_private_networking" {

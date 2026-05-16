@@ -983,11 +983,53 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_retry"></a> [retry](#input\_retry)
+
+Description: Retry configuration applied to every AzAPI resource managed by this module (and forwarded to its submodules). The default `error_message_regex` set covers ARM eventual-consistency conditions that commonly surface during create or destroy, such as the parent delete returning `CannotDeleteResource` while a nested child is still being torn down.
+
+- `error_message_regex` - List of regular expressions matched against ARM error messages. A request whose error matches any regex is retried.
+- `interval_seconds` - Base interval (seconds) between retries.
+- `max_interval_seconds` - Upper bound (seconds) on the interval between retries.
+
+Type:
+
+```hcl
+object({
+    error_message_regex  = optional(list(string), ["CannotDeleteResource", "ReferencedResourceNotProvisioned"])
+    interval_seconds     = optional(number, 10)
+    max_interval_seconds = optional(number, 180)
+  })
+```
+
+Default: `{}`
+
 ### <a name="input_tags"></a> [tags](#input\_tags)
 
 Description: (Optional) Tags of the resource.
 
 Type: `map(string)`
+
+Default: `null`
+
+### <a name="input_timeouts"></a> [timeouts](#input\_timeouts)
+
+Description: Per-operation timeouts forwarded to every AzAPI resource managed by this module (and to its submodules). When `null`, the provider defaults are used. Each value is a Go duration string such as `"30m"` or `"2h45m"`.
+
+- `create` - Timeout for create operations.
+- `delete` - Timeout for delete operations.
+- `read` - Timeout for read operations.
+- `update` - Timeout for update operations.
+
+Type:
+
+```hcl
+object({
+    create = optional(string)
+    delete = optional(string)
+    read   = optional(string)
+    update = optional(string)
+  })
+```
 
 Default: `null`
 

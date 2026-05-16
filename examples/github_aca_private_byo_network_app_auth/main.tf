@@ -152,6 +152,11 @@ resource "azapi_resource" "private_dns_zone_container_registry" {
   parent_id              = azapi_resource.rg.id
   type                   = "Microsoft.Network/privateDnsZones@2024-06-01"
   response_export_values = ["id", "name"]
+  # ARM is eventually consistent about nested virtualNetworkLinks; the parent delete
+  # can return 409 CannotDeleteResource briefly after the child is gone.
+  retry = {
+    error_message_regex = ["CannotDeleteResource"]
+  }
 }
 
 resource "azapi_resource" "private_dns_zone_virtual_network_link_container_registry" {

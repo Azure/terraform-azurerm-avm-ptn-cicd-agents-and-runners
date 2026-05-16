@@ -10,8 +10,10 @@ module "container_registry" {
   use_private_networking                  = var.use_private_networking
   images                                  = local.container_images
   private_dns_zone_id                     = local.container_registry_dns_zone_id
+  retry                                   = var.retry
   subnet_id                               = local.container_registry_private_endpoint_subnet_id
   tags                                    = var.tags
+  timeouts                                = var.timeouts
   use_zone_redundancy                     = var.use_zone_redundancy
 }
 
@@ -32,7 +34,19 @@ resource "azapi_resource" "custom_container_registry_pull" {
   delete_headers         = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
   read_headers           = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
   response_export_values = []
+  retry                  = var.retry
   update_headers         = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
+
+    content {
+      create = timeouts.value.create
+      delete = timeouts.value.delete
+      read   = timeouts.value.read
+      update = timeouts.value.update
+    }
+  }
 }
 
 resource "time_sleep" "delay_after_container_image_build" {

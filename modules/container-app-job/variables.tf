@@ -95,10 +95,22 @@ variable "registry_username" {
 
 variable "retry" {
   type = object({
-    error_message_regex  = optional(list(string), ["ReferencedResourceNotProvisioned"])
+    error_message_regex  = optional(list(string), ["CannotDeleteResource", "ReferencedResourceNotProvisioned"])
     interval_seconds     = optional(number, 10)
     max_interval_seconds = optional(number, 180)
   })
   default     = {}
-  description = "Retry configuration for the resource operations"
+  description = "Retry configuration for the resource operations."
+  nullable    = false
+}
+
+variable "timeouts" {
+  type = object({
+    create = optional(string)
+    delete = optional(string)
+    read   = optional(string)
+    update = optional(string)
+  })
+  default     = null
+  description = "Per-operation timeouts forwarded to AzAPI resources. When `null`, the provider defaults are used. Values are Go duration strings such as `\"30m\"`."
 }

@@ -55,6 +55,17 @@ variable "private_dns_zone_id" {
   description = "The id of the private DNS zone to create for the container registry. Only required if `container_registry_private_dns_zone_creation_enabled` is `false` and you are not using policy to update the DNS zone."
 }
 
+variable "retry" {
+  type = object({
+    error_message_regex  = optional(list(string), ["CannotDeleteResource", "ReferencedResourceNotProvisioned"])
+    interval_seconds     = optional(number, 10)
+    max_interval_seconds = optional(number, 180)
+  })
+  default     = {}
+  description = "Retry configuration for the resource operations."
+  nullable    = false
+}
+
 variable "subnet_id" {
   type        = string
   default     = null
@@ -65,6 +76,17 @@ variable "tags" {
   type        = map(string)
   default     = null
   description = "(Optional) Tags of the resource."
+}
+
+variable "timeouts" {
+  type = object({
+    create = optional(string)
+    delete = optional(string)
+    read   = optional(string)
+    update = optional(string)
+  })
+  default     = null
+  description = "Per-operation timeouts forwarded to AzAPI resources. When `null`, the provider defaults are used. Values are Go duration strings such as `\"30m\"`."
 }
 
 variable "use_zone_redundancy" {

@@ -134,6 +134,22 @@ Type: `map(string)`
 
 Default: `{}`
 
+### <a name="input_retry"></a> [retry](#input\_retry)
+
+Description: Retry configuration for the resource operations.
+
+Type:
+
+```hcl
+object({
+    error_message_regex  = optional(list(string), ["CannotDeleteResource", "ReferencedResourceNotProvisioned"])
+    interval_seconds     = optional(number, 10)
+    max_interval_seconds = optional(number, 180)
+  })
+```
+
+Default: `{}`
+
 ### <a name="input_sensitive_environment_variables"></a> [sensitive\_environment\_variables](#input\_sensitive\_environment\_variables)
 
 Description: Secure environment variables for the container
@@ -155,6 +171,23 @@ Default: `null`
 Description: (Optional) Tags of the resource.
 
 Type: `map(string)`
+
+Default: `null`
+
+### <a name="input_timeouts"></a> [timeouts](#input\_timeouts)
+
+Description: Per-operation timeouts forwarded to AzAPI resources. When `null`, the provider defaults are used. Values are Go duration strings such as `"30m"`.
+
+Type:
+
+```hcl
+object({
+    create = optional(string)
+    delete = optional(string)
+    read   = optional(string)
+    update = optional(string)
+  })
+```
 
 Default: `null`
 

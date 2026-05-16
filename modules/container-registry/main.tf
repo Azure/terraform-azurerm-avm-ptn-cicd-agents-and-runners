@@ -28,6 +28,18 @@ resource "azapi_update_resource" "network_rule_bypass_allowed_for_tasks" {
       networkRuleBypassAllowedForTasks = true
     }
   }
+  retry = var.retry
+
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
+
+    content {
+      create = timeouts.value.create
+      delete = timeouts.value.delete
+      read   = timeouts.value.read
+      update = timeouts.value.update
+    }
+  }
 }
 
 resource "azapi_resource" "task" {
@@ -60,10 +72,21 @@ resource "azapi_resource" "task" {
     }
   }
   response_export_values = ["identity.principalId"]
+  retry                  = var.retry
   tags                   = var.tags
 
   identity {
     type = "SystemAssigned"
+  }
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
+
+    content {
+      create = timeouts.value.create
+      delete = timeouts.value.delete
+      read   = timeouts.value.read
+      update = timeouts.value.update
+    }
   }
 }
 
@@ -94,6 +117,18 @@ resource "azapi_resource" "role_assignment_acr_pull_for_container_instance" {
     }
   }
   response_export_values = []
+  retry                  = var.retry
+
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
+
+    content {
+      create = timeouts.value.create
+      delete = timeouts.value.delete
+      read   = timeouts.value.read
+      update = timeouts.value.update
+    }
+  }
 }
 
 resource "azapi_resource" "role_assignment_acr_push_for_task" {
@@ -110,6 +145,18 @@ resource "azapi_resource" "role_assignment_acr_push_for_task" {
     }
   }
   response_export_values = []
+  retry                  = var.retry
+
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
+
+    content {
+      create = timeouts.value.create
+      delete = timeouts.value.delete
+      read   = timeouts.value.read
+      update = timeouts.value.update
+    }
+  }
 }
 
 data "azapi_client_config" "current" {}

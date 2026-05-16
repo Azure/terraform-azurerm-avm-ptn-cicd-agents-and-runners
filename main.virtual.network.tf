@@ -29,10 +29,20 @@ resource "azapi_resource" "private_dns_zone_container_registry" {
   delete_headers         = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
   read_headers           = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
   response_export_values = ["id", "name"]
+  retry                  = var.retry
   tags                   = var.tags
   update_headers         = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
 
-  depends_on = [azapi_resource.resource_group]
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
+
+    content {
+      create = timeouts.value.create
+      delete = timeouts.value.delete
+      read   = timeouts.value.read
+      update = timeouts.value.update
+    }
+  }
 }
 
 resource "azapi_resource" "private_dns_zone_virtual_network_link_container_registry" {
@@ -54,8 +64,20 @@ resource "azapi_resource" "private_dns_zone_virtual_network_link_container_regis
   delete_headers         = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
   read_headers           = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
   response_export_values = []
+  retry                  = var.retry
   tags                   = var.tags
   update_headers         = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
+
+    content {
+      create = timeouts.value.create
+      delete = timeouts.value.delete
+      read   = timeouts.value.read
+      update = timeouts.value.update
+    }
+  }
 }
 
 resource "azapi_resource" "public_ip" {
@@ -78,10 +100,20 @@ resource "azapi_resource" "public_ip" {
   delete_headers         = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
   read_headers           = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
   response_export_values = ["id"]
+  retry                  = var.retry
   tags                   = var.tags
   update_headers         = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
 
-  depends_on = [azapi_resource.resource_group]
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
+
+    content {
+      create = timeouts.value.create
+      delete = timeouts.value.delete
+      read   = timeouts.value.read
+      update = timeouts.value.update
+    }
+  }
 }
 
 resource "azapi_resource" "nat_gateway" {
@@ -107,8 +139,18 @@ resource "azapi_resource" "nat_gateway" {
   delete_headers         = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
   read_headers           = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
   response_export_values = ["id"]
+  retry                  = var.retry
   tags                   = var.tags
   update_headers         = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
 
-  depends_on = [azapi_resource.resource_group]
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
+
+    content {
+      create = timeouts.value.create
+      delete = timeouts.value.delete
+      read   = timeouts.value.read
+      update = timeouts.value.update
+    }
+  }
 }

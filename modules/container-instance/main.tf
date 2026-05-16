@@ -60,10 +60,21 @@ resource "azapi_resource" "container_group" {
     }
   }
   response_export_values = ["id", "name"]
+  retry                  = var.retry
   tags                   = var.tags
 
   identity {
     type         = "UserAssigned"
     identity_ids = [var.user_assigned_managed_identity_id]
+  }
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
+
+    content {
+      create = timeouts.value.create
+      delete = timeouts.value.delete
+      read   = timeouts.value.read
+      update = timeouts.value.update
+    }
   }
 }

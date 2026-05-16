@@ -50,6 +50,7 @@ resource "azapi_resource" "container_app_environment" {
   ignore_null_property      = true
   read_headers              = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
   response_export_values    = ["id", "name"]
+  retry                     = var.retry
   schema_validation_enabled = true
   sensitive_body = {
     properties = {
@@ -66,7 +67,16 @@ resource "azapi_resource" "container_app_environment" {
   tags           = var.tags
   update_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
 
-  depends_on = [azapi_resource.resource_group]
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
+
+    content {
+      create = timeouts.value.create
+      delete = timeouts.value.delete
+      read   = timeouts.value.read
+      update = timeouts.value.update
+    }
+  }
 }
 
 resource "time_sleep" "delay_after_container_app_environment_creation" {
