@@ -23,7 +23,7 @@ module "container_app_job" {
   sensitive_environment_variables   = local.sensitive_environment_variables
   user_assigned_managed_identity_id = local.user_assigned_managed_identity_id
   environment_variables_placeholder = local.environment_variables_placeholder
-  managed_identity_auth_enabled     = var.version_control_system_type == local.version_control_system_azure_devops && var.version_control_system_authentication_method == "uami"
+  managed_identity_auth_enabled     = var.version_control_system_type == local.version_control_system_azure_devops && local.version_control_system_authentication_method == "uami"
   placeholder_container_name        = var.container_app_placeholder_container_name
   placeholder_job_creation_enabled  = var.version_control_system_type == local.version_control_system_azure_devops
   placeholder_job_name              = var.container_app_placeholder_job_name
@@ -31,12 +31,13 @@ module "container_app_job" {
   placeholder_replica_timeout       = var.container_app_placeholder_replica_timeout
   registry_password                 = var.custom_container_registry_password
   registry_username                 = var.custom_container_registry_username
+  retry                             = var.retry
   tags                              = var.tags
+  timeouts                          = var.timeouts
 
   depends_on = [
-    module.container_registry,
-    azurerm_role_assignment.custom_container_registry_pull,
-    azurerm_private_dns_zone_virtual_network_link.container_registry,
+    azapi_resource.custom_container_registry_pull,
+    azapi_resource.private_dns_zone_virtual_network_link_container_registry,
     time_sleep.delay_after_container_image_build,
     time_sleep.delay_after_container_app_environment_creation
   ]

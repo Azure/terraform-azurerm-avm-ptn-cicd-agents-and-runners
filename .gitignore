@@ -51,3 +51,7 @@ avm.tflint_module.merged.hcl
 examples/*/policy
 *.mptfbackup
 .avm
+
+# Per-example .env files materialized by pre.sh from AVM_E2E_GITHUB_TOKEN
+.env
+**/.env

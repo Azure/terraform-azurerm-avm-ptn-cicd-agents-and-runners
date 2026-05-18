@@ -24,9 +24,9 @@ variable "location" {
   nullable    = false
 }
 
-variable "resource_group_name" {
+variable "parent_id" {
   type        = string
-  description = "Name of the resource group"
+  description = "The Azure resource id of the parent resource group in which to create the container instance (e.g. `/subscriptions/<subscription-id>/resourceGroups/<resource-group-name>`)."
 }
 
 variable "user_assigned_managed_identity_id" {
@@ -83,6 +83,17 @@ variable "environment_variables" {
   description = "Environment variables for the container"
 }
 
+variable "retry" {
+  type = object({
+    error_message_regex  = optional(list(string), ["CannotDeleteResource", "ReferencedResourceNotProvisioned"])
+    interval_seconds     = optional(number, 10)
+    max_interval_seconds = optional(number, 180)
+  })
+  default     = {}
+  description = "Retry configuration for the resource operations."
+  nullable    = false
+}
+
 variable "sensitive_environment_variables" {
   type        = map(string)
   default     = {}
@@ -100,6 +111,17 @@ variable "tags" {
   type        = map(string)
   default     = null
   description = "(Optional) Tags of the resource."
+}
+
+variable "timeouts" {
+  type = object({
+    create = optional(string)
+    delete = optional(string)
+    read   = optional(string)
+    update = optional(string)
+  })
+  default     = null
+  description = "Per-operation timeouts forwarded to AzAPI resources. When `null`, the provider defaults are used. Values are Go duration strings such as `\"30m\"`."
 }
 
 variable "use_private_networking" {

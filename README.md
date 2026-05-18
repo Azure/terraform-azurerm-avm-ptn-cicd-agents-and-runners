@@ -4,6 +4,17 @@
 
 This module deploys self-hosted Azure DevOps Agents and Github Runners with support for both Personal Access Token (PAT) and User Assigned Managed Identity (UAMI) authentication.
 
+> ## ⚠️ Breaking Change
+>
+> All Azure resources directly managed by this module (resource group, management lock, container app environment, NAT gateway, public IP, private DNS zones, container instance, container registry, container registry tasks and role assignments) have been migrated from the `azurerm` provider to the `azapi` provider. The `azurerm` provider is still required for transitive dependencies (AVM resource modules and example provider blocks), but no resources are managed with it directly.
+>
+> **Existing state from prior versions will not migrate automatically.** Terraform `moved` blocks do not support cross-provider type changes. To upgrade an existing deployment you must either:
+>
+> 1. Destroy and re-create the deployment with the new module version, or
+> 2. Manually `terraform state rm` each affected `azurerm_*` resource and use `import` blocks to bring them into the new `azapi_resource` addresses.
+>
+> Greenfield deployments are unaffected.
+
 ## Features
 
 - Deploys Azure DevOps Agents with PAT or UAMI authentication
@@ -23,15 +34,17 @@ This module deploys self-hosted Azure DevOps Agents and Github Runners with supp
 
 **Important**: Before using UAMI authentication with Azure DevOps, the User Assigned Managed Identity must be configured in your Azure DevOps organization:
 
-1. **Add the identity to Azure DevOps**: The UAMI must be added as a service principal in your Azure DevOps organization with appropriate license (Basic or higher)
-2. **Grant agent pool permissions**: The UAMI service principal needs Administrator role on the target agent pool
-3. **Organization access**: The UAMI must be member of the Azure DevOps organization
+1. **Add the identity to Azure DevOps**: The UAMI must be added as a service principal in your Azure DevOps organization with an appropriate license (Basic or higher).
+2. **Grant agent pool permissions**: The UAMI service principal needs the `Administrator` role on the target agent pool so it can register self-hosted agents.
+3. **Organization access**: The UAMI must be a member of the Azure DevOps organization.
+
+See the [Required permissions](#required-permissions) section below for the full least-privilege model and the exact Terraform resources used by the examples.
 
 ### Setup Options
 
 - **Option 1**: Use existing pre-configured UAMI (recommended) - requires `user_assigned_managed_identity_creation_enabled = false` and UAMI details
 - **Option 2**: Let module create UAMI, then configure it manually in Azure DevOps afterward
-- **Option 3**: Use `azure_devops_container_app_uami` example for fully automated setup
+- **Option 3**: Use `azure_devops_aca_private_uami_auth` example for fully automated setup
 
 > **Note**: This module handles Azure infrastructure provisioning only. Azure DevOps organization configuration is managed separately (either manually or through examples using the azuredevops provider).
 
@@ -52,15 +65,13 @@ module "azure_devops_agents_uami" {
   location = "uksouth"
 
   version_control_system_type                  = "azuredevops"
-  version_control_system_authentication_method = "uami"  # No PAT required
   version_control_system_organization          = "https://dev.azure.com/my-organization"
   version_control_system_pool_name             = "my-agent-pool"
 
-  # Use existing UAMI (must be configured in Azure DevOps first)
+  # Use existing UAMI (must be configured in Azure DevOps first). Only the
+  # resource_id is required; the module reads client_id and principal_id from it.
   user_assigned_managed_identity_creation_enabled = false
   user_assigned_managed_identity_id               = "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/my-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/my-uami"
-  user_assigned_managed_identity_client_id        = "12345678-1234-1234-1234-123456789012"
-  user_assigned_managed_identity_principal_id     = "87654321-4321-4321-4321-210987654321"
 
   virtual_network_address_space = "10.0.0.0/16"
 }
@@ -77,7 +88,6 @@ module "azure_devops_agents_uami" {
   location = "uksouth"
 
   version_control_system_type                  = "azuredevops"
-  version_control_system_authentication_method = "uami"  # No PAT required
   version_control_system_organization          = "https://dev.azure.com/my-organization"
   version_control_system_pool_name             = "my-agent-pool"
 
@@ -133,6 +143,79 @@ module "github_runners" {
 }
 ```
 
+## Required permissions
+
+The examples in this repository follow a least-privilege model. The principal that runs Terraform (the *deployer*) and the User Assigned Managed Identity (UAMI) that the agents/runners use at runtime have very different permission requirements - keep them separate.
+
+### Azure (the deployer that runs `terraform apply`)
+
+The identity running Terraform needs to create and manage the resources defined by the module in your subscription / resource group. The minimum built-in roles are:
+
+| Scope | Role | Purpose |
+|---|---|---|
+| Subscription (or resource group, when `resource_group_creation_enabled = false`) | `Contributor` | Create the resource group, virtual network, container app environment / container instances, container registry, log analytics workspace, UAMI, etc. |
+| Resource group containing the UAMI (or any scope where role assignments are written) | `Role Based Access Control Administrator` (or `User Access Administrator`) | The module assigns `AcrPull` on the container registry to the UAMI - the deployer needs permission to create that role assignment. |
+
+> If you provide your own pre-existing UAMI, container registry, virtual network, etc. (`*_creation_enabled = false`), the deployer only needs the rights required to *use* those resources - typically `Reader` on each, plus `Role Based Access Control Administrator` on the registry so the module can grant the UAMI `AcrPull`.
+
+### Azure (the User Assigned Managed Identity used by the agents/runners at runtime)
+
+The UAMI that agents/runners use at runtime is intentionally narrowly scoped. The module assigns it **only** what the agent host needs:
+
+| Scope | Role | Granted by | Purpose |
+|---|---|---|---|
+| Container registry | `AcrPull` | This module | Pull the agent/runner container image from ACR. |
+
+The UAMI is **not** granted `Contributor`, `AcrPush`, or any subscription-level role. Pipelines that need to deploy Azure resources should use a separate workload identity (for example an Azure DevOps service connection or GitHub OIDC federated credential) - do not reuse the agent registration UAMI for pipeline workloads.
+
+### Azure DevOps (UAMI authentication only)
+
+When `version_control_system_authentication_method = "uami"`, the UAMI must be granted permission inside Azure DevOps to register self-hosted agents into the target pool. The examples do this with two Terraform resources:
+
+```hcl
+# 1. Add the UAMI to the Azure DevOps organization as a service principal with
+#    the Basic ("express") license.
+resource "azuredevops_service_principal_entitlement" "uami" {
+  account_license_type = "express"
+  origin               = "aad"
+  origin_id            = module.uami.principal_id
+}
+
+# 2. Grant the UAMI the Administrator role on the organization-level agent
+#    pool. The lower-privilege Service Account role only permits an already-
+#    registered agent to create sessions and listen for jobs; it does not
+#    grant the Manage permission needed to register a new agent. Because
+#    this module's containers are ephemeral and call POST /_apis/distributed
+#    task/pools/{poolId}/agents on every start, Administrator is the lowest
+#    built-in role that works. (A custom role with just Manage added to
+#    Service Account would be tighter, but is not Terraformable today.)
+resource "azuredevops_securityrole_assignment" "uami_pool_admin" {
+  scope       = "distributedtask.agentpoolrole"
+  resource_id = azuredevops_agent_pool.this.id
+  identity_id = azuredevops_service_principal_entitlement.uami.id
+  role_name   = "Administrator"
+}
+```
+
+Per the [Microsoft docs](https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/service-principal-agent-registration?view=azure-devops), `Administrator` on the **organization-level** agent pool is the role a service principal needs to register self-hosted agents. The examples grant it via `azuredevops_securityrole_assignment` with `scope = "distributedtask.agentpoolrole"` and `resource_id = <pool_id>`. No project-queue role assignment is needed: agents register against the org-level pool, and pipeline access to the queue is granted separately via `azuredevops_pipeline_authorization`.
+
+The `identity_id` must be the Azure DevOps Service Principal UUID returned by `azuredevops_service_principal_entitlement` (not the AAD object id) — the provider polls the role assignment until the returned `Identity.ID` matches.
+
+The principal that runs `terraform apply` against Azure DevOps must itself be a [Project Collection Administrator](https://learn.microsoft.com/en-us/azure/devops/organizations/security/look-up-project-collection-administrators) (or otherwise be allowed to manage agent pool security and add service principals to the organization) so it can create the `azuredevops_service_principal_entitlement` and `azuredevops_securityrole_assignment` resources above.
+
+#### Pipeline-level authorization
+
+The examples additionally grant the specific pipeline access to the queue using `azuredevops_pipeline_authorization`. This is what allows a pipeline to run on the pool without an interactive "Authorize resources" approval and is independent of the UAMI's role assignment.
+
+### GitHub (PAT or GitHub App authentication)
+
+When `version_control_system_type = "github"`:
+
+- **PAT**: The PAT supplied via `version_control_system_personal_access_token` needs the [`repo` and `workflow` scopes for repository runners, or `admin:org` for organization runners](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners/adding-self-hosted-runners). Treat the PAT as a secret (Key Vault, Terraform sensitive variable, etc.); the module does not persist it outside the container app/instance.
+- **GitHub App**: The GitHub App must be installed on the target repository or organization with the `Administration: Read & write` permission so it can mint registration tokens. The module accepts the App ID, installation ID, and PEM private key via the `version_control_system_*` variables.
+
+The module never grants the GitHub credential any Azure role - it is consumed only inside the agent container to register runners with GitHub.
+
 <!-- markdownlint-disable MD033 -->
 ## Requirements
 
@@ -141,8 +224,6 @@ The following requirements are needed by this module:
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9.0)
 
 - <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.4)
-
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.20)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
@@ -154,21 +235,23 @@ The following requirements are needed by this module:
 
 The following resources are used by this module:
 
-- [azurerm_container_app_environment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_app_environment) (resource)
-- [azurerm_management_lock.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/management_lock) (resource)
-- [azurerm_nat_gateway.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/nat_gateway) (resource)
-- [azurerm_nat_gateway_public_ip_association.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/nat_gateway_public_ip_association) (resource)
-- [azurerm_private_dns_zone.container_registry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone) (resource)
-- [azurerm_private_dns_zone_virtual_network_link.container_registry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone_virtual_network_link) (resource)
-- [azurerm_public_ip.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/public_ip) (resource)
-- [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
-- [azurerm_role_assignment.custom_container_registry_pull](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
+- [azapi_resource.container_app_environment](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.custom_container_registry_pull](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.management_lock](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.nat_gateway](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.private_dns_zone_container_registry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.private_dns_zone_virtual_network_link_container_registry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.public_ip](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.resource_group](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
 - [modtm_telemetry.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/resources/telemetry) (resource)
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
 - [time_sleep.delay_after_container_app_environment_creation](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) (resource)
 - [time_sleep.delay_after_container_image_build](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) (resource)
+- [azapi_client_config.current](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
 - [azapi_client_config.telemetry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
-- [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
+- [azapi_resource.log_analytics_workspace](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/resource) (data source)
+- [azapi_resource.user_assigned_managed_identity](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/resource) (data source)
+- [azapi_resource_action.log_analytics_workspace_keys](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/resource_action) (data source)
 - [modtm_module_source.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/data-sources/module_source) (data source)
 
 <!-- markdownlint-disable MD013 -->
@@ -678,7 +761,7 @@ Description: The default image registry Dockerfile path to use if no custom imag
 
 Type: `string`
 
-Default: `"dockerfile"`
+Default: `"Dockerfile"`
 
 ### <a name="input_default_image_repository_commit"></a> [default\_image\_repository\_commit](#input\_default\_image\_repository\_commit)
 
@@ -686,7 +769,7 @@ Description: The default image repository commit to use if no custom image is pr
 
 Type: `string`
 
-Default: `"221742d"`
+Default: `"9b4c292"`
 
 ### <a name="input_default_image_repository_folder_paths"></a> [default\_image\_repository\_folder\_paths](#input\_default\_image\_repository\_folder\_paths)
 
@@ -836,6 +919,14 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_parent_id"></a> [parent\_id](#input\_parent\_id)
+
+Description: The resource ID of the resource group where the resources will be deployed. Required when `resource_group_creation_enabled == false`.
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_public_ip_creation_enabled"></a> [public\_ip\_creation\_enabled](#input\_public\_ip\_creation\_enabled)
 
 Description: Whether or not to create a public IP.
@@ -886,17 +977,59 @@ Default: `true`
 
 ### <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name)
 
-Description: The resource group where the resources will be deployed. Must be specified if `resource_group_creation_enabled == false`
+Description: The name to give to the resource group when `resource_group_creation_enabled == true`. Defaults to `rg-<postfix>`. Ignored when bringing your own resource group; set `parent_id` instead.
 
 Type: `string`
 
 Default: `null`
+
+### <a name="input_retry"></a> [retry](#input\_retry)
+
+Description: Retry configuration applied to every AzAPI resource managed by this module (and forwarded to its submodules). The default `error_message_regex` set covers ARM eventual-consistency conditions that commonly surface during create or destroy, such as the parent delete returning `CannotDeleteResource` while a nested child is still being torn down.
+
+- `error_message_regex` - List of regular expressions matched against ARM error messages. A request whose error matches any regex is retried.
+- `interval_seconds` - Base interval (seconds) between retries.
+- `max_interval_seconds` - Upper bound (seconds) on the interval between retries.
+
+Type:
+
+```hcl
+object({
+    error_message_regex  = optional(list(string), ["CannotDeleteResource", "ReferencedResourceNotProvisioned"])
+    interval_seconds     = optional(number, 10)
+    max_interval_seconds = optional(number, 180)
+  })
+```
+
+Default: `{}`
 
 ### <a name="input_tags"></a> [tags](#input\_tags)
 
 Description: (Optional) Tags of the resource.
 
 Type: `map(string)`
+
+Default: `null`
+
+### <a name="input_timeouts"></a> [timeouts](#input\_timeouts)
+
+Description: Per-operation timeouts forwarded to every AzAPI resource managed by this module (and to its submodules). When `null`, the provider defaults are used. Each value is a Go duration string such as `"30m"` or `"2h45m"`.
+
+- `create` - Timeout for create operations.
+- `delete` - Timeout for delete operations.
+- `read` - Timeout for read operations.
+- `update` - Timeout for update operations.
+
+Type:
+
+```hcl
+object({
+    create = optional(string)
+    delete = optional(string)
+    read   = optional(string)
+    update = optional(string)
+  })
+```
 
 Default: `null`
 
@@ -924,14 +1057,6 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_user_assigned_managed_identity_client_id"></a> [user\_assigned\_managed\_identity\_client\_id](#input\_user\_assigned\_managed\_identity\_client\_id)
-
-Description: The client id of the user assigned managed identity. Only required if `user_assigned_managed_identity_creation_enabled == false` and using UAMI authentication. The identity must be configured in Azure DevOps separately.
-
-Type: `string`
-
-Default: `null`
-
 ### <a name="input_user_assigned_managed_identity_creation_enabled"></a> [user\_assigned\_managed\_identity\_creation\_enabled](#input\_user\_assigned\_managed\_identity\_creation\_enabled)
 
 Description: Whether or not to create a user assigned managed identity. When using UAMI authentication, the identity must also be configured in Azure DevOps separately.
@@ -942,7 +1067,7 @@ Default: `true`
 
 ### <a name="input_user_assigned_managed_identity_id"></a> [user\_assigned\_managed\_identity\_id](#input\_user\_assigned\_managed\_identity\_id)
 
-Description: The resource Id of the user assigned managed identity. Only required if `user_assigned_managed_identity_creation_enabled == false`. When using UAMI authentication, ensure the identity is configured in Azure DevOps.
+Description: The resource Id of the user assigned managed identity. Required when `user_assigned_managed_identity_creation_enabled == false`; the module reads `clientId` and `principalId` from this resource. When using UAMI authentication, ensure the identity is configured in Azure DevOps.
 
 Type: `string`
 
@@ -951,14 +1076,6 @@ Default: `null`
 ### <a name="input_user_assigned_managed_identity_name"></a> [user\_assigned\_managed\_identity\_name](#input\_user\_assigned\_managed\_identity\_name)
 
 Description: The name of the user assigned managed identity. Must be specified if `user_assigned_managed_identity_creation_enabled == true`.
-
-Type: `string`
-
-Default: `null`
-
-### <a name="input_user_assigned_managed_identity_principal_id"></a> [user\_assigned\_managed\_identity\_principal\_id](#input\_user\_assigned\_managed\_identity\_principal\_id)
-
-Description: The principal id of the user assigned managed identity. Only required if `user_assigned_managed_identity_creation_enabled == false`. When using UAMI authentication, ensure the identity is configured in Azure DevOps.
 
 Type: `string`
 
@@ -982,11 +1099,11 @@ Default: `1`
 
 ### <a name="input_version_control_system_authentication_method"></a> [version\_control\_system\_authentication\_method](#input\_version\_control\_system\_authentication\_method)
 
-Description: Authentication method. For Azure DevOps: 'pat' or 'uami' (requires Azure DevOps prerequisites - see README). For GitHub: 'pat' or 'github\_app'
+Description: Authentication method. For Azure DevOps: 'pat' or 'uami' (requires Azure DevOps prerequisites - see README). For GitHub: 'pat' or 'github\_app'. If null (the default), Azure DevOps falls back to 'uami' and GitHub falls back to 'github\_app'.
 
 Type: `string`
 
-Default: `"pat"`
+Default: `null`
 
 ### <a name="input_version_control_system_enterprise"></a> [version\_control\_system\_enterprise](#input\_version\_control\_system\_enterprise)
 
@@ -1202,7 +1319,7 @@ Version:
 
 Source: Azure/avm-res-operationalinsights-workspace/azurerm
 
-Version: 0.4.2
+Version: 0.5.1
 
 ### <a name="module_user_assigned_managed_identity"></a> [user\_assigned\_managed\_identity](#module\_user\_assigned\_managed\_identity)
 
