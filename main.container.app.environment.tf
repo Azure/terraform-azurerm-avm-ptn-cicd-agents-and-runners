@@ -29,6 +29,7 @@ resource "azapi_resource" "container_app_environment" {
         destination = "log-analytics"
         logAnalyticsConfiguration = {
           customerId = data.azapi_resource.log_analytics_workspace[0].output.properties.customerId
+          sharedKey  = data.azapi_resource_action.log_analytics_workspace_keys[0].output.primarySharedKey
         }
       }
       vnetConfiguration = var.use_private_networking ? {
@@ -51,21 +52,22 @@ resource "azapi_resource" "container_app_environment" {
   read_headers              = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
   response_export_values    = ["id", "name"]
   retry                     = var.retry
-  schema_validation_enabled = true
-  sensitive_body = {
-    properties = {
-      appLogsConfiguration = {
-        logAnalyticsConfiguration = {
-          sharedKey = data.azapi_resource_action.log_analytics_workspace_keys[0].output.primarySharedKey
-        }
-      }
-    }
+  schema_validation_enabled = false
+  tags                      = var.tags
+  update_headers            = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+
+  lifecycle {
+    # The Log Analytics Workspace `sharedKey` is rotated by Azure on a schedule
+    # and is never returned in the resource read response. Without this ignore
+    # rule the data source value is recomputed on every plan, causing a noisy
+    # in-place update that does nothing useful. Combined with passing sharedKey
+    # via the main `body` (rather than `sensitive_body`), this stops the per-
+    # plan drift loop observed in real deployments while still letting Azure
+    # accept the workspace key on the initial create / explicit re-apply.
+    ignore_changes = [
+      body.properties.appLogsConfiguration.logAnalyticsConfiguration.sharedKey,
+    ]
   }
-  sensitive_body_version = {
-    "properties.appLogsConfiguration.logAnalyticsConfiguration.sharedKey" = "1"
-  }
-  tags           = var.tags
-  update_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
 
   dynamic "timeouts" {
     for_each = var.timeouts == null ? [] : [var.timeouts]
