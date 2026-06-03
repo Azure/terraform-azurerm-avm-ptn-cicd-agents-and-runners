@@ -850,7 +850,7 @@ Default: `true`
 
 ### <a name="input_log_analytics_workspace_id"></a> [log\_analytics\_workspace\_id](#input\_log\_analytics\_workspace\_id)
 
-Description: The resource Id of the Log Analytics Workspace.
+Description: Deprecated. Legacy alias for `log_analytics_workspace_resource_id`. The resource ID of an existing Log Analytics Workspace. New consumers should use `log_analytics_workspace_resource_id`. If both are set they must match.
 
 Type: `string`
 
@@ -875,6 +875,14 @@ Default: `null`
 ### <a name="input_log_analytics_workspace_name"></a> [log\_analytics\_workspace\_name](#input\_log\_analytics\_workspace\_name)
 
 Description: The name of the log analytics workspace. Only required if `log_analytics_workspace_creation_enabled == false`.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_log_analytics_workspace_resource_id"></a> [log\_analytics\_workspace\_resource\_id](#input\_log\_analytics\_workspace\_resource\_id)
+
+Description: The resource ID of an existing Log Analytics Workspace to attach to the Container App Environment when `log_analytics_workspace_creation_enabled` is `false`. Preferred over the legacy `log_analytics_workspace_id` input.
 
 Type: `string`
 

@@ -56,6 +56,17 @@ resource "azapi_resource" "container_app_environment" {
   tags                      = var.tags
   update_headers            = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
 
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
+
+    content {
+      create = timeouts.value.create
+      delete = timeouts.value.delete
+      read   = timeouts.value.read
+      update = timeouts.value.update
+    }
+  }
+
   lifecycle {
     # The Log Analytics Workspace `sharedKey` is rotated by Azure on a schedule
     # and is never returned in the resource read response. Without this ignore
@@ -67,17 +78,6 @@ resource "azapi_resource" "container_app_environment" {
     ignore_changes = [
       body.properties.appLogsConfiguration.logAnalyticsConfiguration.sharedKey,
     ]
-  }
-
-  dynamic "timeouts" {
-    for_each = var.timeouts == null ? [] : [var.timeouts]
-
-    content {
-      create = timeouts.value.create
-      delete = timeouts.value.delete
-      read   = timeouts.value.read
-      update = timeouts.value.update
-    }
   }
 }
 
