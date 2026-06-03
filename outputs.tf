@@ -87,3 +87,28 @@ output "virtual_network_resource_id" {
   description = "The virtual network resource id."
   value       = var.use_private_networking && var.virtual_network_creation_enabled ? module.virtual_network[0].resource_id : null
 }
+
+output "webhook_queue_name" {
+  description = "Name of the Storage Queue used for webhook-driven scaling. `null` when `webhook_scaling_enabled` is `false`."
+  value       = var.webhook_scaling_enabled ? module.webhook_storage[0].queues["runner_jobs"].name : null
+}
+
+output "webhook_storage_account_name" {
+  description = "Name of the Storage Account hosting the webhook queue. `null` when `webhook_scaling_enabled` is `false`."
+  value       = var.webhook_scaling_enabled ? module.webhook_storage[0].name : null
+}
+
+output "webhook_storage_account_resource_id" {
+  description = "Resource ID of the Storage Account hosting the webhook queue. `null` when `webhook_scaling_enabled` is `false`."
+  value       = var.webhook_scaling_enabled ? module.webhook_storage[0].resource_id : null
+}
+
+output "webhook_queue_url" {
+  description = "Queue URL (without `/messages` suffix). Use with Azure Storage SDKs, e.g. `QueueClient.from_queue_url(...)`. `null` when `webhook_scaling_enabled` is `false`."
+  value       = var.webhook_scaling_enabled ? "https://${module.webhook_storage[0].fqdn["queue"]}/${module.webhook_storage[0].queues["runner_jobs"].name}" : null
+}
+
+output "webhook_queue_messages_endpoint" {
+  description = "REST endpoint for the Put Message operation (queue URL + `/messages`). Use this if calling the Storage REST API directly rather than via an SDK. `null` when `webhook_scaling_enabled` is `false`."
+  value       = var.webhook_scaling_enabled ? "https://${module.webhook_storage[0].fqdn["queue"]}/${module.webhook_storage[0].queues["runner_jobs"].name}/messages" : null
+}
