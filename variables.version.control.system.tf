@@ -14,6 +14,46 @@ variable "version_control_system_type" {
   }
 }
 
+variable "runner_visibility" {
+  type        = string
+  default     = null
+  description = <<DESCRIPTION
+Optional trust-boundary signal for the runner pool. **GitHub only.** Has no
+runtime effect by itself - it is purely a declared posture that callers can
+use to reason about pool isolation and to drive their own label conventions
+in composition modules.
+
+Recommended pattern:
+
+- `"private"` - pool is attached to a corp/private VNet, can reach private
+  endpoints (state Storage Accounts, Key Vault, ACR private endpoints).
+  Use non-overlapping labels (e.g. `["self-hosted","linux","corp-private"]`)
+  so only intentional consumers can target this pool.
+- `"public"` - pool is isolated from corp/private resources. Use for fork
+  PRs / public repos where workflow code is untrusted. Use a distinct label
+  set (e.g. `["self-hosted","linux","public-runner"]`) so private workloads
+  cannot accidentally land here.
+
+Mixing private and public workloads on the same pool is a network and
+credential exposure risk - keep them on separate module deployments with
+different visibility values, and use `version_control_system_runner_labels`
+to make the boundary explicit in workflow `runs-on`.
+DESCRIPTION
+
+  validation {
+    condition     = var.runner_visibility == null || contains(["private", "public"], coalesce(var.runner_visibility, "private"))
+    error_message = "runner_visibility must be `private`, `public`, or unset."
+  }
+  validation {
+    condition = (
+      var.version_control_system_type == "azuredevops"
+      ? var.runner_visibility == null
+      : true
+    )
+    error_message = "runner_visibility is GitHub-only. Azure DevOps deployments must leave it unset."
+  }
+}
+
 variable "version_control_system_agent_name_prefix" {
   type        = string
   default     = null
@@ -87,6 +127,43 @@ variable "version_control_system_github_application_key" {
   }
 }
 
+variable "version_control_system_github_url" {
+  type        = string
+  default     = "github.com"
+  description = <<DESCRIPTION
+The base URL for GitHub. Use the default `github.com` for standard GitHub Enterprise Cloud,
+or `<subdomain>.ghe.com` for GitHub Enterprise Cloud with data residency. Ignored for Azure DevOps.
+
+When set to a non-`github.com` value the module:
+- emits `GITHUB_HOST=<value>` into the runner container environment so `config.sh` registers against the right host;
+- sets `githubApiURL = https://api.<value>` on the KEDA `github-runner` scaler so it polls the right API.
+DESCRIPTION
+  nullable    = false
+
+  validation {
+    condition     = can(regex("^[a-zA-Z0-9][a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", var.version_control_system_github_url))
+    error_message = "version_control_system_github_url must be a valid domain name (e.g. `github.com` or `mycompany.ghe.com`). Do not include the protocol prefix."
+  }
+}
+
+variable "version_control_system_keda_enable_etags" {
+  type        = bool
+  default     = false
+  description = <<DESCRIPTION
+When true, sets `enableEtags = "true"` on the KEDA `github-runner` scaler so the scaler uses HTTP ETag conditional requests when polling the GitHub API, reducing API rate limit consumption when nothing has changed since the previous poll. Requires KEDA >= 2.17. **GitHub only.**
+DESCRIPTION
+  nullable    = false
+
+  validation {
+    condition = (
+      var.version_control_system_type == "azuredevops"
+      ? var.version_control_system_keda_enable_etags == false
+      : true
+    )
+    error_message = "version_control_system_keda_enable_etags is GitHub-only."
+  }
+}
+
 variable "version_control_system_personal_access_token" {
   type        = string
   default     = null
@@ -125,12 +202,6 @@ variable "version_control_system_runner_group" {
   description = "The runner group to add the runner to."
 }
 
-variable "version_control_system_runner_scope" {
-  type        = string
-  default     = "repo"
-  description = "The scope of the runner. Must be `ent`, `org`, or `repo`. This is ignored for Azure DevOps."
-}
-
 variable "version_control_system_runner_labels" {
   type        = list(string)
   default     = []
@@ -155,12 +226,10 @@ DESCRIPTION
     ])
     error_message = "Each label must be non-empty, contain no commas, and be <=100 chars (LABELS and KEDA `labels` are comma-separated lists)."
   }
-
   validation {
     condition     = length(var.version_control_system_runner_labels) == length(distinct(var.version_control_system_runner_labels))
     error_message = "version_control_system_runner_labels must not contain duplicates."
   }
-
   validation {
     condition = (
       var.version_control_system_type == "azuredevops"
@@ -191,7 +260,6 @@ DESCRIPTION
     )
     error_message = "version_control_system_runner_no_default_labels = true requires at least one entry in version_control_system_runner_labels (otherwise the runner would have no labels and be unreachable)."
   }
-
   validation {
     condition = (
       var.version_control_system_type == "azuredevops"
@@ -202,80 +270,8 @@ DESCRIPTION
   }
 }
 
-variable "version_control_system_keda_enable_etags" {
-  type        = bool
-  default     = false
-  description = <<DESCRIPTION
-When true, sets `enableEtags = "true"` on the KEDA `github-runner` scaler so the scaler uses HTTP ETag conditional requests when polling the GitHub API, reducing API rate limit consumption when nothing has changed since the previous poll. Requires KEDA >= 2.17. **GitHub only.**
-DESCRIPTION
-  nullable    = false
-
-  validation {
-    condition = (
-      var.version_control_system_type == "azuredevops"
-      ? var.version_control_system_keda_enable_etags == false
-      : true
-    )
-    error_message = "version_control_system_keda_enable_etags is GitHub-only."
-  }
-}
-
-variable "runner_visibility" {
+variable "version_control_system_runner_scope" {
   type        = string
-  default     = null
-  description = <<DESCRIPTION
-Optional trust-boundary signal for the runner pool. **GitHub only.** Has no
-runtime effect by itself - it is purely a declared posture that callers can
-use to reason about pool isolation and to drive their own label conventions
-in composition modules.
-
-Recommended pattern:
-
-- `"private"` - pool is attached to a corp/private VNet, can reach private
-  endpoints (state Storage Accounts, Key Vault, ACR private endpoints).
-  Use non-overlapping labels (e.g. `["self-hosted","linux","corp-private"]`)
-  so only intentional consumers can target this pool.
-- `"public"` - pool is isolated from corp/private resources. Use for fork
-  PRs / public repos where workflow code is untrusted. Use a distinct label
-  set (e.g. `["self-hosted","linux","public-runner"]`) so private workloads
-  cannot accidentally land here.
-
-Mixing private and public workloads on the same pool is a network and
-credential exposure risk - keep them on separate module deployments with
-different visibility values, and use `version_control_system_runner_labels`
-to make the boundary explicit in workflow `runs-on`.
-DESCRIPTION
-
-  validation {
-    condition     = var.runner_visibility == null || contains(["private", "public"], coalesce(var.runner_visibility, "private"))
-    error_message = "runner_visibility must be `private`, `public`, or unset."
-  }
-
-  validation {
-    condition = (
-      var.version_control_system_type == "azuredevops"
-      ? var.runner_visibility == null
-      : true
-    )
-    error_message = "runner_visibility is GitHub-only. Azure DevOps deployments must leave it unset."
-  }
-}
-
-variable "version_control_system_github_url" {
-  type        = string
-  default     = "github.com"
-  description = <<DESCRIPTION
-The base URL for GitHub. Use the default `github.com` for standard GitHub Enterprise Cloud,
-or `<subdomain>.ghe.com` for GitHub Enterprise Cloud with data residency. Ignored for Azure DevOps.
-
-When set to a non-`github.com` value the module:
-- emits `GITHUB_HOST=<value>` into the runner container environment so `config.sh` registers against the right host;
-- sets `githubApiURL = https://api.<value>` on the KEDA `github-runner` scaler so it polls the right API.
-DESCRIPTION
-  nullable    = false
-
-  validation {
-    condition     = can(regex("^[a-zA-Z0-9][a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", var.version_control_system_github_url))
-    error_message = "version_control_system_github_url must be a valid domain name (e.g. `github.com` or `mycompany.ghe.com`). Do not include the protocol prefix."
-  }
+  default     = "repo"
+  description = "The scope of the runner. Must be `ent`, `org`, or `repo`. This is ignored for Azure DevOps."
 }

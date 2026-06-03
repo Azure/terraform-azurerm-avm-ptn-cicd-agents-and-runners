@@ -1,15 +1,10 @@
 locals {
-  keda_meta_data       = tomap(jsondecode(local.keda_meta_data_final))
-  keda_meta_data_final = var.webhook_scaling_enabled ? jsonencode(local.keda_meta_data_webhook) : (var.version_control_system_type == local.version_control_system_azure_devops ? jsonencode(local.keda_meta_data_azure_devops) : jsonencode(local.keda_meta_data_github))
-  keda_meta_data_webhook = {
-    queueName   = var.webhook_queue_name
-    accountName = local.webhook_storage_account_name
-    queueLength = tostring(var.webhook_queue_length_per_runner)
-  }
+  keda_meta_data = tomap(jsondecode(local.keda_meta_data_final))
   keda_meta_data_azure_devops = {
     poolName                   = var.version_control_system_pool_name
     targetPipelinesQueueLength = var.version_control_system_agent_target_queue_length
   }
+  keda_meta_data_final = var.webhook_scaling_enabled ? jsonencode(local.keda_meta_data_webhook) : (var.version_control_system_type == local.version_control_system_azure_devops ? jsonencode(local.keda_meta_data_azure_devops) : jsonencode(local.keda_meta_data_github))
   keda_meta_data_github = merge(
     local.version_control_system_authentication_method == "pat" ? {
       owner                     = var.version_control_system_organization
@@ -30,14 +25,15 @@ locals {
     var.version_control_system_runner_no_default_labels ? { noDefaultLabels = "true" } : {},
     var.version_control_system_keda_enable_etags ? { enableEtags = "true" } : {},
   )
+  keda_meta_data_webhook = {
+    queueName   = var.webhook_queue_name
+    accountName = local.webhook_storage_account_name
+    queueLength = tostring(var.webhook_queue_length_per_runner)
+  }
 }
 
 locals {
   environment_variables = concat(tolist(jsondecode(local.environment_variables_final)), local.environment_variables_runner_labels, tolist(var.container_app_environment_variables))
-  environment_variables_runner_labels = var.version_control_system_type == local.version_control_system_github ? concat(
-    length(var.version_control_system_runner_labels) > 0 ? [{ name = "LABELS", value = join(",", var.version_control_system_runner_labels) }] : [],
-    var.version_control_system_runner_no_default_labels ? [{ name = "NO_DEFAULT_LABELS", value = "true" }] : [],
-  ) : []
   environment_variables_azure_devops = [
     {
       name  = "AZP_POOL"
@@ -120,6 +116,10 @@ locals {
       value = var.version_control_system_github_url
     }
   ]
+  environment_variables_runner_labels = var.version_control_system_type == local.version_control_system_github ? concat(
+    length(var.version_control_system_runner_labels) > 0 ? [{ name = "LABELS", value = join(",", var.version_control_system_runner_labels) }] : [],
+    var.version_control_system_runner_no_default_labels ? [{ name = "NO_DEFAULT_LABELS", value = "true" }] : [],
+  ) : []
 }
 
 locals {

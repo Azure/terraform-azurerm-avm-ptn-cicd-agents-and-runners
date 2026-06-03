@@ -91,12 +91,6 @@ variable "default_image_repository_url" {
   description = "The default image repository URL to use if no custom image is provided."
 }
 
-variable "use_default_container_image" {
-  type        = bool
-  default     = true
-  description = "Whether or not to use the default container image provided by the module."
-}
-
 variable "runner_acr_push_enabled" {
   type        = bool
   default     = false
@@ -113,4 +107,10 @@ this opt-in with a Buildah/Kaniko-based custom runner image, or a separate ACR T
 pool, so build operations themselves do not run as the same identity that scales the pool.
 DESCRIPTION
   nullable    = false
+}
+
+variable "use_default_container_image" {
+  type        = bool
+  default     = true
+  description = "Whether or not to use the default container image provided by the module."
 }
