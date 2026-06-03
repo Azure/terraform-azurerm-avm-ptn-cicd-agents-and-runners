@@ -48,7 +48,7 @@ locals {
     },
     {
       name  = "GH_RUNNER_URL"
-      value = var.version_control_system_runner_scope == "repo" ? local.github_repository_url : "https://github.com/${var.version_control_system_organization}"
+      value = var.version_control_system_runner_scope == "repo" ? local.github_repository_url : "https://${var.version_control_system_github_url}/${var.version_control_system_organization}"
     },
     {
       name  = "GH_RUNNER_GROUP"
@@ -61,7 +61,7 @@ locals {
     },
     {
       name  = "GH_RUNNER_URL"
-      value = var.version_control_system_runner_scope == "repo" ? local.github_repository_url : "https://github.com/${var.version_control_system_organization}"
+      value = var.version_control_system_runner_scope == "repo" ? local.github_repository_url : "https://${var.version_control_system_github_url}/${var.version_control_system_organization}"
     },
     {
       name  = "GH_RUNNER_GROUP"

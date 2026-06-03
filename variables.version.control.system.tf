@@ -130,3 +130,22 @@ variable "version_control_system_runner_scope" {
   default     = "repo"
   description = "The scope of the runner. Must be `ent`, `org`, or `repo`. This is ignored for Azure DevOps."
 }
+
+variable "version_control_system_github_url" {
+  type        = string
+  default     = "github.com"
+  description = <<DESCRIPTION
+The base URL for GitHub. Use the default `github.com` for standard GitHub Enterprise Cloud,
+or `<subdomain>.ghe.com` for GitHub Enterprise Cloud with data residency. Ignored for Azure DevOps.
+
+When set to a non-`github.com` value the module:
+- emits `GITHUB_HOST=<value>` into the runner container environment so `config.sh` registers against the right host;
+- sets `githubApiURL = https://api.<value>` on the KEDA `github-runner` scaler so it polls the right API.
+DESCRIPTION
+  nullable    = false
+
+  validation {
+    condition     = can(regex("^[a-zA-Z0-9][a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", var.version_control_system_github_url))
+    error_message = "version_control_system_github_url must be a valid domain name (e.g. `github.com` or `mycompany.ghe.com`). Do not include the protocol prefix."
+  }
+}

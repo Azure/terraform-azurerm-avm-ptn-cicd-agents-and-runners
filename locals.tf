@@ -33,7 +33,7 @@ locals {
   container_instance_subnet_name                  = var.container_instance_subnet_name != null ? var.container_instance_subnet_name : "subnet-container-instance-${var.postfix}"
   container_registry_name                         = replace(var.container_registry_name != null ? var.container_registry_name : "acr${var.postfix}", "-", "")
   container_registry_private_endpoint_subnet_name = var.container_registry_private_endpoint_subnet_name != null ? var.container_registry_private_endpoint_subnet_name : "subnet-container-registry-private-endpoint-${var.postfix}"
-  github_repository_url                           = var.version_control_system_repository != null ? (startswith(var.version_control_system_repository, "https") ? var.version_control_system_repository : "https://github.com/${var.version_control_system_organization}/${var.version_control_system_repository}") : ""
+  github_repository_url                           = var.version_control_system_repository != null ? (startswith(var.version_control_system_repository, "https") ? var.version_control_system_repository : "https://${var.version_control_system_github_url}/${var.version_control_system_organization}/${var.version_control_system_repository}") : ""
   log_analytics_workspace_name                    = var.log_analytics_workspace_name != null ? var.log_analytics_workspace_name : "laws-${var.postfix}"
   nat_gateway_name                                = var.nat_gateway_name != null ? var.nat_gateway_name : "natgw-${var.postfix}"
   public_ip_name                                  = var.public_ip_name != null ? var.public_ip_name : "pip-${var.postfix}"
