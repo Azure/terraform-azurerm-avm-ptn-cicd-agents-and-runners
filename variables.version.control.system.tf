@@ -220,6 +220,47 @@ DESCRIPTION
   }
 }
 
+variable "runner_visibility" {
+  type        = string
+  default     = null
+  description = <<DESCRIPTION
+Optional trust-boundary signal for the runner pool. **GitHub only.** Has no
+runtime effect by itself - it is purely a declared posture that callers can
+use to reason about pool isolation and to drive their own label conventions
+in composition modules.
+
+Recommended pattern:
+
+- `"private"` - pool is attached to a corp/private VNet, can reach private
+  endpoints (state Storage Accounts, Key Vault, ACR private endpoints).
+  Use non-overlapping labels (e.g. `["self-hosted","linux","corp-private"]`)
+  so only intentional consumers can target this pool.
+- `"public"` - pool is isolated from corp/private resources. Use for fork
+  PRs / public repos where workflow code is untrusted. Use a distinct label
+  set (e.g. `["self-hosted","linux","public-runner"]`) so private workloads
+  cannot accidentally land here.
+
+Mixing private and public workloads on the same pool is a network and
+credential exposure risk - keep them on separate module deployments with
+different visibility values, and use `version_control_system_runner_labels`
+to make the boundary explicit in workflow `runs-on`.
+DESCRIPTION
+
+  validation {
+    condition     = var.runner_visibility == null || contains(["private", "public"], coalesce(var.runner_visibility, "private"))
+    error_message = "runner_visibility must be `private`, `public`, or unset."
+  }
+
+  validation {
+    condition = (
+      var.version_control_system_type == "azuredevops"
+      ? var.runner_visibility == null
+      : true
+    )
+    error_message = "runner_visibility is GitHub-only. Azure DevOps deployments must leave it unset."
+  }
+}
+
 variable "version_control_system_github_url" {
   type        = string
   default     = "github.com"
