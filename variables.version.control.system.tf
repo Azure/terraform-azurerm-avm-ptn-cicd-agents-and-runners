@@ -131,6 +131,95 @@ variable "version_control_system_runner_scope" {
   description = "The scope of the runner. Must be `ent`, `org`, or `repo`. This is ignored for Azure DevOps."
 }
 
+variable "version_control_system_runner_labels" {
+  type        = list(string)
+  default     = []
+  description = <<DESCRIPTION
+Custom labels to register the runner with. **GitHub only.** Azure DevOps uses pool/demands, not labels.
+
+When non-empty, the labels are wired into two places that must always stay in sync:
+
+1. The runner container's `LABELS` env var, which becomes `config.sh --labels <csv>` at registration time.
+2. The KEDA `github-runner` scaler's `labels` metadata, so the scaler only triggers on queued jobs that request a matching label set.
+
+In webhook scaling mode (`webhook_scaling_enabled = true`) the KEDA scaler is `azure-queue` and ignores GitHub labels; the labels still apply to runner registration, and your webhook receiver is responsible for filtering jobs by label before enqueueing.
+
+Set a unique label (e.g. `["self-hosted","linux","my-pool"]`) when you operate multiple runner pools in the same org to prevent cross-pool job pickup.
+DESCRIPTION
+  nullable    = false
+
+  validation {
+    condition = alltrue([
+      for l in var.version_control_system_runner_labels :
+      length(trimspace(l)) > 0 && !can(regex(",", l)) && length(l) <= 100
+    ])
+    error_message = "Each label must be non-empty, contain no commas, and be <=100 chars (LABELS and KEDA `labels` are comma-separated lists)."
+  }
+
+  validation {
+    condition     = length(var.version_control_system_runner_labels) == length(distinct(var.version_control_system_runner_labels))
+    error_message = "version_control_system_runner_labels must not contain duplicates."
+  }
+
+  validation {
+    condition = (
+      var.version_control_system_type == "azuredevops"
+      ? length(var.version_control_system_runner_labels) == 0
+      : true
+    )
+    error_message = "version_control_system_runner_labels is GitHub-only. Azure DevOps uses pool name and demands."
+  }
+}
+
+variable "version_control_system_runner_no_default_labels" {
+  type        = bool
+  default     = false
+  description = <<DESCRIPTION
+Disable the default `self-hosted`, `linux`, `<arch>` labels the GitHub runner adds during registration. **GitHub only.**
+
+Forwards `NO_DEFAULT_LABELS=true` to the runner container (applies `--no-default-labels` to `config.sh`) and sets `noDefaultLabels = "true"` on the KEDA `github-runner` scaler so scaling decisions also ignore default labels.
+
+Only set this when you provide an explicit, non-empty `version_control_system_runner_labels` set - a runner with no labels at all cannot be targeted by any workflow.
+DESCRIPTION
+  nullable    = false
+
+  validation {
+    condition = (
+      var.version_control_system_runner_no_default_labels
+      ? length(var.version_control_system_runner_labels) > 0
+      : true
+    )
+    error_message = "version_control_system_runner_no_default_labels = true requires at least one entry in version_control_system_runner_labels (otherwise the runner would have no labels and be unreachable)."
+  }
+
+  validation {
+    condition = (
+      var.version_control_system_type == "azuredevops"
+      ? var.version_control_system_runner_no_default_labels == false
+      : true
+    )
+    error_message = "version_control_system_runner_no_default_labels is GitHub-only."
+  }
+}
+
+variable "version_control_system_keda_enable_etags" {
+  type        = bool
+  default     = false
+  description = <<DESCRIPTION
+When true, sets `enableEtags = "true"` on the KEDA `github-runner` scaler so the scaler uses HTTP ETag conditional requests when polling the GitHub API, reducing API rate limit consumption when nothing has changed since the previous poll. Requires KEDA >= 2.17. **GitHub only.**
+DESCRIPTION
+  nullable    = false
+
+  validation {
+    condition = (
+      var.version_control_system_type == "azuredevops"
+      ? var.version_control_system_keda_enable_etags == false
+      : true
+    )
+    error_message = "version_control_system_keda_enable_etags is GitHub-only."
+  }
+}
+
 variable "version_control_system_github_url" {
   type        = string
   default     = "github.com"
