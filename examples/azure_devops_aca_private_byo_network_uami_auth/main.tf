@@ -185,7 +185,7 @@ resource "azapi_resource" "rg" {
 
 module "virtual_network" {
   source  = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version = "0.7.1"
+  version = "0.17.1"
 
   address_space       = [local.virtual_network_address_space]
   location            = local.selected_region
