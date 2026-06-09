@@ -227,7 +227,7 @@ resource "azapi_resource" "private_dns_zone_virtual_network_link_container_regis
 # User Assigned Managed Identity for agent authentication
 module "uami" {
   source  = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
-  version = "0.3.3"
+  version = "0.5.0"
 
   location            = local.selected_region
   name                = "uami-devops-agents-${random_string.name.result}"
