@@ -4,7 +4,7 @@ locals {
   container_instance_subnet_id                     = var.use_private_networking && local.deploy_container_instance ? (var.virtual_network_creation_enabled ? module.virtual_network[0].subnets["container_instance"].resource_id : var.container_instance_subnet_id) : ""
   container_registry_dns_zone_id                   = var.use_private_networking ? (var.container_registry_private_dns_zone_creation_enabled ? azapi_resource.private_dns_zone_container_registry[0].id : var.container_registry_dns_zone_id) : ""
   container_registry_private_endpoint_subnet_id    = var.use_private_networking ? (var.virtual_network_creation_enabled ? module.virtual_network[0].subnets["container_registry_private_endpoint"].resource_id : var.container_registry_private_endpoint_subnet_id) : ""
-  log_analytics_workspace_id                       = local.deploy_container_app && var.log_analytics_workspace_creation_enabled ? module.log_analytics_workspace[0].resource_id : var.log_analytics_workspace_id
+  log_analytics_workspace_id                       = local.deploy_container_app && var.log_analytics_workspace_creation_enabled ? module.log_analytics_workspace[0].resource_id : coalesce(var.log_analytics_workspace_resource_id, var.log_analytics_workspace_id)
   nat_gateway_id                                   = var.use_private_networking ? (var.nat_gateway_creation_enabled ? azapi_resource.nat_gateway[0].id : var.nat_gateway_id) : ""
   public_ip_id                                     = var.use_private_networking ? (var.public_ip_creation_enabled ? azapi_resource.public_ip[0].id : var.public_ip_id) : ""
   registry_login_server                            = var.container_registry_creation_enabled ? module.container_registry[0].login_server : var.custom_container_registry_login_server
@@ -33,7 +33,7 @@ locals {
   container_instance_subnet_name                  = var.container_instance_subnet_name != null ? var.container_instance_subnet_name : "subnet-container-instance-${var.postfix}"
   container_registry_name                         = replace(var.container_registry_name != null ? var.container_registry_name : "acr${var.postfix}", "-", "")
   container_registry_private_endpoint_subnet_name = var.container_registry_private_endpoint_subnet_name != null ? var.container_registry_private_endpoint_subnet_name : "subnet-container-registry-private-endpoint-${var.postfix}"
-  github_repository_url                           = var.version_control_system_repository != null ? (startswith(var.version_control_system_repository, "https") ? var.version_control_system_repository : "https://github.com/${var.version_control_system_organization}/${var.version_control_system_repository}") : ""
+  github_repository_url                           = var.version_control_system_repository != null ? (startswith(var.version_control_system_repository, "https") ? var.version_control_system_repository : "https://${var.version_control_system_github_url}/${var.version_control_system_organization}/${var.version_control_system_repository}") : ""
   log_analytics_workspace_name                    = var.log_analytics_workspace_name != null ? var.log_analytics_workspace_name : "laws-${var.postfix}"
   nat_gateway_name                                = var.nat_gateway_name != null ? var.nat_gateway_name : "natgw-${var.postfix}"
   public_ip_name                                  = var.public_ip_name != null ? var.public_ip_name : "pip-${var.postfix}"
@@ -42,6 +42,7 @@ locals {
   version_control_system_agent_name_prefix        = var.version_control_system_agent_name_prefix != null ? var.version_control_system_agent_name_prefix : (var.version_control_system_type == local.version_control_system_azure_devops ? "agent-${var.postfix}" : "runner-${var.postfix}")
   version_control_system_placeholder_agent_name   = var.version_control_system_placeholder_agent_name != null ? var.version_control_system_placeholder_agent_name : "placeholder-${var.postfix}"
   virtual_network_name                            = var.virtual_network_name != null ? var.virtual_network_name : "vnet-${var.postfix}"
+  webhook_storage_account_name                    = var.webhook_storage_account_name != null ? var.webhook_storage_account_name : substr(replace("stwh${var.postfix}", "-", ""), 0, 24)
 }
 
 locals {
