@@ -1,6 +1,6 @@
 module "user_assigned_managed_identity" {
   source  = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
-  version = "0.3.3"
+  version = "0.5.0"
   count   = var.user_assigned_managed_identity_creation_enabled ? 1 : 0
 
   location            = var.location
