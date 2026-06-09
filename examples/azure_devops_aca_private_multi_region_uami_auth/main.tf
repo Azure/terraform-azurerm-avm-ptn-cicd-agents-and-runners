@@ -165,7 +165,7 @@ resource "azapi_resource" "rg_secondary" {
 # Single User Assigned Managed Identity shared between both regional deployments
 module "uami" {
   source  = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
-  version = "0.3.3"
+  version = "0.5.0"
 
   location            = local.selected_region_primary
   name                = "uami-devops-agents-${random_string.name.result}"
