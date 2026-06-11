@@ -93,7 +93,7 @@ module "github_runners" {
 # Region helpers
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.3.0"
+  version = "0.12.0"
 }
 
 resource "random_integer" "region_index" {
