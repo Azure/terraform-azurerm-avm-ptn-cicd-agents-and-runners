@@ -259,7 +259,7 @@ module "azure_devops_agents_secondary" {
 # Region helpers
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.3.0"
+  version = "0.12.0"
 }
 
 resource "random_integer" "region_index_primary" {
