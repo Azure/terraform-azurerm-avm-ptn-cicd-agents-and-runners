@@ -243,6 +243,7 @@ The following resources are used by this module:
 - [azapi_resource.private_dns_zone_virtual_network_link_container_registry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
 - [azapi_resource.public_ip](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
 - [azapi_resource.resource_group](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.runner_acr_push](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
 - [modtm_telemetry.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/resources/telemetry) (resource)
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
 - [time_sleep.delay_after_container_app_environment_creation](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) (resource)
@@ -849,7 +850,7 @@ Default: `true`
 
 ### <a name="input_log_analytics_workspace_id"></a> [log\_analytics\_workspace\_id](#input\_log\_analytics\_workspace\_id)
 
-Description: The resource Id of the Log Analytics Workspace.
+Description: Deprecated. Legacy alias for `log_analytics_workspace_resource_id`. The resource ID of an existing Log Analytics Workspace. New consumers should use `log_analytics_workspace_resource_id`. If both are set they must match.
 
 Type: `string`
 
@@ -874,6 +875,14 @@ Default: `null`
 ### <a name="input_log_analytics_workspace_name"></a> [log\_analytics\_workspace\_name](#input\_log\_analytics\_workspace\_name)
 
 Description: The name of the log analytics workspace. Only required if `log_analytics_workspace_creation_enabled == false`.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_log_analytics_workspace_resource_id"></a> [log\_analytics\_workspace\_resource\_id](#input\_log\_analytics\_workspace\_resource\_id)
+
+Description: The resource ID of an existing Log Analytics Workspace to attach to the Container App Environment when `log_analytics_workspace_creation_enabled` is `false`. Preferred over the legacy `log_analytics_workspace_id` input.
 
 Type: `string`
 
@@ -1002,6 +1011,50 @@ object({
 ```
 
 Default: `{}`
+
+### <a name="input_runner_acr_push_enabled"></a> [runner\_acr\_push\_enabled](#input\_runner\_acr\_push\_enabled)
+
+Description: Whether to grant the runner User Assigned Managed Identity `AcrPush` on the container registry  
+created by this module. Has no effect when `container_registry_creation_enabled = false`.
+
+Default is `false` (least privilege): the runner gets `AcrPull` only via the existing
+`container-registry` sub-module wiring, which is sufficient to pull runner images and start  
+runner pods.
+
+Set to `true` when workflows running on this pool need to **push** images to the ACR. Pair  
+this opt-in with a Buildah/Kaniko-based custom runner image, or a separate ACR Tasks agent  
+pool, so build operations themselves do not run as the same identity that scales the pool.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_runner_visibility"></a> [runner\_visibility](#input\_runner\_visibility)
+
+Description: Optional trust-boundary signal for the runner pool. **GitHub only.** Has no  
+runtime effect by itself - it is purely a declared posture that callers can  
+use to reason about pool isolation and to drive their own label conventions  
+in composition modules.
+
+Recommended pattern:
+
+- `"private"` - pool is attached to a corp/private VNet, can reach private  
+  endpoints (state Storage Accounts, Key Vault, ACR private endpoints).  
+  Use non-overlapping labels (e.g. `["self-hosted","linux","corp-private"]`)  
+  so only intentional consumers can target this pool.
+- `"public"` - pool is isolated from corp/private resources. Use for fork  
+  PRs / public repos where workflow code is untrusted. Use a distinct label  
+  set (e.g. `["self-hosted","linux","public-runner"]`) so private workloads  
+  cannot accidentally land here.
+
+Mixing private and public workloads on the same pool is a network and  
+credential exposure risk - keep them on separate module deployments with  
+different visibility values, and use `version_control_system_runner_labels`  
+to make the boundary explicit in workflow `runs-on`.
+
+Type: `string`
+
+Default: `null`
 
 ### <a name="input_tags"></a> [tags](#input\_tags)
 
@@ -1137,6 +1190,27 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_version_control_system_github_url"></a> [version\_control\_system\_github\_url](#input\_version\_control\_system\_github\_url)
+
+Description: The base URL for GitHub. Use the default `github.com` for standard GitHub Enterprise Cloud,  
+or `<subdomain>.ghe.com` for GitHub Enterprise Cloud with data residency. Ignored for Azure DevOps.
+
+When set to a non-`github.com` value the module:
+- emits `GITHUB_HOST=<value>` into the runner container environment so `config.sh` registers against the right host;
+- sets `githubApiURL = https://api.<value>` on the KEDA `github-runner` scaler so it polls the right API.
+
+Type: `string`
+
+Default: `"github.com"`
+
+### <a name="input_version_control_system_keda_enable_etags"></a> [version\_control\_system\_keda\_enable\_etags](#input\_version\_control\_system\_keda\_enable\_etags)
+
+Description: When true, sets `enableEtags = "true"` on the KEDA `github-runner` scaler so the scaler uses HTTP ETag conditional requests when polling the GitHub API, reducing API rate limit consumption when nothing has changed since the previous poll. Requires KEDA >= 2.17. **GitHub only.**
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_version_control_system_personal_access_token"></a> [version\_control\_system\_personal\_access\_token](#input\_version\_control\_system\_personal\_access\_token)
 
 Description: The personal access token for the version control system. Required when authentication\_method is 'pat'.
@@ -1177,6 +1251,35 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_version_control_system_runner_labels"></a> [version\_control\_system\_runner\_labels](#input\_version\_control\_system\_runner\_labels)
+
+Description: Custom labels to register the runner with. **GitHub only.** Azure DevOps uses pool/demands, not labels.
+
+When non-empty, the labels are wired into two places that must always stay in sync:
+
+1. The runner container's `LABELS` env var, which becomes `config.sh --labels <csv>` at registration time.  
+2. The KEDA `github-runner` scaler's `labels` metadata, so the scaler only triggers on queued jobs that request a matching label set.
+
+In webhook scaling mode (`webhook_scaling_enabled = true`) the KEDA scaler is `azure-queue` and ignores GitHub labels; the labels still apply to runner registration, and your webhook receiver is responsible for filtering jobs by label before enqueueing.
+
+Set a unique label (e.g. `["self-hosted","linux","my-pool"]`) when you operate multiple runner pools in the same org to prevent cross-pool job pickup.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_version_control_system_runner_no_default_labels"></a> [version\_control\_system\_runner\_no\_default\_labels](#input\_version\_control\_system\_runner\_no\_default\_labels)
+
+Description: Disable the default `self-hosted`, `linux`, `<arch>` labels the GitHub runner adds during registration. **GitHub only.**
+
+Forwards `NO_DEFAULT_LABELS=true` to the runner container (applies `--no-default-labels` to `config.sh`) and sets `noDefaultLabels = "true"` on the KEDA `github-runner` scaler so scaling decisions also ignore default labels.
+
+Only set this when you provide an explicit, non-empty `version_control_system_runner_labels` set - a runner with no labels at all cannot be targeted by any workflow.
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_version_control_system_runner_scope"></a> [version\_control\_system\_runner\_scope](#input\_version\_control\_system\_runner\_scope)
 
 Description: The scope of the runner. Must be `ent`, `org`, or `repo`. This is ignored for Azure DevOps.
@@ -1212,6 +1315,81 @@ Default: `null`
 ### <a name="input_virtual_network_name"></a> [virtual\_network\_name](#input\_virtual\_network\_name)
 
 Description: The name of the virtual network. Must be specified if `virtual_network_creation_enabled` is `true`.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_webhook_queue_length_per_runner"></a> [webhook\_queue\_length\_per\_runner](#input\_webhook\_queue\_length\_per\_runner)
+
+Description: KEDA `queueLength` metadata - how many messages in the queue trigger one additional runner. Default `1` means one runner per queued job. Only used when `webhook_scaling_enabled` is `true`.
+
+Type: `number`
+
+Default: `1`
+
+### <a name="input_webhook_queue_name"></a> [webhook\_queue\_name](#input\_webhook\_queue\_name)
+
+Description: Name of the Storage Queue used to trigger runner scale-up. Only used when `webhook_scaling_enabled` is `true`.
+
+Type: `string`
+
+Default: `"runner-jobs"`
+
+### <a name="input_webhook_receiver_principal_ids"></a> [webhook\_receiver\_principal\_ids](#input\_webhook\_receiver\_principal\_ids)
+
+Description: Principal IDs (object IDs) of identities that should be granted `Storage Queue Data Message Sender`  
+on the webhook queue. Typically the managed identity of the Azure Function / Logic App that receives  
+webhooks and writes to the queue. Only used when `webhook_scaling_enabled` is `true`.
+
+Type: `set(string)`
+
+Default: `[]`
+
+### <a name="input_webhook_scaling_enabled"></a> [webhook\_scaling\_enabled](#input\_webhook\_scaling\_enabled)
+
+Description: Whether to enable webhook-driven KEDA scaling instead of the default polling scalers
+(`github-runner` / `azure-pipelines`).
+
+When `false` (default), KEDA polls the GitHub/Azure DevOps API every
+`container_app_polling_interval_seconds` to detect queued jobs. Simple, but adds  
+0-30s of latency per job and consumes API rate limit.
+
+When `true`, this module provisions a private Storage Account + Storage Queue and  
+KEDA scales the runner job on **queue length** using the `azure-queue` scaler with  
+UAMI auth (no secrets). A webhook receiver (out of scope for this module - typically  
+an Azure Function, Logic App, or APIM policy in a hub/online landing zone) translates  
+GitHub `workflow_job` / Azure DevOps service hook events into queue messages.
+
+See `WEBHOOKS.md` for the receiver contract, sample Python Function App, secret  
+rotation guidance, and caveats.
+
+Webhook mode gives sub-second scale-up latency and eliminates API polling load, at  
+the cost of operating an additional receiver component.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_webhook_storage_account_name"></a> [webhook\_storage\_account\_name](#input\_webhook\_storage\_account\_name)
+
+Description: Name of the Storage Account that hosts the webhook queue. If null, defaults to `stwh<postfix>` (hyphens removed). Only used when `webhook_scaling_enabled` is `true`.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_webhook_storage_private_endpoint_subnet_id"></a> [webhook\_storage\_private\_endpoint\_subnet\_id](#input\_webhook\_storage\_private\_endpoint\_subnet\_id)
+
+Description: Resource ID of the subnet for the webhook Storage Account private endpoint. If null, falls back to `container_registry_private_endpoint_subnet_id`. Only used when `webhook_scaling_enabled` is `true`.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_webhook_storage_queue_dns_zone_id"></a> [webhook\_storage\_queue\_dns\_zone\_id](#input\_webhook\_storage\_queue\_dns\_zone\_id)
+
+Description: Resource ID of the private DNS zone for Storage Queue (`privatelink.queue.core.windows.net`). If null, DNS is assumed to be handled by Azure Policy or central DNS. Only used when `webhook_scaling_enabled` is `true`.
 
 Type: `string`
 
@@ -1293,6 +1471,26 @@ Description: The virtual network name.
 
 Description: The virtual network resource id.
 
+### <a name="output_webhook_queue_messages_endpoint"></a> [webhook\_queue\_messages\_endpoint](#output\_webhook\_queue\_messages\_endpoint)
+
+Description: REST endpoint for the Put Message operation (queue URL + `/messages`). Use this if calling the Storage REST API directly rather than via an SDK. `null` when `webhook_scaling_enabled` is `false`.
+
+### <a name="output_webhook_queue_name"></a> [webhook\_queue\_name](#output\_webhook\_queue\_name)
+
+Description: Name of the Storage Queue used for webhook-driven scaling. `null` when `webhook_scaling_enabled` is `false`.
+
+### <a name="output_webhook_queue_url"></a> [webhook\_queue\_url](#output\_webhook\_queue\_url)
+
+Description: Queue URL (without `/messages` suffix). Use with Azure Storage SDKs, e.g. `QueueClient.from_queue_url(...)`. `null` when `webhook_scaling_enabled` is `false`.
+
+### <a name="output_webhook_storage_account_name"></a> [webhook\_storage\_account\_name](#output\_webhook\_storage\_account\_name)
+
+Description: Name of the Storage Account hosting the webhook queue. `null` when `webhook_scaling_enabled` is `false`.
+
+### <a name="output_webhook_storage_account_resource_id"></a> [webhook\_storage\_account\_resource\_id](#output\_webhook\_storage\_account\_resource\_id)
+
+Description: Resource ID of the Storage Account hosting the webhook queue. `null` when `webhook_scaling_enabled` is `false`.
+
 ## Modules
 
 The following Modules are called:
@@ -1332,6 +1530,12 @@ Version: 0.3.3
 Source: Azure/avm-res-network-virtualnetwork/azurerm
 
 Version: 0.8.1
+
+### <a name="module_webhook_storage"></a> [webhook\_storage](#module\_webhook\_storage)
+
+Source: Azure/avm-res-storage-storageaccount/azurerm
+
+Version: 0.7.0
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection

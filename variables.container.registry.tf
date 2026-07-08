@@ -91,6 +91,24 @@ variable "default_image_repository_url" {
   description = "The default image repository URL to use if no custom image is provided."
 }
 
+variable "runner_acr_push_enabled" {
+  type        = bool
+  default     = false
+  description = <<DESCRIPTION
+Whether to grant the runner User Assigned Managed Identity `AcrPush` on the container registry
+created by this module. Has no effect when `container_registry_creation_enabled = false`.
+
+Default is `false` (least privilege): the runner gets `AcrPull` only via the existing
+`container-registry` sub-module wiring, which is sufficient to pull runner images and start
+runner pods.
+
+Set to `true` when workflows running on this pool need to **push** images to the ACR. Pair
+this opt-in with a Buildah/Kaniko-based custom runner image, or a separate ACR Tasks agent
+pool, so build operations themselves do not run as the same identity that scales the pool.
+DESCRIPTION
+  nullable    = false
+}
+
 variable "use_default_container_image" {
   type        = bool
   default     = true
