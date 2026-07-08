@@ -75,7 +75,7 @@ resource "azapi_resource" "placeholder" {
     }
   }
   retry = var.retry
-  tags  = null
+  tags  = var.tags
 
   identity {
     type         = "UserAssigned"
