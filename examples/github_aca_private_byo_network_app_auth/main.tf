@@ -42,7 +42,7 @@ resource "random_string" "name" {
 
 module "naming" {
   source  = "Azure/naming/azurerm"
-  version = "0.4.2"
+  version = "0.4.3"
 }
 data "github_organization" "alz" {
   name = var.github_organization_name
@@ -137,7 +137,7 @@ resource "azapi_resource" "rg" {
 
 module "virtual_network" {
   source  = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version = "0.7.1"
+  version = "0.19.0"
 
   address_space       = [local.virtual_network_address_space]
   location            = local.selected_region
@@ -206,7 +206,7 @@ module "github_runners" {
 # Region helpers
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.3.0"
+  version = "0.12.0"
 }
 
 resource "random_integer" "region_index" {

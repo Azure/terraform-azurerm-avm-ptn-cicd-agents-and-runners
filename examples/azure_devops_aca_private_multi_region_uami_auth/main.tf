@@ -52,7 +52,7 @@ resource "random_string" "name" {
 
 module "naming" {
   source  = "Azure/naming/azurerm"
-  version = "0.4.2"
+  version = "0.4.3"
 }
 
 resource "azuredevops_project" "this" {
@@ -165,7 +165,7 @@ resource "azapi_resource" "rg_secondary" {
 # Single User Assigned Managed Identity shared between both regional deployments
 module "uami" {
   source  = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
-  version = "0.3.3"
+  version = "0.5.1"
 
   location            = local.selected_region_primary
   name                = "uami-devops-agents-${random_string.name.result}"
@@ -259,7 +259,7 @@ module "azure_devops_agents_secondary" {
 # Region helpers
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.3.0"
+  version = "0.12.0"
 }
 
 resource "random_integer" "region_index_primary" {
