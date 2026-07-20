@@ -1,6 +1,6 @@
 module "virtual_network" {
   source  = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version = "0.8.1"
+  version = "0.19.0"
   count   = var.use_private_networking && var.virtual_network_creation_enabled ? 1 : 0
 
   address_space       = [var.virtual_network_address_space]
