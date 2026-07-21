@@ -11,6 +11,7 @@ module "container_registry" {
     container_registry = {
       private_dns_zone_resource_ids = var.private_dns_zone_id == null || var.private_dns_zone_id == "" ? [] : [var.private_dns_zone_id]
       subnet_resource_id            = var.subnet_id
+      tags                          = var.tags
     }
   } : null
   public_network_access_enabled = !var.use_private_networking
