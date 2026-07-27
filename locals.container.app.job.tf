@@ -4,24 +4,36 @@ locals {
     poolName                   = var.version_control_system_pool_name
     targetPipelinesQueueLength = var.version_control_system_agent_target_queue_length
   }
-  keda_meta_data_final = var.version_control_system_type == local.version_control_system_azure_devops ? jsonencode(local.keda_meta_data_azure_devops) : jsonencode(local.keda_meta_data_github)
-  keda_meta_data_github = local.version_control_system_authentication_method == "pat" ? {
-    owner                     = var.version_control_system_organization
-    repos                     = var.version_control_system_repository
-    targetWorkflowQueueLength = var.version_control_system_agent_target_queue_length
-    runnerScope               = var.version_control_system_runner_scope
-    } : {
-    owner                     = var.version_control_system_organization
-    repos                     = var.version_control_system_repository
-    targetWorkflowQueueLength = var.version_control_system_agent_target_queue_length
-    runnerScope               = var.version_control_system_runner_scope
-    applicationID             = var.version_control_system_github_application_id
-    installationID            = var.version_control_system_github_application_installation_id
+  keda_meta_data_final = var.webhook_scaling_enabled ? jsonencode(local.keda_meta_data_webhook) : (var.version_control_system_type == local.version_control_system_azure_devops ? jsonencode(local.keda_meta_data_azure_devops) : jsonencode(local.keda_meta_data_github))
+  keda_meta_data_github = merge(
+    local.version_control_system_authentication_method == "pat" ? {
+      owner                     = var.version_control_system_organization
+      repos                     = var.version_control_system_repository
+      targetWorkflowQueueLength = var.version_control_system_agent_target_queue_length
+      runnerScope               = var.version_control_system_runner_scope
+      githubApiURL              = var.version_control_system_github_url != "github.com" ? "https://api.${var.version_control_system_github_url}" : ""
+      } : {
+      owner                     = var.version_control_system_organization
+      repos                     = var.version_control_system_repository
+      targetWorkflowQueueLength = var.version_control_system_agent_target_queue_length
+      runnerScope               = var.version_control_system_runner_scope
+      applicationID             = var.version_control_system_github_application_id
+      installationID            = var.version_control_system_github_application_installation_id
+      githubApiURL              = var.version_control_system_github_url != "github.com" ? "https://api.${var.version_control_system_github_url}" : ""
+    },
+    length(var.version_control_system_runner_labels) > 0 ? { labels = join(",", var.version_control_system_runner_labels) } : {},
+    var.version_control_system_runner_no_default_labels ? { noDefaultLabels = "true" } : {},
+    var.version_control_system_keda_enable_etags ? { enableEtags = "true" } : {},
+  )
+  keda_meta_data_webhook = {
+    queueName   = var.webhook_queue_name
+    accountName = local.webhook_storage_account_name
+    queueLength = tostring(var.webhook_queue_length_per_runner)
   }
 }
 
 locals {
-  environment_variables = concat(tolist(jsondecode(local.environment_variables_final)), tolist(var.container_app_environment_variables))
+  environment_variables = concat(tolist(jsondecode(local.environment_variables_final)), local.environment_variables_runner_labels, tolist(var.container_app_environment_variables))
   environment_variables_azure_devops = [
     {
       name  = "AZP_POOL"
@@ -61,6 +73,10 @@ locals {
     {
       name  = "RUNNER_GROUP"
       value = var.version_control_system_runner_group
+    },
+    {
+      name  = "GITHUB_HOST"
+      value = var.version_control_system_github_url
     }
     ] : [
     {
@@ -94,8 +110,16 @@ locals {
     {
       name  = "APP_ID"
       value = var.version_control_system_github_application_id
+    },
+    {
+      name  = "GITHUB_HOST"
+      value = var.version_control_system_github_url
     }
   ]
+  environment_variables_runner_labels = var.version_control_system_type == local.version_control_system_github ? concat(
+    length(var.version_control_system_runner_labels) > 0 ? [{ name = "LABELS", value = join(",", var.version_control_system_runner_labels) }] : [],
+    var.version_control_system_runner_no_default_labels ? [{ name = "NO_DEFAULT_LABELS", value = "true" }] : [],
+  ) : []
 }
 
 locals {
@@ -116,12 +140,15 @@ locals {
 
 locals {
   sensitive_environment_variables = concat(tolist(jsondecode(local.sensitive_environment_variables_final)), tolist(var.container_app_sensitive_environment_variables))
+  # In webhook mode KEDA uses the azure-queue scaler with UAMI auth - no secret-based
+  # KEDA auth is required, so `keda_auth_name` is stripped. The sensitive env vars are
+  # still mounted as container secrets/env vars for the runner itself.
   sensitive_environment_variables_azure_devops = local.version_control_system_authentication_method == "uami" ? [
     {
       name                      = "AZP_URL"
       value                     = var.version_control_system_organization
       container_app_secret_name = "organization-url"
-      keda_auth_name            = "organizationURL"
+      keda_auth_name            = var.webhook_scaling_enabled ? null : "organizationURL"
     },
     {
       name                      = "USRMI_ID"
@@ -134,13 +161,13 @@ locals {
       name                      = "AZP_URL"
       value                     = var.version_control_system_organization
       container_app_secret_name = "organization-url"
-      keda_auth_name            = "organizationURL"
+      keda_auth_name            = var.webhook_scaling_enabled ? null : "organizationURL"
     },
     {
       name                      = "AZP_TOKEN"
       value                     = var.version_control_system_personal_access_token
       container_app_secret_name = "personal-access-token"
-      keda_auth_name            = "personalAccessToken"
+      keda_auth_name            = var.webhook_scaling_enabled ? null : "personalAccessToken"
     }
   ]
   sensitive_environment_variables_final = var.version_control_system_type == local.version_control_system_azure_devops ? jsonencode(local.sensitive_environment_variables_azure_devops) : jsonencode(local.sensitive_environment_variables_github)
@@ -149,14 +176,14 @@ locals {
       name                      = "ACCESS_TOKEN"
       value                     = var.version_control_system_personal_access_token
       container_app_secret_name = "personal-access-token"
-      keda_auth_name            = "personalAccessToken"
+      keda_auth_name            = var.webhook_scaling_enabled ? null : "personalAccessToken"
     }
     ] : [
     {
       name                      = "APP_PRIVATE_KEY"
       value                     = var.version_control_system_github_application_key
       container_app_secret_name = "application-key"
-      keda_auth_name            = "appKey"
+      keda_auth_name            = var.webhook_scaling_enabled ? null : "appKey"
     }
   ]
 }

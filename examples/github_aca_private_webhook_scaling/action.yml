@@ -1,0 +1,9 @@
+name: ci
+on:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: [self-hosted, linux, demo-webhook]
+    steps:
+      - run: echo "Hello from the webhook-scaled runner"
