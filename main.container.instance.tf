@@ -25,4 +25,3 @@ module "container_instance" {
 
   depends_on = [azapi_resource.custom_container_registry_pull, azapi_resource.private_dns_zone_virtual_network_link_container_registry, time_sleep.delay_after_container_image_build]
 }
-
