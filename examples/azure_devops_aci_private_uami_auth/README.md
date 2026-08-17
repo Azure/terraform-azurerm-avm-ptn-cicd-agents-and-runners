@@ -36,7 +36,7 @@ terraform {
     }
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.20"
+      version = "~> 5.0"
     }
     random = {
       source  = "hashicorp/random"
@@ -70,7 +70,7 @@ resource "random_string" "name" {
 
 module "naming" {
   source  = "Azure/naming/azurerm"
-  version = "0.4.2"
+  version = "0.4.3"
 }
 
 resource "azuredevops_project" "this" {
@@ -152,7 +152,7 @@ resource "azapi_resource" "rg" {
 # User Assigned Managed Identity for ACI agent authentication (no PAT required)
 module "uami" {
   source  = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
-  version = "0.3.3"
+  version = "0.5.1"
 
   location            = local.selected_region
   name                = "uami-devops-agents-${random_string.name.result}"
@@ -223,7 +223,7 @@ module "azure_devops_agents" {
 # Region helpers
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.3.0"
+  version = "0.12.0"
 }
 
 resource "random_integer" "region_index" {
@@ -254,7 +254,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azuredevops"></a> [azuredevops](#requirement\_azuredevops) (~> 1.15)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.20)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 5.0)
 
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
@@ -315,19 +315,19 @@ Version:
 
 Source: Azure/naming/azurerm
 
-Version: 0.4.2
+Version: 0.4.3
 
 ### <a name="module_regions"></a> [regions](#module\_regions)
 
 Source: Azure/avm-utl-regions/azurerm
 
-Version: 0.3.0
+Version: 0.12.0
 
 ### <a name="module_uami"></a> [uami](#module\_uami)
 
 Source: Azure/avm-res-managedidentity-userassignedidentity/azurerm
 
-Version: 0.3.3
+Version: 0.5.1
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection

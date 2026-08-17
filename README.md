@@ -1325,13 +1325,13 @@ Version: 0.5.1
 
 Source: Azure/avm-res-managedidentity-userassignedidentity/azurerm
 
-Version: 0.3.3
+Version: 0.5.1
 
 ### <a name="module_virtual_network"></a> [virtual\_network](#module\_virtual\_network)
 
 Source: Azure/avm-res-network-virtualnetwork/azurerm
 
-Version: 0.8.1
+Version: 0.20.0
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection
