@@ -84,4 +84,3 @@ resource "time_sleep" "delay_after_container_app_environment_creation" {
 
   depends_on = [azapi_resource.container_app_environment]
 }
-
