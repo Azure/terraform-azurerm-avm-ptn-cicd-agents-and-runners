@@ -64,6 +64,7 @@ module "naming" {
   source  = "Azure/naming/azurerm"
   version = "0.4.2"
 }
+
 data "github_organization" "alz" {
   name = var.github_organization_name
 }
