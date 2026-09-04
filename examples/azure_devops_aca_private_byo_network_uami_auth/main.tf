@@ -1,6 +1,3 @@
-
-
-
 locals {
   tags = {
     scenario = "azure_devops_aca_private_byo_network_uami_auth"
@@ -83,6 +80,7 @@ resource "azuredevops_git_repository" "this" {
   project_id     = azuredevops_project.this.id
   name           = local.repository_name
   default_branch = local.default_branch
+
   initialization {
     init_type = "Clean"
   }

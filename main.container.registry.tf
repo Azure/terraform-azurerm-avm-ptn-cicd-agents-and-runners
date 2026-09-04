@@ -30,12 +30,8 @@ resource "azapi_resource" "custom_container_registry_pull" {
       principalType    = "ServicePrincipal"
     }
   }
-  create_headers         = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
-  delete_headers         = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
-  read_headers           = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
   response_export_values = []
   retry                  = var.retry
-  update_headers         = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
 
   dynamic "timeouts" {
     for_each = var.timeouts == null ? [] : [var.timeouts]

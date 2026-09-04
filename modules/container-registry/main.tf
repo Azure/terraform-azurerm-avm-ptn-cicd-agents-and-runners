@@ -78,6 +78,7 @@ resource "azapi_resource" "task" {
   identity {
     type = "SystemAssigned"
   }
+
   dynamic "timeouts" {
     for_each = var.timeouts == null ? [] : [var.timeouts]
 
@@ -95,14 +96,13 @@ resource "azurerm_container_registry_task_schedule_run_now" "task_run" {
 
   container_registry_task_id = azapi_resource.task[each.key].id
 
+  lifecycle {
+    replace_triggered_by = [azapi_resource.task]
+  }
   depends_on = [
     azapi_resource.role_assignment_acr_push_for_task,
     azapi_update_resource.network_rule_bypass_allowed_for_tasks
   ]
-
-  lifecycle {
-    replace_triggered_by = [azapi_resource.task]
-  }
 }
 
 resource "azapi_resource" "role_assignment_acr_pull_for_container_instance" {

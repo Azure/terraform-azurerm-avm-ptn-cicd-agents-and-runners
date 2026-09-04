@@ -16,9 +16,6 @@ az login
 For other provider authentication methods (Personal Access Token, OIDC, Managed Identity, Service Principal, etc.), see the [provider authentication documentation](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs#authentication).
 
 ```hcl
-
-
-
 locals {
   tags = {
     scenario = "azure_devops_aca_private_byo_network_uami_auth"
@@ -101,6 +98,7 @@ resource "azuredevops_git_repository" "this" {
   project_id     = azuredevops_project.this.id
   name           = local.repository_name
   default_branch = local.default_branch
+
   initialization {
     init_type = "Clean"
   }

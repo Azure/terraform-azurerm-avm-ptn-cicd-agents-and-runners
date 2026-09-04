@@ -36,6 +36,7 @@ resource "azapi_resource" "job" {
     type         = "UserAssigned"
     identity_ids = [var.user_assigned_managed_identity_id]
   }
+
   dynamic "timeouts" {
     for_each = var.timeouts == null ? [] : [var.timeouts]
 
@@ -81,6 +82,7 @@ resource "azapi_resource" "placeholder" {
     type         = "UserAssigned"
     identity_ids = [var.user_assigned_managed_identity_id]
   }
+
   dynamic "timeouts" {
     for_each = var.timeouts == null ? [] : [var.timeouts]
 
