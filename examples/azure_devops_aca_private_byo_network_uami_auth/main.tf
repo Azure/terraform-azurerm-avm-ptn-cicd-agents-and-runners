@@ -18,7 +18,7 @@ terraform {
     }
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.20"
+      version = "~> 5.4"
     }
     random = {
       source  = "hashicorp/random"
@@ -52,7 +52,7 @@ resource "random_string" "name" {
 
 module "naming" {
   source  = "Azure/naming/azurerm"
-  version = "0.4.2"
+  version = "0.4.3"
 }
 
 resource "azuredevops_project" "this" {
@@ -183,7 +183,7 @@ resource "azapi_resource" "rg" {
 
 module "virtual_network" {
   source  = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version = "0.7.1"
+  version = "0.22.2"
 
   address_space       = [local.virtual_network_address_space]
   location            = local.selected_region
@@ -225,7 +225,7 @@ resource "azapi_resource" "private_dns_zone_virtual_network_link_container_regis
 # User Assigned Managed Identity for agent authentication
 module "uami" {
   source  = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
-  version = "0.3.3"
+  version = "0.5.2"
 
   location            = local.selected_region
   name                = "uami-devops-agents-${random_string.name.result}"
@@ -303,7 +303,7 @@ module "azure_devops_agents" {
 # Region helpers
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.3.0"
+  version = "0.12.0"
 }
 
 resource "random_integer" "region_index" {
