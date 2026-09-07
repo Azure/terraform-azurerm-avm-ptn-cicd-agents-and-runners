@@ -140,11 +140,11 @@ module "virtual_network" {
   source  = "Azure/avm-res-network-virtualnetwork/azurerm"
   version = "0.22.2"
 
-  address_space       = [local.virtual_network_address_space]
   location            = local.selected_region
-  resource_group_name = azapi_resource.rg.name
+  address_space       = [local.virtual_network_address_space]
   name                = "vnet-${random_string.name.result}"
   subnets             = local.subnets
+  resource_group_name = azapi_resource.rg.name
 }
 
 resource "azapi_resource" "private_dns_zone_container_registry" {
