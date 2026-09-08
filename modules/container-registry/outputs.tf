@@ -1,6 +1,6 @@
 output "login_server" {
   description = "The login server of the container registry"
-  value       = module.container_registry.resource.login_server
+  value       = module.container_registry.login_server
 }
 
 output "name" {
