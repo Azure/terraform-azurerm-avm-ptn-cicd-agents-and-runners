@@ -34,7 +34,7 @@ terraform {
     }
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.20"
+      version = "~> 5.5"
     }
     github = {
       source  = "integrations/github"
@@ -62,7 +62,7 @@ resource "random_string" "name" {
 
 module "naming" {
   source  = "Azure/naming/azurerm"
-  version = "0.4.2"
+  version = "0.4.3"
 }
 
 data "github_organization" "alz" {
@@ -158,13 +158,13 @@ resource "azapi_resource" "rg" {
 
 module "virtual_network" {
   source  = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version = "0.7.1"
+  version = "0.22.2"
 
-  address_space       = [local.virtual_network_address_space]
   location            = local.selected_region
-  resource_group_name = azapi_resource.rg.name
+  address_space       = [local.virtual_network_address_space]
   name                = "vnet-${random_string.name.result}"
   subnets             = local.subnets
+  resource_group_name = azapi_resource.rg.name
 }
 
 resource "azapi_resource" "private_dns_zone_container_registry" {
@@ -227,7 +227,7 @@ module "github_runners" {
 # Region helpers
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.3.0"
+  version = "0.12.0"
 }
 
 resource "random_integer" "region_index" {
@@ -256,7 +256,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.20)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 5.5)
 
 - <a name="requirement_github"></a> [github](#requirement\_github) (~> 6.12)
 
@@ -344,19 +344,19 @@ Version:
 
 Source: Azure/naming/azurerm
 
-Version: 0.4.2
+Version: 0.4.3
 
 ### <a name="module_regions"></a> [regions](#module\_regions)
 
 Source: Azure/avm-utl-regions/azurerm
 
-Version: 0.3.0
+Version: 0.12.0
 
 ### <a name="module_virtual_network"></a> [virtual\_network](#module\_virtual\_network)
 
 Source: Azure/avm-res-network-virtualnetwork/azurerm
 
-Version: 0.7.1
+Version: 0.22.2
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection
