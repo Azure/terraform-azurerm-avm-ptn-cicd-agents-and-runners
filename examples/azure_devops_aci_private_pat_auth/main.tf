@@ -127,6 +127,7 @@ module "azure_devops_agents" {
   version_control_system_organization          = local.azure_devops_organization_url
   version_control_system_type                  = "azuredevops"
   compute_types                                = ["azure_container_instance"]
+  enable_telemetry                             = false
   tags                                         = local.tags
   version_control_system_authentication_method = "pat"
   version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
@@ -140,6 +141,8 @@ module "azure_devops_agents" {
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.3.0"
+
+  enable_telemetry = false
 }
 
 resource "random_integer" "region_index" {
