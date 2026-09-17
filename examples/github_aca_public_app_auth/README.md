@@ -122,6 +122,7 @@ module "github_runners" {
   postfix                                                   = random_string.name.result
   version_control_system_organization                       = var.github_organization_name
   version_control_system_type                               = "github"
+  enable_telemetry                                          = false
   tags                                                      = local.tags
   use_private_networking                                    = false
   use_zone_redundancy                                       = false
@@ -137,6 +138,8 @@ module "github_runners" {
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.3.0"
+
+  enable_telemetry = false
 }
 
 resource "random_integer" "region_index" {

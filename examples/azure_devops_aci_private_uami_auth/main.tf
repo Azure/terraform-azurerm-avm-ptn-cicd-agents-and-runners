@@ -140,7 +140,7 @@ module "uami" {
   location            = local.selected_region
   name                = "uami-devops-agents-${random_string.name.result}"
   resource_group_name = azapi_resource.rg.name
-  enable_telemetry    = true
+  enable_telemetry    = false
   tags                = local.tags
 }
 
@@ -188,6 +188,7 @@ module "azure_devops_agents" {
   version_control_system_organization             = local.azure_devops_organization_url
   version_control_system_type                     = "azuredevops"
   compute_types                                   = ["azure_container_instance"]
+  enable_telemetry                                = false
   parent_id                                       = azapi_resource.rg.id
   resource_group_creation_enabled                 = false
   tags                                            = local.tags
@@ -207,6 +208,8 @@ module "azure_devops_agents" {
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.3.0"
+
+  enable_telemetry = false
 }
 
 resource "random_integer" "region_index" {
