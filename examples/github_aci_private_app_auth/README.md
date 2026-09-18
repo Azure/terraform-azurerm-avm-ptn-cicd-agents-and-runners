@@ -100,7 +100,7 @@ module "github_runners" {
   version_control_system_organization                       = var.github_organization_name
   version_control_system_type                               = "github"
   compute_types                                             = ["azure_container_instance"]
-  enable_telemetry                                          = false
+  enable_telemetry                                          = var.enable_telemetry
   tags                                                      = local.tags
   version_control_system_github_application_id              = var.github_application_id
   version_control_system_github_application_installation_id = var.github_application_installation_id
@@ -116,7 +116,7 @@ module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.3.0"
 
-  enable_telemetry = false
+  enable_telemetry = var.enable_telemetry
 }
 
 resource "random_integer" "region_index" {
@@ -190,7 +190,17 @@ Type: `string`
 
 ## Optional Inputs
 
-No optional inputs.
+The following input variables are optional (have default values):
+
+### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
+
+Description: This variable controls whether or not telemetry is enabled for the module.  
+For more information see <https://aka.ms/avm/telemetryinfo>.  
+If it is set to false, then no telemetry will be collected.
+
+Type: `bool`
+
+Default: `false`
 
 ## Outputs
 
