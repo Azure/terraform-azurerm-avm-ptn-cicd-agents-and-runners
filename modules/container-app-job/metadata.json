@@ -1,0 +1,7 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Azure/azure-verified-modules-tools/main/src/Avm.Authoring/Resources/Schemas/v1/avm-module-metadata.schema.json",
+  "moduleDisplayName": "CI/CD Agents and Runners - Container Apps Job",
+  "moduleDescription": "This submodule deploys an Azure Container Apps Job for CI/CD agents and runners.",
+  "canonicalType": "dev-ops/cicd-agents-and-runners/container-app-job",
+  "telemetryIdPrefix": "46d3xtrf.ptn.6671e94"
+}
