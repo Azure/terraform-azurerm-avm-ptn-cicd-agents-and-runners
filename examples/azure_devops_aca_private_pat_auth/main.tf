@@ -143,7 +143,7 @@ module "azure_devops_agents" {
   postfix                                      = random_string.name.result
   version_control_system_organization          = local.azure_devops_organization_url
   version_control_system_type                  = "azuredevops"
-  enable_telemetry                             = false
+  enable_telemetry                             = var.enable_telemetry
   tags                                         = local.tags
   version_control_system_authentication_method = "pat"
   version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
@@ -158,7 +158,7 @@ module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.3.0"
 
-  enable_telemetry = false
+  enable_telemetry = var.enable_telemetry
 }
 
 resource "random_integer" "region_index" {
