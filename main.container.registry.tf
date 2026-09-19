@@ -26,7 +26,7 @@ resource "azapi_resource" "custom_container_registry_pull" {
   body = {
     properties = {
       principalId      = local.user_assigned_managed_identity_principal_id
-      roleDefinitionId = "/subscriptions/${data.azapi_client_config.current.subscription_id}/providers/Microsoft.Authorization/roleDefinitions/${local.role_definition_ids.acr_pull}"
+      roleDefinitionId = "/subscriptions/${split("/", var.custom_container_registry_id)[2]}/providers/Microsoft.Authorization/roleDefinitions/${local.role_definition_ids.acr_pull}"
       principalType    = "ServicePrincipal"
     }
   }
