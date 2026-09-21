@@ -45,10 +45,7 @@ resource "azapi_resource" "container_app_environment" {
       infrastructureResourceGroup = var.use_private_networking ? local.resource_group_name_container_app_infrastructure : null
     }
   }
-  create_headers            = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
-  delete_headers            = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
   ignore_null_property      = true
-  read_headers              = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
   response_export_values    = ["id", "name"]
   retry                     = var.retry
   schema_validation_enabled = true
@@ -64,8 +61,7 @@ resource "azapi_resource" "container_app_environment" {
   sensitive_body_version = {
     "properties.appLogsConfiguration.logAnalyticsConfiguration.sharedKey" = "1"
   }
-  tags           = var.tags
-  update_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+  tags = var.tags
 
   dynamic "timeouts" {
     for_each = var.timeouts == null ? [] : [var.timeouts]

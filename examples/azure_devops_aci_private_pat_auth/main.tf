@@ -78,6 +78,7 @@ resource "azuredevops_git_repository" "this" {
   project_id     = azuredevops_project.this.id
   name           = local.repository_name
   default_branch = local.default_branch
+
   initialization {
     init_type = "Clean"
   }
@@ -126,6 +127,7 @@ module "azure_devops_agents" {
   version_control_system_organization          = local.azure_devops_organization_url
   version_control_system_type                  = "azuredevops"
   compute_types                                = ["azure_container_instance"]
+  enable_telemetry                             = var.enable_telemetry
   tags                                         = local.tags
   version_control_system_authentication_method = "pat"
   version_control_system_personal_access_token = var.azure_devops_agents_personal_access_token
@@ -139,6 +141,8 @@ module "azure_devops_agents" {
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.3.0"
+
+  enable_telemetry = var.enable_telemetry
 }
 
 resource "random_integer" "region_index" {
