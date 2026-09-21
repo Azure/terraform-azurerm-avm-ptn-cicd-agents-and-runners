@@ -42,7 +42,7 @@ resource "random_string" "name" {
 
 module "naming" {
   source  = "Azure/naming/azurerm"
-  version = "0.4.2"
+  version = "0.4.3"
 }
 
 data "github_organization" "alz" {
@@ -138,14 +138,14 @@ resource "azapi_resource" "rg" {
 
 module "virtual_network" {
   source  = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version = "0.7.1"
+  version = "0.22.2"
 
-  address_space       = [local.virtual_network_address_space]
   location            = local.selected_region
-  resource_group_name = azapi_resource.rg.name
+  address_space       = [local.virtual_network_address_space]
   enable_telemetry    = var.enable_telemetry
   name                = "vnet-${random_string.name.result}"
   subnets             = local.subnets
+  resource_group_name = azapi_resource.rg.name
 }
 
 resource "azapi_resource" "private_dns_zone_container_registry" {
@@ -209,7 +209,7 @@ module "github_runners" {
 # Region helpers
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.3.0"
+  version = "0.12.0"
 
   enable_telemetry = var.enable_telemetry
 }
