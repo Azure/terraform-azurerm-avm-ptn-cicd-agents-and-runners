@@ -11,7 +11,7 @@ variable "github_runners_personal_access_token" {
 
 variable "enable_telemetry" {
   type        = bool
-  default     = false
+  default     = true
   description = <<DESCRIPTION
 This variable controls whether or not telemetry is enabled for the module.
 For more information see <https://aka.ms/avm/telemetryinfo>.
