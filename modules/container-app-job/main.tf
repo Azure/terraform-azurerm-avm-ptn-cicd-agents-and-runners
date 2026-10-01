@@ -36,6 +36,17 @@ resource "azapi_resource" "job" {
     type         = "UserAssigned"
     identity_ids = [var.user_assigned_managed_identity_id]
   }
+
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
+
+    content {
+      create = timeouts.value.create
+      delete = timeouts.value.delete
+      read   = timeouts.value.read
+      update = timeouts.value.update
+    }
+  }
 }
 
 resource "azapi_resource" "placeholder" {
@@ -65,11 +76,22 @@ resource "azapi_resource" "placeholder" {
     }
   }
   retry = var.retry
-  tags  = null
+  tags  = var.tags
 
   identity {
     type         = "UserAssigned"
     identity_ids = [var.user_assigned_managed_identity_id]
+  }
+
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
+
+    content {
+      create = timeouts.value.create
+      delete = timeouts.value.delete
+      read   = timeouts.value.read
+      update = timeouts.value.update
+    }
   }
 }
 

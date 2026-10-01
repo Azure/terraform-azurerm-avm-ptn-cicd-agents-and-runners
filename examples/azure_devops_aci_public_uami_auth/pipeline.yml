@@ -1,0 +1,8 @@
+trigger:
+- main
+
+pool: ${agent_pool_name}
+
+steps:
+- script: echo Hello, world!
+  displayName: 'Run a one-line script'
