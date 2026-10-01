@@ -66,6 +66,12 @@ variable "retry" {
   nullable    = false
 }
 
+variable "sku" {
+  type        = string
+  default     = "Premium"
+  description = "The SKU name of the Container Registry. Default is `Premium`. `Possible values are `Basic`, `Standard` and `Premium`."
+}
+
 variable "subnet_id" {
   type        = string
   default     = null

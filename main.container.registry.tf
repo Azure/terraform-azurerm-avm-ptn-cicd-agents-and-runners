@@ -11,6 +11,7 @@ module "container_registry" {
   images                                  = local.container_images
   private_dns_zone_id                     = local.container_registry_dns_zone_id
   retry                                   = var.retry
+  sku                                     = var.container_registry_sku
   subnet_id                               = local.container_registry_private_endpoint_subnet_id
   tags                                    = var.tags
   timeouts                                = var.timeouts
