@@ -1,0 +1,7 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Azure/azure-verified-modules-tools/main/src/Avm.Authoring/Resources/Schemas/v1/avm-module-metadata.schema.json",
+  "moduleDisplayName": "CI/CD Agents and Runners - Container Registry",
+  "moduleDescription": "This submodule deploys an Azure Container Registry and image build tasks for CI/CD agents and runners.",
+  "canonicalType": "dev-ops/cicd-agents-and-runners/container-registry",
+  "telemetryIdPrefix": "46d3xtrf.ptn.4d91aed"
+}

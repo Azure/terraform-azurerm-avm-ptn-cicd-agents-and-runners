@@ -149,6 +149,7 @@ module "github_runners_primary" {
   version_control_system_organization                       = var.github_organization_name
   version_control_system_type                               = "github"
   container_app_polling_interval_seconds                    = local.primary_polling_interval_prime_number
+  enable_telemetry                                          = var.enable_telemetry
   parent_id                                                 = azapi_resource.rg_primary.id
   resource_group_creation_enabled                           = false
   tags                                                      = local.tags
@@ -169,6 +170,7 @@ module "github_runners_secondary" {
   version_control_system_organization                       = var.github_organization_name
   version_control_system_type                               = "github"
   container_app_polling_interval_seconds                    = local.secondary_polling_interval_prime_number
+  enable_telemetry                                          = var.enable_telemetry
   parent_id                                                 = azapi_resource.rg_secondary.id
   resource_group_creation_enabled                           = false
   tags                                                      = local.tags
@@ -185,6 +187,8 @@ module "github_runners_secondary" {
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.3.0"
+
+  enable_telemetry = var.enable_telemetry
 }
 
 resource "random_integer" "region_index_primary" {
@@ -272,7 +276,17 @@ Type: `string`
 
 ## Optional Inputs
 
-No optional inputs.
+The following input variables are optional (have default values):
+
+### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
+
+Description: This variable controls whether or not telemetry is enabled for the module.  
+For more information see <https://aka.ms/avm/telemetryinfo>.  
+If it is set to false, then no telemetry will be collected.
+
+Type: `bool`
+
+Default: `true`
 
 ## Outputs
 

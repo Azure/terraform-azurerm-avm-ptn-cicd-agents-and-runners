@@ -98,6 +98,7 @@ resource "azuredevops_git_repository" "this" {
   project_id     = azuredevops_project.this.id
   name           = local.repository_name
   default_branch = local.default_branch
+
   initialization {
     init_type = "Clean"
   }
@@ -174,7 +175,7 @@ module "uami" {
   location            = local.selected_region
   name                = "uami-devops-agents-${random_string.name.result}"
   resource_group_name = azapi_resource.rg.name
-  enable_telemetry    = true
+  enable_telemetry    = var.enable_telemetry
   tags                = local.tags
 }
 
@@ -221,6 +222,7 @@ module "azure_devops_agents" {
   postfix                                         = random_string.name.result
   version_control_system_organization             = local.azure_devops_organization_url
   version_control_system_type                     = "azuredevops"
+  enable_telemetry                                = var.enable_telemetry
   parent_id                                       = azapi_resource.rg.id
   resource_group_creation_enabled                 = false
   tags                                            = local.tags
@@ -239,6 +241,8 @@ module "azure_devops_agents" {
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.3.0"
+
+  enable_telemetry = var.enable_telemetry
 }
 
 resource "random_integer" "region_index" {
@@ -303,7 +307,17 @@ No required inputs.
 
 ## Optional Inputs
 
-No optional inputs.
+The following input variables are optional (have default values):
+
+### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
+
+Description: This variable controls whether or not telemetry is enabled for the module.  
+For more information see <https://aka.ms/avm/telemetryinfo>.  
+If it is set to false, then no telemetry will be collected.
+
+Type: `bool`
+
+Default: `true`
 
 ## Outputs
 

@@ -80,6 +80,7 @@ resource "azuredevops_git_repository" "this" {
   project_id     = azuredevops_project.this.id
   name           = local.repository_name
   default_branch = local.default_branch
+
   initialization {
     init_type = "Clean"
   }
@@ -170,7 +171,7 @@ module "uami" {
   location            = local.selected_region_primary
   name                = "uami-devops-agents-${random_string.name.result}"
   resource_group_name = azapi_resource.rg_primary.name
-  enable_telemetry    = true
+  enable_telemetry    = var.enable_telemetry
   tags                = local.tags
 }
 
@@ -218,6 +219,7 @@ module "azure_devops_agents_primary" {
   version_control_system_organization             = local.azure_devops_organization_url
   version_control_system_type                     = "azuredevops"
   container_app_polling_interval_seconds          = local.primary_polling_interval_prime_number
+  enable_telemetry                                = var.enable_telemetry
   parent_id                                       = azapi_resource.rg_primary.id
   resource_group_creation_enabled                 = false
   tags                                            = local.tags
@@ -241,6 +243,7 @@ module "azure_devops_agents_secondary" {
   version_control_system_organization             = local.azure_devops_organization_url
   version_control_system_type                     = "azuredevops"
   container_app_polling_interval_seconds          = local.secondary_polling_interval_prime_number
+  enable_telemetry                                = var.enable_telemetry
   parent_id                                       = azapi_resource.rg_secondary.id
   resource_group_creation_enabled                 = false
   tags                                            = local.tags
@@ -260,6 +263,8 @@ module "azure_devops_agents_secondary" {
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.3.0"
+
+  enable_telemetry = var.enable_telemetry
 }
 
 resource "random_integer" "region_index_primary" {
