@@ -3,11 +3,6 @@ variable "container_compute_identity_principal_id" {
   description = "The principal id of the managed identity used by the container compute to pull images from the container registry"
 }
 
-variable "enable_telemetry" {
-  type        = bool
-  description = "Whether to enable telemetry for the container registry"
-}
-
 variable "location" {
   type        = string
   description = "Azure region where the resource should be deployed."
@@ -27,6 +22,17 @@ variable "parent_id" {
 variable "use_private_networking" {
   type        = bool
   description = "Whether to use private networking for the container registry"
+}
+
+variable "enable_telemetry" {
+  type        = bool
+  default     = true
+  description = <<DESCRIPTION
+This variable controls whether or not telemetry is enabled for the module.
+For more information see <https://aka.ms/avm/telemetryinfo>.
+If it is set to false, then no telemetry will be collected.
+DESCRIPTION
+  nullable    = false
 }
 
 variable "images" {

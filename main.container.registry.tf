@@ -3,11 +3,11 @@ module "container_registry" {
   count  = var.container_registry_creation_enabled ? 1 : 0
 
   container_compute_identity_principal_id = local.user_assigned_managed_identity_principal_id
-  enable_telemetry                        = var.enable_telemetry
   location                                = var.location
   name                                    = local.container_registry_name
   parent_id                               = local.resource_group_id
   use_private_networking                  = var.use_private_networking
+  enable_telemetry                        = var.enable_telemetry
   images                                  = local.container_images
   private_dns_zone_id                     = local.container_registry_dns_zone_id
   retry                                   = var.retry
