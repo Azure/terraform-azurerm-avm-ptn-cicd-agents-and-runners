@@ -70,7 +70,7 @@ resource "random_string" "name" {
 
 module "naming" {
   source  = "Azure/naming/azurerm"
-  version = "0.4.2"
+  version = "0.4.3"
 }
 
 resource "azuredevops_project" "this" {
@@ -178,7 +178,7 @@ module "azure_devops_agents" {
 # Region helpers
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.3.0"
+  version = "0.12.0"
 
   enable_telemetry = var.enable_telemetry
 }
@@ -291,13 +291,13 @@ Version:
 
 Source: Azure/naming/azurerm
 
-Version: 0.4.2
+Version: 0.4.3
 
 ### <a name="module_regions"></a> [regions](#module\_regions)
 
 Source: Azure/avm-utl-regions/azurerm
 
-Version: 0.3.0
+Version: 0.12.0
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection
