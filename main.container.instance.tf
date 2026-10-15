@@ -16,6 +16,7 @@ module "container_instance" {
   container_memory_limit            = var.container_instance_container_memory_limit
   container_registry_password       = var.custom_container_registry_password
   container_registry_username       = var.custom_container_registry_username
+  enable_telemetry                  = var.enable_telemetry
   environment_variables             = merge({ for key, value in local.container_instance_environment_variables_map : key => value if !endswith(value, "%s") }, { for key, value in local.container_instance_environment_variables_map : key => format(value, each.key) if endswith(value, "%s") })
   retry                             = var.retry
   sensitive_environment_variables   = local.container_instance_sensitive_environment_variables_map
