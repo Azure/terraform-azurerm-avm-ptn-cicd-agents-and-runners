@@ -1,6 +1,7 @@
 module "container_registry" {
-  source = "./modules/container-registry"
-  count  = var.container_registry_creation_enabled ? 1 : 0
+  source    = "./modules/container-registry"
+  providers = { modtm = modtm }
+  count     = var.container_registry_creation_enabled ? 1 : 0
 
   container_compute_identity_principal_id = local.user_assigned_managed_identity_principal_id
   location                                = var.location

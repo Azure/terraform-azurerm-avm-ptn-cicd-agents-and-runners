@@ -9,8 +9,8 @@ terraform {
 
   required_providers {
     azapi = {
-      source  = "azure/azapi"
-      version = "~> 2.0"
+      source  = "Azure/azapi"
+      version = "~> 2.12"
     }
     azuredevops = {
       source  = "microsoft/azuredevops"
@@ -19,6 +19,10 @@ terraform {
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 4.20"
+    }
+    modtm = {
+      source  = "registry.terraform.io/azure/modtm"
+      version = "~> 0.3"
     }
     random = {
       source  = "hashicorp/random"
@@ -51,8 +55,8 @@ resource "random_string" "name" {
 }
 
 module "naming" {
-  source  = "Azure/naming/azurerm"
-  version = "0.4.2"
+  source  = "Azure/avm-utl-naming/azure"
+  version = "0.2.0"
 }
 
 resource "azuredevops_project" "this" {
@@ -165,8 +169,9 @@ resource "azapi_resource" "rg_secondary" {
 
 # Single User Assigned Managed Identity shared between both regional deployments
 module "uami" {
-  source  = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
-  version = "0.3.3"
+  source    = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
+  version   = "0.3.3"
+  providers = { modtm = modtm }
 
   location            = local.selected_region_primary
   name                = "uami-devops-agents-${random_string.name.result}"
@@ -212,7 +217,8 @@ resource "azuredevops_securityrole_assignment" "uami_pool_admin" {
 
 # This is the module call
 module "azure_devops_agents_primary" {
-  source = "../.."
+  source    = "../.."
+  providers = { modtm = modtm }
 
   location                                        = local.selected_region_primary
   postfix                                         = "${random_string.name.result}1"
@@ -236,7 +242,8 @@ module "azure_devops_agents_primary" {
 }
 
 module "azure_devops_agents_secondary" {
-  source = "../.."
+  source    = "../.."
+  providers = { modtm = modtm }
 
   location                                        = local.selected_region_secondary
   postfix                                         = "${random_string.name.result}2"
@@ -262,8 +269,9 @@ module "azure_devops_agents_secondary" {
 # Region helpers
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.3.0"
+  version = "0.13.0"
 
+  location         = var.location
   enable_telemetry = var.enable_telemetry
 }
 
