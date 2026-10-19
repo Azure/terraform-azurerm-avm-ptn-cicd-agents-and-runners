@@ -8,6 +8,10 @@ terraform {
   required_version = ">= 1.9"
 
   required_providers {
+    azapi = {
+      source  = "Azure/azapi"
+      version = "~> 2.12"
+    }
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 4.20"
@@ -15,6 +19,10 @@ terraform {
     github = {
       source  = "integrations/github"
       version = "~> 6.12"
+    }
+    modtm = {
+      source  = "registry.terraform.io/azure/modtm"
+      version = "~> 0.3"
     }
     random = {
       source  = "hashicorp/random"
@@ -37,8 +45,8 @@ resource "random_string" "name" {
 }
 
 module "naming" {
-  source  = "Azure/naming/azurerm"
-  version = "0.4.2"
+  source  = "Azure/avm-utl-naming/azure"
+  version = "0.2.0"
 }
 
 data "github_organization" "alz" {
@@ -73,7 +81,8 @@ resource "github_repository_file" "this" {
 
 # This is the module call
 module "github_runners" {
-  source = "../.."
+  source    = "../.."
+  providers = { modtm = modtm }
 
   location                                                  = local.selected_region
   postfix                                                   = random_string.name.result
@@ -94,8 +103,12 @@ module "github_runners" {
 # Region helpers
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.3.0"
+  version = "0.13.0"
+  providers = {
+    azapi = azapi
+  }
 
+  location         = var.location
   enable_telemetry = var.enable_telemetry
 }
 

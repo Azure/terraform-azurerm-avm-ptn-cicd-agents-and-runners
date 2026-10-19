@@ -9,8 +9,8 @@ terraform {
 
   required_providers {
     azapi = {
-      source  = "azure/azapi"
-      version = "~> 2.0"
+      source  = "Azure/azapi"
+      version = "~> 2.12"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -19,6 +19,10 @@ terraform {
     github = {
       source  = "integrations/github"
       version = "~> 6.12"
+    }
+    modtm = {
+      source  = "registry.terraform.io/azure/modtm"
+      version = "~> 0.3"
     }
     random = {
       source  = "hashicorp/random"
@@ -41,8 +45,8 @@ resource "random_string" "name" {
 }
 
 module "naming" {
-  source  = "Azure/naming/azurerm"
-  version = "0.4.2"
+  source  = "Azure/avm-utl-naming/azure"
+  version = "0.2.0"
 }
 
 data "github_organization" "alz" {
@@ -137,8 +141,9 @@ resource "azapi_resource" "rg" {
 }
 
 module "virtual_network" {
-  source  = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version = "0.7.1"
+  source    = "Azure/avm-res-network-virtualnetwork/azurerm"
+  version   = "0.7.1"
+  providers = { modtm = modtm }
 
   address_space       = [local.virtual_network_address_space]
   location            = local.selected_region
@@ -180,7 +185,8 @@ resource "azapi_resource" "private_dns_zone_virtual_network_link_container_regis
 
 # This is the module call
 module "github_runners" {
-  source = "../.."
+  source    = "../.."
+  providers = { modtm = modtm }
 
   location                                                  = local.selected_region
   postfix                                                   = random_string.name.result
@@ -209,8 +215,9 @@ module "github_runners" {
 # Region helpers
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.3.0"
+  version = "0.13.0"
 
+  location         = var.location
   enable_telemetry = var.enable_telemetry
 }
 

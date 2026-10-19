@@ -1,6 +1,7 @@
 module "container_registry" {
-  source  = "Azure/avm-res-containerregistry-registry/azurerm"
-  version = "0.8.0"
+  source    = "Azure/avm-res-containerregistry-registry/azurerm"
+  version   = "0.8.0"
+  providers = { modtm = modtm }
 
   location                              = var.location
   name                                  = var.name
