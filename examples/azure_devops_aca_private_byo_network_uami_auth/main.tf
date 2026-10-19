@@ -187,7 +187,7 @@ resource "azapi_resource" "rg" {
 
 module "virtual_network" {
   source    = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version   = "0.7.1"
+  version   = "0.22.3"
   providers = { modtm = modtm }
 
   address_space       = [local.virtual_network_address_space]
@@ -231,7 +231,7 @@ resource "azapi_resource" "private_dns_zone_virtual_network_link_container_regis
 # User Assigned Managed Identity for agent authentication
 module "uami" {
   source    = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
-  version   = "0.3.3"
+  version   = "0.5.3"
   providers = { modtm = modtm }
 
   location            = local.selected_region

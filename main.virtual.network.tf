@@ -1,6 +1,6 @@
 module "virtual_network" {
   source    = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version   = "0.8.1"
+  version   = "0.22.3"
   providers = { modtm = modtm }
   count     = var.use_private_networking && var.virtual_network_creation_enabled ? 1 : 0
 
