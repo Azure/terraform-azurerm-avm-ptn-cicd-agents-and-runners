@@ -156,7 +156,7 @@ resource "azapi_resource" "rg" {
 # User Assigned Managed Identity for agent authentication
 module "uami" {
   source    = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
-  version   = "0.3.3"
+  version   = "0.5.3"
   providers = { modtm = modtm }
 
   location            = local.selected_region
