@@ -20,6 +20,7 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.20"
     }
+    # tflint-ignore: terraform_unused_required_providers
     modtm = {
       source  = "registry.terraform.io/azure/modtm"
       version = "~> 0.3"
@@ -169,9 +170,8 @@ resource "azapi_resource" "rg_secondary" {
 
 # Single User Assigned Managed Identity shared between both regional deployments
 module "uami" {
-  source    = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
-  version   = "0.3.3"
-  providers = { modtm = modtm }
+  source  = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
+  version = "0.3.3"
 
   location            = local.selected_region_primary
   name                = "uami-devops-agents-${random_string.name.result}"
@@ -217,8 +217,7 @@ resource "azuredevops_securityrole_assignment" "uami_pool_admin" {
 
 # This is the module call
 module "azure_devops_agents_primary" {
-  source    = "../.."
-  providers = { modtm = modtm }
+  source = "../.."
 
   location                                        = local.selected_region_primary
   postfix                                         = "${random_string.name.result}1"
@@ -242,8 +241,7 @@ module "azure_devops_agents_primary" {
 }
 
 module "azure_devops_agents_secondary" {
-  source    = "../.."
-  providers = { modtm = modtm }
+  source = "../.."
 
   location                                        = local.selected_region_secondary
   postfix                                         = "${random_string.name.result}2"

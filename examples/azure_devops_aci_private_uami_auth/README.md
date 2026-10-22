@@ -38,6 +38,7 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.20"
     }
+    # tflint-ignore: terraform_unused_required_providers
     modtm = {
       source  = "registry.terraform.io/azure/modtm"
       version = "~> 0.3"
@@ -156,9 +157,8 @@ resource "azapi_resource" "rg" {
 
 # User Assigned Managed Identity for ACI agent authentication (no PAT required)
 module "uami" {
-  source    = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
-  version   = "0.3.3"
-  providers = { modtm = modtm }
+  source  = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
+  version = "0.3.3"
 
   location            = local.selected_region
   name                = "uami-devops-agents-${random_string.name.result}"
@@ -204,8 +204,7 @@ resource "azuredevops_securityrole_assignment" "uami_pool_admin" {
 
 # This is the module call
 module "azure_devops_agents" {
-  source    = "../.."
-  providers = { modtm = modtm }
+  source = "../.."
 
   location                                        = local.selected_region
   postfix                                         = random_string.name.result

@@ -38,6 +38,7 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.20"
     }
+    # tflint-ignore: terraform_unused_required_providers
     modtm = {
       source  = "registry.terraform.io/azure/modtm"
       version = "~> 0.3"
@@ -204,9 +205,8 @@ resource "azapi_resource" "rg" {
 }
 
 module "virtual_network" {
-  source    = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version   = "0.7.1"
-  providers = { modtm = modtm }
+  source  = "Azure/avm-res-network-virtualnetwork/azurerm"
+  version = "0.7.1"
 
   address_space       = [local.virtual_network_address_space]
   location            = local.selected_region
@@ -248,9 +248,8 @@ resource "azapi_resource" "private_dns_zone_virtual_network_link_container_regis
 
 # User Assigned Managed Identity for agent authentication
 module "uami" {
-  source    = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
-  version   = "0.3.3"
-  providers = { modtm = modtm }
+  source  = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
+  version = "0.3.3"
 
   location            = local.selected_region
   name                = "uami-devops-agents-${random_string.name.result}"
@@ -296,8 +295,7 @@ resource "azuredevops_securityrole_assignment" "uami_pool_admin" {
 
 # This is the module call
 module "azure_devops_agents" {
-  source    = "../.."
-  providers = { modtm = modtm }
+  source = "../.."
 
   location                                             = local.selected_region
   postfix                                              = random_string.name.result
