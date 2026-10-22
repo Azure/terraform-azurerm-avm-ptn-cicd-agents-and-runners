@@ -42,6 +42,7 @@ terraform {
       source  = "integrations/github"
       version = "~> 6.12"
     }
+    # tflint-ignore: terraform_unused_required_providers
     modtm = {
       source  = "registry.terraform.io/azure/modtm"
       version = "~> 0.3"
@@ -146,8 +147,7 @@ resource "azapi_resource" "rg_secondary" {
 
 # This is the module call
 module "github_runners_primary" {
-  source    = "../.."
-  providers = { modtm = modtm }
+  source = "../.."
 
   location                                                  = local.selected_region_primary
   postfix                                                   = "${random_string.name.result}1"
@@ -168,8 +168,7 @@ module "github_runners_primary" {
 }
 
 module "github_runners_secondary" {
-  source    = "../.."
-  providers = { modtm = modtm }
+  source = "../.."
 
   location                                                  = local.selected_region_secondary
   postfix                                                   = "${random_string.name.result}2"
