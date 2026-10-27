@@ -129,6 +129,14 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_dns_servers"></a> [dns\_servers](#input\_dns\_servers)
+
+Description: List of DNS server IP addresses for the container instance. When set, these servers are used instead of Azure's default DNS (168.63.129.16). Changing this value forces replacement of the container instance.
+
+Type: `list(string)`
+
+Default: `null`
+
 ### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
 
 Description: This variable controls whether or not telemetry is enabled for the module.  

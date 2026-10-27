@@ -77,6 +77,12 @@ variable "container_registry_username" {
   description = "Username of the container registry"
 }
 
+variable "dns_servers" {
+  type        = list(string)
+  default     = null
+  description = "List of DNS server IP addresses for the container instance. When set, these servers are used instead of Azure's default DNS (168.63.129.16). Changing this value forces replacement of the container instance."
+}
+
 variable "enable_telemetry" {
   type        = bool
   default     = true

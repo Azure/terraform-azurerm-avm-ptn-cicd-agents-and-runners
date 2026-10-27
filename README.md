@@ -546,6 +546,14 @@ Type: `number`
 
 Default: `2`
 
+### <a name="input_container_instance_dns_servers"></a> [container\_instance\_dns\_servers](#input\_container\_instance\_dns\_servers)
+
+Description: List of DNS server IP addresses to configure on the container instances. When set, the container instances use these DNS servers instead of Azure's default DNS (168.63.129.16), which allows them to resolve private DNS zones linked to custom or VNet DNS servers. Changing this value forces replacement of the container instances.
+
+Type: `list(string)`
+
+Default: `null`
+
 ### <a name="input_container_instance_environment_variables"></a> [container\_instance\_environment\_variables](#input\_container\_instance\_environment\_variables)
 
 Description: List of additional environment variables to pass to the container.

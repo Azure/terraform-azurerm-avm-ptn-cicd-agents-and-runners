@@ -17,6 +17,7 @@ resource "azapi_resource" "container_group" {
         ]
       } : null
       subnetIds = var.use_private_networking ? [{ id = var.subnet_id }] : null
+      dnsConfig = var.dns_servers != null ? { nameServers = var.dns_servers } : null
       containers = [
         {
           name = var.container_name
