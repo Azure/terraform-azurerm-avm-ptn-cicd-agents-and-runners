@@ -10,6 +10,17 @@ variable "container_registry_name" {
   description = "The name of the container registry. Only required if `container_registry_creation_enabled` is `true`."
 }
 
+variable "container_registry_sku" {
+  type        = string
+  default     = "Premium"
+  description = "The SKU name of the Container Registry. Default is `Premium`. `Possible values are `Basic`, `Standard` and `Premium`."
+
+  validation {
+    condition     = contains(["Basic", "Standard", "Premium"], var.container_registry_sku)
+    error_message = "The SKU name must be either `Basic`, `Standard` or `Premium`."
+  }
+}
+
 variable "custom_container_registry_id" {
   type        = string
   default     = null
