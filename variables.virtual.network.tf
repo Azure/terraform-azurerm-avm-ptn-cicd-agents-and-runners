@@ -100,6 +100,13 @@ variable "nat_gateway_name" {
   description = "The name of the NAT Gateway."
 }
 
+variable "network_security_group_creation_enabled" {
+  type        = bool
+  default     = false
+  description = "Whether to create a Network Security Group with Azure's default rules for each module-created subnet without an entry in subnet_network_security_groups. Only applies when use_private_networking and virtual_network_creation_enabled are true."
+  nullable    = false
+}
+
 variable "public_ip_creation_enabled" {
   type        = bool
   default     = true
@@ -122,6 +129,26 @@ variable "public_ip_zones" {
   type        = set(string)
   default     = ["1", "2", "3"]
   description = "The availability zones for the public IP. Only required if `public_ip_creation_enabled` is `true`."
+}
+
+variable "subnet_network_security_groups" {
+  type = map(object({
+    id = string
+  }))
+  default     = {}
+  description = <<DESCRIPTION
+Existing Network Security Groups to attach when creating subnets. Keys are `container_app`, `container_instance`, or `container_registry_private_endpoint`; each value contains the NSG resource `id`. An entry takes precedence over NSG creation for that subnet, including when the ID is computed during apply. Only applies when use_private_networking and virtual_network_creation_enabled are true. Manage custom security rules on these existing NSGs.
+DESCRIPTION
+  nullable    = false
+
+  validation {
+    condition     = alltrue([for key in keys(var.subnet_network_security_groups) : contains(["container_app", "container_instance", "container_registry_private_endpoint"], key)])
+    error_message = "subnet_network_security_groups keys must be container_app, container_instance, or container_registry_private_endpoint."
+  }
+  validation {
+    condition     = alltrue([for nsg in values(var.subnet_network_security_groups) : can(provider::azapi::parse_resource_id("Microsoft.Network/networkSecurityGroups", nsg.id))])
+    error_message = "Each subnet_network_security_groups entry must contain a valid Network Security Group resource id."
+  }
 }
 
 variable "virtual_network_address_space" {
