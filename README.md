@@ -25,6 +25,23 @@ This module deploys self-hosted Azure DevOps Agents and Github Runners with supp
 - Creates all required Azure resources or use existing ones
 - No PAT token management required with UAMI authentication
 
+## Subnet Network Security Groups
+
+Set `network_security_group_creation_enabled = true` to create a separate NSG for each module-created compute subnet and the container registry private endpoint subnet. NSGs are attached in the subnet creation request, supporting policies that deny subnets without an NSG. This requires Terraform 1.11 or later.
+
+NSG creation defaults to `false` to preserve existing deployments. Created NSGs use Azure's default security rules, including outbound Internet access; they do not restrict egress to GitHub, Azure DevOps, or Azure service endpoints. For custom rules, supply existing NSGs through `subnet_network_security_groups`; these take precedence over creation for the corresponding subnets:
+
+```hcl
+network_security_group_creation_enabled = true
+subnet_network_security_groups = {
+  container_app = {
+    id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-network/providers/Microsoft.Network/networkSecurityGroups/nsg-runners"
+  }
+}
+```
+
+Both inputs apply only when `use_private_networking` and `virtual_network_creation_enabled` are `true`. Manage NSGs on bring-your-own subnets outside this module. Environments with additional NSG rule policies may require custom NSGs.
+
 ## Authentication Methods
 
 **Azure DevOps**: PAT (token-based) or UAMI (identity-based, no tokens required)
@@ -221,7 +238,7 @@ The module never grants the GitHub credential any Azure role - it is consumed on
 
 The following requirements are needed by this module:
 
-- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9.0)
+- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.11.0, < 2.0.0)
 
 - <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.12)
 
@@ -916,6 +933,14 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_network_security_group_creation_enabled"></a> [network\_security\_group\_creation\_enabled](#input\_network\_security\_group\_creation\_enabled)
+
+Description: Whether to create a Network Security Group with Azure's default rules for each module-created subnet without an entry in subnet\_network\_security\_groups. Only applies when use\_private\_networking and virtual\_network\_creation\_enabled are true.
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_parent_id"></a> [parent\_id](#input\_parent\_id)
 
 Description: The resource ID of the resource group where the resources will be deployed. Required when `resource_group_creation_enabled == false`.
@@ -996,6 +1021,20 @@ object({
     interval_seconds     = optional(number, 10)
     max_interval_seconds = optional(number, 180)
   })
+```
+
+Default: `{}`
+
+### <a name="input_subnet_network_security_groups"></a> [subnet\_network\_security\_groups](#input\_subnet\_network\_security\_groups)
+
+Description: Existing Network Security Groups to attach when creating subnets. Keys are `container_app`, `container_instance`, or `container_registry_private_endpoint`; each value contains the NSG resource `id`. An entry takes precedence over NSG creation for that subnet, including when the ID is computed during apply. Only applies when use\_private\_networking and virtual\_network\_creation\_enabled are true. Manage custom security rules on these existing NSGs.
+
+Type:
+
+```hcl
+map(object({
+    id = string
+  }))
 ```
 
 Default: `{}`
@@ -1317,6 +1356,12 @@ Version:
 Source: Azure/avm-res-operationalinsights-workspace/azurerm
 
 Version: 0.5.1
+
+### <a name="module_network_security_group"></a> [network\_security\_group](#module\_network\_security\_group)
+
+Source: Azure/avm-res-network-networksecuritygroup/azurerm
+
+Version: 0.6.0
 
 ### <a name="module_user_assigned_managed_identity"></a> [user\_assigned\_managed\_identity](#module\_user\_assigned\_managed\_identity)
 

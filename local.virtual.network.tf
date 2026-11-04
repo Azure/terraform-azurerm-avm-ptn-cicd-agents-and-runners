@@ -15,8 +15,9 @@ locals {
   final_subnets = merge(local.subnet_container_app, local.subnet_container_instance)
   subnet_container_app = local.deploy_container_app ? {
     container_app = {
-      name           = local.container_app_subnet_name
-      address_prefix = local.container_app_subnet_address_prefix
+      name                   = local.container_app_subnet_name
+      address_prefix         = local.container_app_subnet_address_prefix
+      network_security_group = lookup(local.subnet_network_security_groups, "container_app", null)
       delegation = [
         {
           name = "Microsoft.App/environments"
@@ -33,8 +34,9 @@ locals {
   } : {}
   subnet_container_instance = local.deploy_container_instance ? {
     container_instance = {
-      name           = local.container_instance_subnet_name
-      address_prefix = local.container_instance_subnet_address_prefix
+      name                   = local.container_instance_subnet_name
+      address_prefix         = local.container_instance_subnet_address_prefix
+      network_security_group = lookup(local.subnet_network_security_groups, "container_instance", null)
       delegation = [
         {
           name = "Microsoft.ContainerInstance/containerGroups"
@@ -49,4 +51,8 @@ locals {
       }
     }
   } : {}
+  subnet_network_security_groups = merge(
+    { for key, nsg in module.network_security_group : key => { id = nsg.resource_id } },
+    var.subnet_network_security_groups
+  )
 }
