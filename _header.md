@@ -25,7 +25,7 @@ This module deploys self-hosted Azure DevOps Agents and Github Runners with supp
 
 ## Subnet Network Security Groups
 
-Set `network_security_group_creation_enabled = true` to create a separate NSG for each module-created compute subnet and the container registry private endpoint subnet. NSGs are attached in the subnet creation request, supporting policies that deny subnets without an NSG. This requires Terraform 1.11 or later.
+Set `network_security_group_creation_enabled = true` to create a separate NSG for each module-created compute subnet and the container registry private endpoint subnet. NSGs are attached in the subnet creation request, supporting policies that deny subnets without an NSG. This module requires Terraform 1.11 or later, including when NSG creation is disabled.
 
 NSG creation defaults to `false` to preserve existing deployments. Created NSGs use Azure's default security rules, including outbound Internet access; they do not restrict egress to GitHub, Azure DevOps, or Azure service endpoints. For custom rules, supply existing NSGs through `subnet_network_security_groups`; these take precedence over creation for the corresponding subnets:
 
