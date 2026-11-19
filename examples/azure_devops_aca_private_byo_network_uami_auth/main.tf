@@ -57,7 +57,7 @@ resource "random_string" "name" {
 
 module "naming" {
   source  = "Azure/avm-utl-naming/azure"
-  version = "0.2.0"
+  version = "0.3.0"
 }
 
 resource "azuredevops_project" "this" {
@@ -188,14 +188,14 @@ resource "azapi_resource" "rg" {
 
 module "virtual_network" {
   source  = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version = "0.7.1"
+  version = "0.22.3"
 
-  address_space       = [local.virtual_network_address_space]
   location            = local.selected_region
-  resource_group_name = azapi_resource.rg.name
+  address_space       = [local.virtual_network_address_space]
   enable_telemetry    = var.enable_telemetry
   name                = "vnet-${random_string.name.result}"
   subnets             = local.subnets
+  resource_group_name = azapi_resource.rg.name
 }
 
 resource "azapi_resource" "private_dns_zone_container_registry" {
@@ -231,7 +231,7 @@ resource "azapi_resource" "private_dns_zone_virtual_network_link_container_regis
 # User Assigned Managed Identity for agent authentication
 module "uami" {
   source  = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
-  version = "0.3.3"
+  version = "0.6.0"
 
   location            = local.selected_region
   name                = "uami-devops-agents-${random_string.name.result}"
@@ -310,7 +310,7 @@ module "azure_devops_agents" {
 # Region helpers
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.13.0"
+  version = "0.13.2"
 
   location         = var.location
   enable_telemetry = var.enable_telemetry

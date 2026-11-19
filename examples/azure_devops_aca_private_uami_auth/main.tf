@@ -57,7 +57,7 @@ resource "random_string" "name" {
 
 module "naming" {
   source  = "Azure/avm-utl-naming/azure"
-  version = "0.2.0"
+  version = "0.3.0"
 }
 
 resource "azuredevops_project" "this" {
@@ -157,7 +157,7 @@ resource "azapi_resource" "rg" {
 # User Assigned Managed Identity for agent authentication
 module "uami" {
   source  = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
-  version = "0.3.3"
+  version = "0.6.0"
 
   location            = local.selected_region
   name                = "uami-devops-agents-${random_string.name.result}"
@@ -227,7 +227,7 @@ module "azure_devops_agents" {
 # Region helpers
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.13.0"
+  version = "0.13.2"
 
   location         = var.location
   enable_telemetry = var.enable_telemetry
