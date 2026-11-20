@@ -34,6 +34,12 @@ variable "container_instance_count" {
   description = "The number of container instances to create"
 }
 
+variable "container_instance_dns_servers" {
+  type        = list(string)
+  default     = null
+  description = "List of DNS server IP addresses to configure on the container instances. When set, the container instances use these DNS servers instead of Azure's default DNS (168.63.129.16), which allows them to resolve private DNS zones linked to custom or VNet DNS servers. Changing this value forces replacement of the container instances."
+}
+
 variable "container_instance_environment_variables" {
   type = set(object({
     name  = string

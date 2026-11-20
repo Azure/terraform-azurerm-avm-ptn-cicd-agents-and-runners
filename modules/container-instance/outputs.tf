@@ -5,6 +5,7 @@ output "name" {
 
 output "resource" {
   description = "The container instance resource"
+  sensitive   = true
   value       = azapi_resource.container_group
 }
 
