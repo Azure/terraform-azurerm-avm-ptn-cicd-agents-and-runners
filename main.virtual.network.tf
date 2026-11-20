@@ -9,10 +9,32 @@ module "virtual_network" {
   name                = local.virtual_network_name
   subnets = merge(local.final_subnets, {
     container_registry_private_endpoint = {
-      name           = local.container_registry_private_endpoint_subnet_name
-      address_prefix = local.container_registry_private_endpoint_subnet_address_prefix
+      name                   = local.container_registry_private_endpoint_subnet_name
+      address_prefix         = local.container_registry_private_endpoint_subnet_address_prefix
+      network_security_group = lookup(local.subnet_network_security_groups, "container_registry_private_endpoint", null)
     }
   })
+}
+
+module "network_security_group" {
+  source  = "Azure/avm-res-network-networksecuritygroup/azurerm"
+  version = "0.6.0"
+  for_each = {
+    for key in concat(
+      local.deploy_container_app ? ["container_app"] : [],
+      local.deploy_container_instance ? ["container_instance"] : [],
+      ["container_registry_private_endpoint"]
+    ) : key => key
+    if var.use_private_networking && var.virtual_network_creation_enabled && var.network_security_group_creation_enabled && !contains(keys(var.subnet_network_security_groups), key)
+  }
+
+  location         = var.location
+  name             = "nsg-${replace(each.key, "_", "-")}-${var.postfix}"
+  parent_id        = local.resource_group_id
+  enable_telemetry = var.enable_telemetry
+  retry            = var.retry
+  tags             = var.tags
+  timeouts         = var.timeouts
 }
 
 resource "azapi_resource" "private_dns_zone_container_registry" {
