@@ -6,9 +6,9 @@ This module deploys self-hosted Azure DevOps Agents and Github Runners with supp
 
 > ## ⚠️ Breaking Change
 >
-> All Azure resources directly managed by this module (resource group, management lock, container app environment, NAT gateway, public IP, private DNS zones, container instance, container registry, container registry tasks and role assignments) have been migrated from the `azurerm` provider to the `azapi` provider. The `azurerm` provider is still required for transitive dependencies (AVM resource modules and example provider blocks), but no resources are managed with it directly.
+> All Azure resources directly managed by this module (resource group, management lock, container app environment, NAT gateway, public IP, private DNS zones, container instance, container registry, container registry tasks and role assignments) have been migrated from the `azurerm` provider to the `azapi` provider. The one exception is `azurerm_container_registry_task_schedule_run_now`, which triggers the container image builds. [#262](https://github.com/Azure/terraform-azurerm-avm-ptn-cicd-agents-and-runners/issues/262) tracks replacing it. The `azurerm` provider is also still required for transitive dependencies (AVM resource modules and example provider blocks).
 >
-> **Existing state from prior versions will not migrate automatically.** Terraform `moved` blocks do not support cross-provider type changes. To upgrade an existing deployment you must either:
+> **Existing state from prior versions will not migrate automatically.** This release does not include `moved` blocks for the provider change. Terraform can't apply your own `moved` blocks to resources inside a registry module. To upgrade an existing deployment you must either:
 >
 > 1. Destroy and re-create the deployment with the new module version, or
 > 2. Manually `terraform state rm` each affected `azurerm_*` resource and use `import` blocks to bring them into the new `azapi_resource` addresses.
