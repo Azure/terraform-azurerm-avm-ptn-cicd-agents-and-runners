@@ -23,6 +23,23 @@ This module deploys self-hosted Azure DevOps Agents and Github Runners with supp
 - Creates all required Azure resources or use existing ones
 - No PAT token management required with UAMI authentication
 
+## Subnet Network Security Groups
+
+Set `network_security_group_creation_enabled = true` to create a separate NSG for each module-created compute subnet and the container registry private endpoint subnet. NSGs are attached in the subnet creation request, supporting policies that deny subnets without an NSG. This module requires Terraform 1.11 or later, including when NSG creation is disabled.
+
+NSG creation defaults to `false` to preserve existing deployments. Created NSGs use Azure's default security rules, including outbound Internet access; they do not restrict egress to GitHub, Azure DevOps, or Azure service endpoints. For custom rules, supply existing NSGs through `subnet_network_security_groups`; these take precedence over creation for the corresponding subnets:
+
+```hcl
+network_security_group_creation_enabled = true
+subnet_network_security_groups = {
+  container_app = {
+    id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-network/providers/Microsoft.Network/networkSecurityGroups/nsg-runners"
+  }
+}
+```
+
+Both inputs apply only when `use_private_networking` and `virtual_network_creation_enabled` are `true`. Manage NSGs on bring-your-own subnets outside this module. Environments with additional NSG rule policies may require custom NSGs.
+
 ## Authentication Methods
 
 **Azure DevOps**: PAT (token-based) or UAMI (identity-based, no tokens required)
